@@ -1,0 +1,38 @@
+Package: growthrates
+Title: Estimate Incidence, Proportions and Exponential Growth Rates
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Robert",
+           family = "Challen",
+           role = c("aut", "cre"),
+           email = "rob.challen@bristol.ac.uk",
+           comment = c(ORCID = "0000-0002-5504-7768"))
+Description: This is a work in progress.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Suggests: 
+    downloader,
+    fs,
+    knitr,
+    rappdirs,
+    rmarkdown,
+    ggplot2,
+    here,
+    jsonlite,
+    readr,
+    tidyverse,
+    stringr,
+    testthat
+VignetteBuilder: knitr
+Imports: 
+    dplyr,
+    magrittr,
+    nnet,
+    rlang,
+    stats,
+    tibble,
+    tidyr,
+    glue,
+    locfit
