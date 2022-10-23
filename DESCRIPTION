@@ -36,3 +36,6 @@ Imports:
     tidyr,
     glue,
     locfit
+URL: https://bristol-vaccine-centre.github.io/growthrates/,
+    https://github.com/bristol-vaccine-centre/growthrates,
+    https://doi.org/10.5281/zenodo.7242761
