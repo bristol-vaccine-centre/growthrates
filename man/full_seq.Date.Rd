@@ -4,7 +4,13 @@
 \alias{full_seq.Date}
 \title{Expand a date vector to the full range of possible dates}
 \usage{
-\method{full_seq}{Date}(x, period = .day_interval(x), anchor = "start", complete = FALSE, ...)
+full_seq.Date(
+  x,
+  period = .day_interval(x),
+  anchor = "start",
+  complete = FALSE,
+  ...
+)
 }
 \arguments{
 \item{period}{the gap between observations as a number of days or as a natural

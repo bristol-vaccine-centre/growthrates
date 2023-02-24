@@ -4,7 +4,7 @@
 \alias{full_seq.time_period}
 \title{Expand a \code{time_period} vector to the full range of possible timess}
 \usage{
-\method{full_seq}{time_period}(x, period = attributes(x)$unit, complete = FALSE, ...)
+full_seq.time_period(x, period = attributes(x)$unit, complete = FALSE, ...)
 }
 \arguments{
 \item{period}{the gap between observations as a number of days or as a natural
