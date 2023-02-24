@@ -11,10 +11,10 @@
 
 .null_result = function(new_time, ...) {
   dots = rlang::list2(...)
-  out = tibble(time = new_time)
+  out = tibble::tibble(time = new_time)
   for (k in names(dots)) {
     v = dots[[k]]
-    out = out %>% mutate(
+    out = out %>% dplyr::mutate(
       !!paste0(k,".0.025") := v[1],
       !!paste0(k,".0.5") := v[2],
       !!paste0(k,".0.975") := v[3]
@@ -59,13 +59,13 @@ proportion_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 
   nn = .nn_from_window(window, d)
 
   # Not enough non zero results
-  if(sum(na.omit(d$count) != 0) < deg) {
+  if(sum(stats::na.omit(d$count) != 0) < deg) {
     return(.null_result(output_times, proportion=c(0,0,0), relative.growth=c(NA,0,NA)))
   }
 
   # Not enough non one results
   # TODO: calculate CIs.
-  if(sum(na.omit(d$count != d$denom)) < deg) {
+  if(sum(stats::na.omit(d$count != d$denom)) < deg) {
     return(.null_result(output_times, proportion=c(1,1,1), relative.growth=c(NA,0,NA)))
   }
 
@@ -121,7 +121,7 @@ poisson_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 day
   new_time = .daily_times(d$time)
 
   # Not enough non zero results
-  if(sum(na.omit(d$count) != 0) < deg) {
+  if(sum(stats::na.omit(d$count) != 0) < deg) {
     return(.null_result(new_time, incidence=c(0,0,0), growth=c(NA,0,NA)))
   }
 

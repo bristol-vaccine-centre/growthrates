@@ -18,13 +18,13 @@ Suggests:
     knitr,
     rappdirs,
     rmarkdown,
-    ggplot2,
     here,
     jsonlite,
     readr,
     tidyverse,
     stringr,
-    testthat
+    testthat,
+    devtools
 VignetteBuilder: knitr
 Imports: 
     dplyr,
@@ -38,7 +38,8 @@ Imports:
     functional,
     lubridate,
     scales,
-    tidyselect
+    tidyselect,
+    ggplot2
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,
     https://doi.org/10.5281/zenodo.7242761

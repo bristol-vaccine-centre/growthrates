@@ -21,7 +21,7 @@
     extra = setdiff(colnames(df), expected)
     xcols = paste0(extra,collapse=", ")
     rlang::warn(c("!"="Removing unsupported column(s): ","*" = xcols,"*" = "Did you mean to group beforehand?"), .frequency = "once", .frequency_id = xcols)
-    df = df %>% select(any_of(expected)) # any of because of ignored columns.
+    df = df %>% dplyr::select(tidyselect::any_of(expected)) # any of because of ignored columns.
   }
   invisible(NULL)
 }
@@ -55,11 +55,11 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
   if (.has_cols(df,"time")) warning("time_summarise ignores existing time_period columns")
 
   has_class = .has_cols(df,"class")
-  grps = df %>% groups()
+  grps = df %>% dplyr::groups()
 
-  df = df %>% mutate(time = cut_date(date, unit=  unit, anchor = anchor, output="time_period"))
-  if (has_class) df = df %>% group_by(class, .add = TRUE)
-  df = df %>% group_by(time, .add = TRUE)
+  df = df %>% dplyr::mutate(time = cut_date(date, unit=  unit, anchor = anchor, output="time_period"))
+  if (has_class) df = df %>% dplyr::group_by(class, .add = TRUE)
+  df = df %>% dplyr::group_by(time, .add = TRUE)
 
   dots = dplyr::enexprs(...)
 
@@ -87,9 +87,9 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
           # calculate a classwise denominator if class and count are present and no denom column
           # created by the summarise.
           dtmp = dtmp %>%
-            group_by(time) %>%
-            mutate(denom = sum(count, na.rm = TRUE)) %>%
-            ungroup()
+            dplyr::group_by(time) %>%
+            dplyr::mutate(denom = sum(count, na.rm = TRUE)) %>%
+            dplyr::ungroup()
         }
       } else {
         dtmp = d %>% tidyr::complete(time = times, fill = .fill)
@@ -98,7 +98,7 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
     })
 
 
-  return(tmp %>% ungroup())
+  return(tmp %>% dplyr::ungroup())
 }
 
 
@@ -110,12 +110,12 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
     )
   }
 
-  return(new_data %>% mutate(
+  return(new_data %>% dplyr::mutate(
     !!(paste0(type,".fit")) := unname(fit),
     !!(paste0(type,".se.fit")) := unname(se.fit),
-    !!(paste0(type,".0.025")) := .opt_inv(qnorm(0.025, fit, se.fit)),
+    !!(paste0(type,".0.025")) := .opt_inv(stats::qnorm(0.025, fit, se.fit)),
     !!(paste0(type,".0.5")) := .opt_inv(fit),
-    !!(paste0(type,".0.975")) := .opt_inv(qnorm(0.975, fit, se.fit))
+    !!(paste0(type,".0.975")) := .opt_inv(stats::qnorm(0.975, fit, se.fit))
   ))
 }
 
@@ -125,17 +125,17 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
 
 preprocess_data = function(df, multinom, ...,  date_col = "date") {
 
-  grps = df %>% groups()
+  grps = df %>% dplyr::groups()
 
   # Is this a dated line list? i.e. a datafram with a date, or a time, but no count:
   if (!.has_cols(df, "count")) {
 
     if (.has_time(df) && !.has_cols(df, "date")) {
       # need a date column to summarise
-      df = df %>% mutate(date = as.Date(time))
+      df = df %>% dplyr::mutate(date = as.Date(time))
     } else {
-      dateVar = ensym(date_col)
-      df = df %>% rename(date = !!dateVar)
+      dateVar = rlang::ensym(date_col)
+      df = df %>% dplyr::rename(date = !!dateVar)
     }
 
     # this does everything:
@@ -148,20 +148,20 @@ preprocess_data = function(df, multinom, ...,  date_col = "date") {
 
     # make sure there is a time column.
     if (!.has_time(df)) {
-      dateVar = ensym(date_col)
-      df = df %>% mutate(time = as.time_period(!!dateVar, ...))
+      dateVar = rlang::ensym(date_col)
+      df = df %>% dplyr::mutate(time = as.time_period(!!dateVar, ...))
     }
 
     if (.has_cols(df, "class") && !.has_cols(df, "denom")) {
       df = df %>%
-        group_by(!!!grps, time) %>%
-        mutate(denom = sum(count)) %>%
-        group_by(!!!grps)
+        dplyr::group_by(!!!grps, time) %>%
+        dplyr::mutate(denom = sum(count)) %>%
+        dplyr::group_by(!!!grps)
     }
 
   }
 
-  if (!multinom) {df = df %>% group_by(class, .add = TRUE)}
+  if (!multinom) {df = df %>% dplyr::group_by(class, .add = TRUE)}
 
   return(df)
 }

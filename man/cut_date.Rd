@@ -49,12 +49,12 @@ relies on a numeric representation of the date or duration from the anchor.
 }
 \examples{
 dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-fs = full_seq(dates, "2 days")
+fs = tidyr::full_seq(dates, "2 days")
 dates - cut_date(dates, "2 days")
 cut_date(dates,unit="2 days", output="time_period")
 
 # A weekly set of dates:
-dates2 = Sys.Date() + floor(runif(50,max=10))*7
+dates2 = Sys.Date() + floor(stats::runif(50,max=10))*7
 
 # in this specific situation the final date is not truncated because the
 # input data is seen as an exact match for the whole output period.

@@ -23,7 +23,7 @@ as.time_period(x, unit = NULL, start_date = NULL, anchor = NULL, ...)
 
 \method{[[}{time_period}(x, ...) <- value
 
-is.time_period(times)
+is.time_period(x)
 
 \method{print}{time_period}(x, ...)
 }
@@ -45,6 +45,10 @@ time-series. If this is \code{NULL} and \code{start_date} is also \code{NULL} it
 \code{getOption("day_zero","2019-12-29")}}
 
 \item{...}{used for subtype implementations}
+
+\item{recursive}{concate recursively}
+
+\item{value}{the value}
 }
 \value{
 a \code{time_period} class, consisting of a vector of numbers, with

@@ -10,16 +10,16 @@ logit_trans()
 A scales object
 }
 \description{
-it perform logit scaling with right axis formatting. To not be used directly but with ggplot (e.g. scale_y_continuous(trans = "logit") )
+it perform logit scaling with right axis formatting. To not be used directly but with ggplot (e.g. ggplot2::scale_y_continuous(trans = "logit") )
 }
 \examples{
 
 library(ggplot2)
 library(tibble)
 
-tibble(pvalue = c(0.001, 0.05, 0.1), fold_change = 1:3) \%>\%
- ggplot(aes(fold_change , pvalue)) +
- geom_point() +
- scale_y_continuous(trans = "logit")
+tibble::tibble(pvalue = c(0.001, 0.05, 0.1), fold_change = 1:3) \%>\%
+ ggplot2::ggplot(aes(fold_change , pvalue)) +
+ ggplot2::geom_point() +
+ ggplot2::scale_y_continuous(trans = "logit")
 
 }

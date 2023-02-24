@@ -37,6 +37,15 @@
     <loc>/reference/as.timeseries.html</loc>
   </url>
   <url>
+    <loc>/reference/breaks_log1p.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cut_date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/date_to_time.html</loc>
+  </url>
+  <url>
     <loc>/reference/estimate_binomial_proportion.html</loc>
   </url>
   <url>
@@ -44,6 +53,15 @@
   </url>
   <url>
     <loc>/reference/estimate_poisson_rate.html</loc>
+  </url>
+  <url>
+    <loc>/reference/fdmy.html</loc>
+  </url>
+  <url>
+    <loc>/reference/full_seq.Date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/full_seq.time_period.html</loc>
   </url>
   <url>
     <loc>/reference/group_by.timed_df.html</loc>
@@ -58,7 +76,31 @@
     <loc>/reference/is.Date.html</loc>
   </url>
   <url>
+    <loc>/reference/logit_trans.html</loc>
+  </url>
+  <url>
+    <loc>/reference/max_date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/min_date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/multinomial_nnet_model.html</loc>
+  </url>
+  <url>
     <loc>/reference/pipe.html</loc>
+  </url>
+  <url>
+    <loc>/reference/poisson_glm_model.html</loc>
+  </url>
+  <url>
+    <loc>/reference/poisson_locfit_model.html</loc>
+  </url>
+  <url>
+    <loc>/reference/proportion_glm_model.html</loc>
+  </url>
+  <url>
+    <loc>/reference/proportion_locfit_model.html</loc>
   </url>
   <url>
     <loc>/reference/restore_groups.html</loc>
@@ -68,5 +110,8 @@
   </url>
   <url>
     <loc>/reference/time_summarise.html</loc>
+  </url>
+  <url>
+    <loc>/reference/time_to_date.html</loc>
   </url>
 </urlset>

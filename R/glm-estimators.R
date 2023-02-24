@@ -42,7 +42,7 @@ multinomial_nnet_model = function(d, ..., window = 14, frequency = "1 day", pred
 
   # remove zero count time points as these crash the algorithm
   tmp2 = d %>% dplyr::group_by(time) %>% dplyr::filter(sum(count)>0) %>% dplyr::ungroup()
-  tmp2 = tmp2 %>% select(time,class,count) %>%
+  tmp2 = tmp2 %>% dplyr::select(time,class,count) %>%
     tidyr::pivot_wider(names_from = class, values_from = count, values_fill = 0)
 
   response = tmp2 %>% dplyr::select(-tidyselect::any_of(c("time"))) %>% as.matrix()
@@ -61,8 +61,8 @@ multinomial_nnet_model = function(d, ..., window = 14, frequency = "1 day", pred
   # This will need to be done with resampling and a spaghetti plot.
   # browser()
   # Gets the basis model:
-  # new_matrix = model.matrix(~ splines::ns(time, df = df), data=new_data)
-  # betahat = t(rbind(0, coef(model))) # model coefficients, with explicit zero row added for reference category & transposed
+  # new_matrix = stats::model.matrix(~ splines::ns(time, df = df), data=new_data)
+  # betahat = t(rbind(0, stats::coef(model))) # model coefficients, with explicit zero row added for reference category & transposed
   # # transform works rowwise: in another log link type thing it could just be applied I think.
   # preds = t(apply(new_matrix %*% betahat, MARGIN = 1,FUN=.softmax))
   # colnames(preds) = colnames(response)
@@ -112,12 +112,12 @@ proportion_glm_model = function(d, ..., window = 14, frequency = "1 day") { #, o
   df = .df_from_window(window,timeseries = d)
 
   if (df < 2) df=2
-  model = glm(y ~ splines::ns(time, df = df), family = quasibinomial, data = d)
-  new_data = tibble(time = output_times)
+  model = stats::glm(y ~ splines::ns(time, df = df), family = stats::quasibinomial, data = d)
+  new_data = tibble::tibble(time = output_times)
   # response is transformed:
-  # proportion_estimate = predict(model, newdata = new_data, type="response")
+  # proportion_estimate = stats::predict(model, newdata = new_data, type="response")
   # this prediction in in the logit space:
-  est2 = predict(model, newdata = new_data, se.fit = TRUE)
+  est2 = stats::predict(model, newdata = new_data, se.fit = TRUE)
   # it is possible to get CIs out here but they are the logit transformed ones.
   new_data = new_data %>%
     .result_from_fit(type = "proportion", est2$fit, est2$se.fit, model$family$linkinv)
@@ -148,12 +148,12 @@ poisson_glm_model = function(d, ..., window = 14, frequency = "1 day") {
   # to stop extra wigglyness in shorter timeseries.
   df = .df_from_window(window,timeseries = d)
 
-  model = glm(count ~ splines::ns(time, df = df), family = quasipoisson, data = d)
-  new_data = tibble(time = output_times)
+  model = stats::glm(count ~ splines::ns(time, df = df), family = stats::quasipoisson, data = d)
+  new_data = tibble::tibble(time = output_times)
   # response is transformed:
-  rate_estimate = predict(model, newdata = new_data, type="response")
+  rate_estimate = stats::predict(model, newdata = new_data, type="response")
   # this prediction in in the logit space:
-  est2 = predict(model, newdata = new_data, se.fit = TRUE)
+  est2 = stats::predict(model, newdata = new_data, se.fit = TRUE)
   # it is possible to get CIs out here but they are the logit transformed ones.
 
   new_data = new_data %>%

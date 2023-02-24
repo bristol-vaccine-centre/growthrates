@@ -10,9 +10,9 @@
 #'
 #' @examples
 #' library(tidyverse)
-#' ggplot(diamonds, aes(x=price))+
-#'   geom_density()+
-#'   scale_x_continuous(trans="log1p", breaks=breaks_log1p())
+#' ggplot2::ggplot(diamonds, ggplot2::aes(x=price))+
+#'   ggplot2::geom_density()+
+#'   ggplot2::scale_x_continuous(trans="log1p", breaks=breaks_log1p())
 breaks_log1p = function(n=5,base=10) {
   #scales::force_all(n, base)
   n_default = n
@@ -24,7 +24,7 @@ breaks_log1p = function(n=5,base=10) {
 
 #' logit scale
 #'
-#' @description it perform logit scaling with right axis formatting. To not be used directly but with ggplot (e.g. scale_y_continuous(trans = "logit") )
+#' @description it perform logit scaling with right axis formatting. To not be used directly but with ggplot (e.g. ggplot2::scale_y_continuous(trans = "logit") )
 #'
 #' @return A scales object
 #'
@@ -33,10 +33,10 @@ breaks_log1p = function(n=5,base=10) {
 #' library(ggplot2)
 #' library(tibble)
 #'
-#' tibble(pvalue = c(0.001, 0.05, 0.1), fold_change = 1:3) %>%
-#'  ggplot(aes(fold_change , pvalue)) +
-#'  geom_point() +
-#'  scale_y_continuous(trans = "logit")
+#' tibble::tibble(pvalue = c(0.001, 0.05, 0.1), fold_change = 1:3) %>%
+#'  ggplot2::ggplot(aes(fold_change , pvalue)) +
+#'  ggplot2::geom_point() +
+#'  ggplot2::scale_y_continuous(trans = "logit")
 #'
 #' @export
 logit_trans = function() {

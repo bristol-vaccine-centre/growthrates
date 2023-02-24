@@ -19,7 +19,7 @@ A scales breaks generator for log1p scales
 }
 \examples{
 library(tidyverse)
-ggplot(diamonds, aes(x=price))+
-  geom_density()+
-  scale_x_continuous(trans="log1p", breaks=breaks_log1p())
+ggplot2::ggplot(diamonds, ggplot2::aes(x=price))+
+  ggplot2::geom_density()+
+  ggplot2::scale_x_continuous(trans="log1p", breaks=breaks_log1p())
 }

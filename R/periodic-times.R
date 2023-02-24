@@ -174,6 +174,7 @@ as.POSIXct.time_period = function(x,...) {
 }
 
 #' @describeIn as.time_period Combine `time_period`
+#' @param recursive concate recursively
 #' @export
 c.time_period = function(..., recursive = F) {
   inputs = list(...)
@@ -196,6 +197,7 @@ c.time_period = function(..., recursive = F) {
 }
 
 #' @describeIn as.time_period Assign values to a subset of a `time_period`
+#' @param value the value
 #' @export
 `[<-.time_period` = function(x,...,value) {
   y = `[<-`(as.numeric(x),...,as.numeric(value))
@@ -210,6 +212,7 @@ c.time_period = function(..., recursive = F) {
 }
 
 #' @describeIn as.time_period Assign a value in a `time_period`
+#' @param value the value
 #' @export
 `[[<-.time_period` = function(x,...,value) {
   y = `[[<-`(as.numeric(x),...,as.numeric(value))
@@ -266,8 +269,8 @@ c.time_period = function(..., recursive = F) {
 
 #' @describeIn as.time_period Check is a `time_period`
 #' @export
-is.time_period = function(times) {
-  return("time_period" %in% class(times))
+is.time_period = function(x) {
+  return("time_period" %in% class(x))
 }
 
 #' @describeIn as.time_period Print a time_period
@@ -348,7 +351,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
   if (is.time_period(times)) return(times)
   dates = unique(sort(dates))
   times = unique(sort(times))
-  interval = as.numeric(na.omit(dates - dplyr::lag(dates))) / as.numeric(na.omit(times - dplyr::lag(times)))
+  interval = as.numeric(stats::na.omit(dates - dplyr::lag(dates))) / as.numeric(stats::na.omit(times - dplyr::lag(times)))
   if (all(interval %% 7 == 0)) {
     n = .gcd(interval %/% 7)
     unit = lubridate::as.period(n, unit="week")
@@ -365,7 +368,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 
   ends = dates-floor(times)*unit
   starts = dates-ceiling(times)*unit
-  possible_start_dates = na.omit(starts + round(as.numeric(ends - starts)*(1+floor(times)-times)))
+  possible_start_dates = stats::na.omit(starts + round(as.numeric(ends - starts)*(1+floor(times)-times)))
 
   if (length(unique(possible_start_dates)) != 1) stop("Could not infer start date from dates and times, having units of: ", unit,", possibilities are ",paste0(sort(unique(possible_start_dates)), collapse = ", "))
   return(as.time_period.numeric(times,start_date = unique(possible_start_dates),unit = unit))
@@ -428,7 +431,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @export
 #'
 #' @examples
-#' full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
+#' tidyr::full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
 full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
   dates = x
   if (all(is.na(x))) stop("No non-NA dates provided to full_seq")
@@ -479,7 +482,7 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #'
 #' @examples
 #' tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
-#' full_seq(tmp, "7 days")
+#' tidyr::full_seq(tmp, "7 days")
 full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE, ...) {
 
   if (all(is.na(x))) stop("No non-NA times provided to full_seq")
@@ -556,12 +559,12 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #'
 #' @examples
 #' dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-#' fs = full_seq(dates, "2 days")
+#' fs = tidyr::full_seq(dates, "2 days")
 #' dates - cut_date(dates, "2 days")
 #' cut_date(dates,unit="2 days", output="time_period")
 #'
 #' # A weekly set of dates:
-#' dates2 = Sys.Date() + floor(runif(50,max=10))*7
+#' dates2 = Sys.Date() + floor(stats::runif(50,max=10))*7
 #'
 #' # in this specific situation the final date is not truncated because the
 #' # input data is seen as an exact match for the whole output period.
@@ -631,7 +634,7 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
 #
 .time_labels = function(times, dfmt = "%d/%b", ifmt = "%s \u2014 %s", na.value="Unknown") {
 
-  if (any(na.omit(abs(floor(times)-times))>0.01)) warning("Labelling applied to non-integer times. The result will be unexpected.")
+  if (any(stats::na.omit(abs(floor(times)-times))>0.01)) warning("Labelling applied to non-integer times. The result will be unexpected.")
 
   start_dates = time_to_date(times)
   end_dates = start_dates + attributes(times)$unit - lubridate::days(1)

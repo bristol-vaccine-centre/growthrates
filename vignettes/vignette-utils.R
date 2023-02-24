@@ -39,15 +39,15 @@
   }
 
   out = out %>%
-    mutate(time = as.time_period(time, unit = "7 days",start_date = "2020-01-01")) %>%
-    group_by(time) %>%
+    dplyr::mutate(time = as.time_period(time, unit = "7 days",start_date = "2020-01-01")) %>%
+    dplyr::group_by(time) %>%
     # The relative growth rate of one variant is the weighted average growth rate of the other variants (excluding current one)
-    mutate(
+    dplyr::mutate(
       proportion = rate/sum(rate),
       proportion.obs = count/sum(count),
       relative.r = r - (sum(r*rate)-r*rate)/(sum(rate)-rate)
     ) %>%
-    ungroup()
+    dplyr::ungroup()
 
   return(out)
 }
@@ -56,7 +56,7 @@
 .multinomial_waves = function(profile, waves=5, delay=20) {
   sim_len = length(profile+(waves-1)*delay)
   times = 1:sim_len
-  tibble(
+  tibble::tibble(
     time = as.time_period(times, unit = "7 days",start_date = "2020-01-01")
   )
 }

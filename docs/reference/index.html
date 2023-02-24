@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">growthrates</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.2</span>
       </span>
     </div>
 
@@ -65,54 +65,77 @@
         </td>
         <td><p>Convert time period to dates</p></td>
       </tr><tr><td>
-          <p><code><a href="as.time_period.html">as.time_period()</a></code> <code><a href="as.time_period.html">is.time_period()</a></code> </p>
+          <p><code><a href="as.time_period.html">as.time_period()</a></code> <code><a href="as.time_period.html">c(<i>&lt;time_period&gt;</i>)</a></code> <code><a href="as.time_period.html">`[`(<i>&lt;time_period&gt;</i>)</a></code> <code><a href="as.time_period.html">`[&lt;-`(<i>&lt;time_period&gt;</i>)</a></code> <code><a href="as.time_period.html">`[[`(<i>&lt;time_period&gt;</i>)</a></code> <code><a href="as.time_period.html">`[[&lt;-`(<i>&lt;time_period&gt;</i>)</a></code> <code><a href="as.time_period.html">is.time_period()</a></code> <code><a href="as.time_period.html">print(<i>&lt;time_period&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Convert numbers to a time period class</p></td>
+        <td><p>Convert to a time period class</p></td>
       </tr><tr><td>
-          <p><code><a href="as.timed_df.html">as.timed_df()</a></code> <code><a href="as.timed_df.html">is.timed_df()</a></code> </p>
+          <p><code><a href="breaks_log1p.html">breaks_log1p()</a></code> </p>
         </td>
-        <td><p>Timed dataframes</p></td>
+        <td><p>A scales breaks generator for log1p scales</p></td>
       </tr><tr><td>
-          <p><code><a href="as.timeseries.html">as.timeseries()</a></code> <code><a href="as.timeseries.html">is.timeseries()</a></code> <code><a href="as.timeseries.html">is.multinomial_ts()</a></code> </p>
+          <p><code><a href="cut_date.html">cut_date()</a></code> </p>
         </td>
-        <td><p>A time-series is a regular sequence of times with other data</p></td>
+        <td><p>Places a set of dates within a regular time series</p></td>
       </tr><tr><td>
-          <p><code><a href="estimate_binomial_proportion.html">estimate_binomial_proportion()</a></code> </p>
+          <p><code><a href="date_to_time.html">date_to_time()</a></code> </p>
         </td>
-        <td><p>A binomial proportion estimate and associated exponential growth rate</p></td>
+        <td><p>Convert a set of dates to numeric timepoints</p></td>
       </tr><tr><td>
-          <p><code><a href="estimate_multinomial_proportion.html">estimate_multinomial_proportion()</a></code> </p>
+          <p><code><a href="fdmy.html">fdmy()</a></code> </p>
         </td>
-        <td><p>Estimate the probabilities of a multinomial class based on count data</p></td>
+        <td><p>Format date as dmy</p></td>
       </tr><tr><td>
-          <p><code><a href="estimate_poisson_rate.html">estimate_poisson_rate()</a></code> </p>
+          <p><code><a href="full_seq.Date.html">full_seq(<i>&lt;Date&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Estimate an incidence rate from count data using a poisson regression</p></td>
+        <td><p>Expand a date vector to the full range of possible dates</p></td>
       </tr><tr><td>
-          <p><code><a href="group_by.timed_df.html">group_by(<i>&lt;timed_df&gt;</i>)</a></code> </p>
+          <p><code><a href="full_seq.time_period.html">full_seq(<i>&lt;time_period&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Group by one or more variables</p></td>
-      </tr><tr><td>
-          <p><code><a href="group_by.timeseries.html">group_by(<i>&lt;timeseries&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Group by one or more variables</p></td>
+        <td><p>Expand a <code>time_period</code> vector to the full range of possible timess</p></td>
       </tr><tr><td>
           <p><code><a href="is.Date.html">is.Date()</a></code> </p>
         </td>
         <td><p>Check whether vector is a date</p></td>
       </tr><tr><td>
-          <p><code><a href="restore_groups.html">restore_groups()</a></code> </p>
+          <p><code><a href="logit_trans.html">logit_trans()</a></code> </p>
         </td>
-        <td><p>Restore original format to a timed_df
-#'</p></td>
+        <td><p>logit scale</p></td>
       </tr><tr><td>
-          <p><code><a href="time_decompose.html">time_decompose()</a></code> </p>
+          <p><code><a href="max_date.html">max_date()</a></code> </p>
         </td>
-        <td><p>Decompose a timeseries with counts to timed data at individual level</p></td>
+        <td><p>The maximum of a set of dates</p></td>
+      </tr><tr><td>
+          <p><code><a href="min_date.html">min_date()</a></code> </p>
+        </td>
+        <td><p>The minimum of a set of dates</p></td>
+      </tr><tr><td>
+          <p><code><a href="multinomial_nnet_model.html">multinomial_nnet_model()</a></code> </p>
+        </td>
+        <td><p>Multinomial time-series model.</p></td>
+      </tr><tr><td>
+          <p><code><a href="poisson_glm_model.html">poisson_glm_model()</a></code> </p>
+        </td>
+        <td><p>Poisson time-series model.</p></td>
+      </tr><tr><td>
+          <p><code><a href="poisson_locfit_model.html">poisson_locfit_model()</a></code> </p>
+        </td>
+        <td><p>Poisson time-series model.</p></td>
+      </tr><tr><td>
+          <p><code><a href="proportion_glm_model.html">proportion_glm_model()</a></code> </p>
+        </td>
+        <td><p>Binomial time-series model.</p></td>
+      </tr><tr><td>
+          <p><code><a href="proportion_locfit_model.html">proportion_locfit_model()</a></code> </p>
+        </td>
+        <td><p>A binomial proportion estimate and associated exponential growth rate</p></td>
       </tr><tr><td>
           <p><code><a href="time_summarise.html">time_summarise()</a></code> </p>
         </td>
-        <td><p>Summarise data from a <code>timed_df</code> to a <code>timeseries</code></p></td>
+        <td><p>Summarise data from a line list to a time-series of counts.</p></td>
+      </tr><tr><td>
+          <p><code><a href="time_to_date.html">time_to_date()</a></code> </p>
+        </td>
+        <td><p>Convert a set of timepoints to dates</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -38,7 +38,7 @@ lineage_keys = lineage_keys %>% magrittr::extract(lapply(.,length)==1)
 lineage_key_df = tibble::tibble(prefix = names(lineage_keys), expanded = unlist(unname(lineage_keys)))
 recombinant_key_df = tibble::tibble(prefix = names(recombinants), expanded = names(recombinants))
 
-lineage_key_df = bind_rows(lineage_key_df, recombinant_key_df)
+lineage_key_df = dplyr::bind_rows(lineage_key_df, recombinant_key_df)
 
 # replace e.g. AY with B.1.617.2
 variants2 = variants %>% 
@@ -75,7 +75,7 @@ variants2 = variants %>%
     )
   ) #%>% dplyr::select(-prefix,-suffix,-expanded)
 
-# variants2 %>% filter(lineage_class == "Unclassified") %>% filter(WeekEndDate > "2022-12-01") %>% view()
+# variants2 %>% dplyr::filter(lineage_class == "Unclassified") %>% dplyr::filter(WeekEndDate > "2022-12-01") %>% tibble::view()
 
 ```
 
@@ -115,7 +115,7 @@ variants_data = dplyr::bind_rows(
     variants_uk,
     variants_bristol
   ) %>% 
-  mutate(time = as.time_period(date)) %>% 
+  dplyr::mutate(time = as.time_period(date)) %>% 
   dplyr::group_by(place)
 ```
 
@@ -124,9 +124,9 @@ variants_data = dplyr::bind_rows(
 ```{r}
 # debug(estimate_multinomial_proportion)
 # devtools::load_all()
-probs = variants_data %>% select(-date) %>% group_modify(multinomial_nnet_model, window = 28) %>% 
+probs = variants_data %>% dplyr::select(-date) %>% dplyr::group_modify(multinomial_nnet_model, window = 28) %>% 
   # This is needed to map the "time period" in time back to a normal "date"
-  mutate(date = time_to_date(time))
+  dplyr::mutate(date = time_to_date(time))
 
 
 ggplot(probs, ggplot2::aes(x=date,y=proportion.0.5,fill=class))+ggplot2::geom_area(color="black")+
@@ -138,13 +138,13 @@ ggplot(probs, ggplot2::aes(x=date,y=proportion.0.5,fill=class))+ggplot2::geom_ar
 
 ```{r}
 
-probs2 = variants_data %>% select(-date) %>% 
-  group_by(place,time) %>% 
-  mutate(denom = sum(count)) %>%
-  group_by(place,class) %>%
-  group_modify(proportion_locfit_model, window = 14) %>% 
+probs2 = variants_data %>% dplyr::select(-date) %>% 
+  dplyr::group_by(place,time) %>% 
+  dplyr::mutate(denom = sum(count)) %>%
+  dplyr::group_by(place,class) %>%
+  dplyr::group_modify(proportion_locfit_model, window = 14) %>% 
   # This is needed to map the "time period" in time back to a normal "date"
-  mutate(date = time_to_date(time))
+  dplyr::mutate(date = time_to_date(time))
 
 ggplot2::ggplot(probs2, ggplot2::aes(x=date,y=proportion.0.5,ymin=proportion.0.025,ymax=proportion.0.975,fill=class,colour=class))+
   ggplot2::geom_ribbon(colour=NA,alpha=0.2)+

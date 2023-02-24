@@ -40,5 +40,5 @@ incomplete starting and end periods, which may not be comparable to other
 periods, and we may need to exclude these from the result.
 }
 \examples{
-full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
+tidyr::full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
 }

@@ -31,7 +31,7 @@ conversion to the timeseries.
 ```{r}
 data = .test_data()
 
-tmp = data %>% select(-r,-rate) %>% poisson_locfit_model(window=7, deg = 2)
+tmp = data %>% dplyr::select(-r,-rate) %>% poisson_locfit_model(window=7, deg = 2)
 
 ggplot(tmp,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975))+
   ggplot2::geom_line()+
@@ -52,7 +52,7 @@ ggplot(tmp,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.97
 
 ```{r}
 data2 = .test_multinomial()
-tmp2 = data2 %>% select(-r,-rate) %>% group_by(class) %>% group_modify(poisson_locfit_model, window=7, deg = 1)
+tmp2 = data2 %>% dplyr::select(-r,-rate) %>% dplyr::group_by(class) %>% dplyr::group_modify(poisson_locfit_model, window=7, deg = 1)
 
 ggplot(tmp2,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975, colour=class, group=class))+
   ggplot2::geom_line()+
@@ -66,7 +66,7 @@ ggplot(tmp2,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=inci
 ```{r}
 ggplot(tmp2,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975,colour=class,groups=class))+
   ggplot2::geom_line()+ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=r, colour=class), data=data2,inherit.aes = FALSE)+facet_wrap(vars(class), ncol=1)
+  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=r, colour=class), data=data2,inherit.aes = FALSE)+ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
 ```
 
 # One versus others binomial model 
@@ -79,10 +79,10 @@ ggplot(tmp2,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.9
 
 # This will reinterpret total to be the total of positives
 tmp3 = data2 %>% 
-  group_by(time) %>% 
-  mutate(denom = sum(count)) %>%
-  group_by(class) %>% 
-  group_modify(proportion_locfit_model, window=14, deg = 2)
+  dplyr::group_by(time) %>% 
+  dplyr::mutate(denom = sum(count)) %>%
+  dplyr::group_by(class) %>% 
+  dplyr::group_modify(proportion_locfit_model, window=14, deg = 2)
 
 
 
@@ -144,10 +144,10 @@ ggplot(tmp5,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=inci
 
 # we don;t need to calculate the denominator as it is done automatically by the 
 tmp6 = data2 %>%
-  group_by(time) %>% 
-  mutate(denom = sum(count)) %>%
-  group_by(class) %>% 
-  group_modify(proportion_glm_model, window=14, deg = 2)
+  dplyr::group_by(time) %>% 
+  dplyr::mutate(denom = sum(count)) %>%
+  dplyr::group_by(class) %>% 
+  dplyr::group_modify(proportion_glm_model, window=14, deg = 2)
 
 ggplot(tmp6,ggplot2::aes(x=time,y=proportion.0.5, colour=class,group=class))+
   ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
