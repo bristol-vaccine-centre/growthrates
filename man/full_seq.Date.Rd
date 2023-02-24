@@ -13,6 +13,8 @@ full_seq.Date(
 )
 }
 \arguments{
+\item{x}{a vector of dates, possibly including NA values}
+
 \item{period}{the gap between observations as a number of days or as a natural
 language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 If not given this will be derived from the dates.}
@@ -24,8 +26,6 @@ week, e.g. "mon".}
 \item{complete}{truncate incomplete start and end periods}
 
 \item{...}{ignored}
-
-\item{dates}{a vector of dates, possibly including NA values}
 }
 \value{
 a vector of dates for regular periods between the minimum and maximum of

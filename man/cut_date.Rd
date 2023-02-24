@@ -31,7 +31,7 @@ named with labels referring to the}
 
 \item{ifmt}{a \code{sprintf} format for the period label containing \verb{\%s} exactly twice.}
 
-\item{...}{}
+\item{...}{ignored}
 }
 \value{
 a set of dates, times or a factor level, representing the start of

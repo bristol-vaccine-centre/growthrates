@@ -1,6 +1,6 @@
 Package: growthrates
 Title: Estimate Incidence, Proportions and Exponential Growth Rates
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person(given = "Robert",
            family = "Challen",
@@ -36,7 +36,10 @@ Imports:
     tidyr,
     glue,
     locfit,
-    MNLpred
+    functional,
+    lubridate,
+    scales,
+    tidyselect
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,
     https://doi.org/10.5281/zenodo.7242761

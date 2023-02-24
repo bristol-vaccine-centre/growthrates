@@ -197,8 +197,8 @@ c.time_period = function(..., recursive = F) {
 
 #' @describeIn as.time_period Assign values to a subset of a `time_period`
 #' @export
-`[<-.time_period` = function(x,...) {
-  y = `[<-`(as.numeric(x),...)
+`[<-.time_period` = function(x,...,value) {
+  y = `[<-`(as.numeric(x),...,as.numeric(value))
   return(.clone_time_period(y, x))
 }
 
@@ -211,8 +211,8 @@ c.time_period = function(..., recursive = F) {
 
 #' @describeIn as.time_period Assign a value in a `time_period`
 #' @export
-`[[<-.time_period` = function(x,...) {
-  y = `[[<-`(as.numeric(x),...)
+`[[<-.time_period` = function(x,...,value) {
+  y = `[[<-`(as.numeric(x),...,as.numeric(value))
   return(.clone_time_period(y, x))
 }
 
@@ -413,7 +413,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' incomplete starting and end periods, which may not be comparable to other
 #' periods, and we may need to exclude these from the result.
 #'
-#' @param dates a vector of dates, possibly including NA values
+#' @param x a vector of dates, possibly including NA values
 #' @param period the gap between observations as a number of days or as a natural
 #'   language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 #'   If not given this will be derived from the dates.
@@ -464,7 +464,7 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #' incomplete starting and end periods, which may not be comparable to other
 #' periods, and we may need to exclude these from the result.
 #'
-#' @param dates a vector of dates, possibly including NA values
+#' @param x a time period vector
 #' @param period the gap between observations as a number of days or as a natural
 #'   language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 #'   If not given this will be derived from the dates.
@@ -542,7 +542,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #'   named with labels referring to the
 #' @param dfmt the `strptime` format for the dates in the labels
 #' @param ifmt a `sprintf` format for the period label containing `%s` exactly twice.
-#' @param ...
+#' @param ... ignored
 #'
 #' @return a set of dates, times or a factor level, representing the start of
 #'   the period the date falls into, where the period is defined by the duration

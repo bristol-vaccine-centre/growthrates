@@ -4,7 +4,7 @@
 \alias{poisson_glm_model}
 \title{Poisson time-series model.}
 \usage{
-poisson_glm_model(d, ..., window = 14, frequency = "1 day", predict = TRUE)
+poisson_glm_model(d, ..., window = 14, frequency = "1 day")
 }
 \arguments{
 \item{d}{input dataframe with: \code{time} (as a \code{time_period}), \code{count} columns.

@@ -102,7 +102,6 @@ multinomial_nnet_model = function(d, ..., window = 14, frequency = "1 day", pred
 #' @param window a number of data points between knots, smaller values result in
 #'   less smoothing, large value in more.
 #' @param frequency the density of the output estimates.
-#' @param predict result a prediction. If false we return the model.
 #'
 #' @return a new dataframe with `time` (as a time period), and `proportion.0.5` plus quantiles, or a model object
 #'
@@ -118,7 +117,7 @@ multinomial_nnet_model = function(d, ..., window = 14, frequency = "1 day", pred
 #'   group_by(serotype) %>%
 #'   group_modify(proportion_model, df=4) %>%
 #'   glimpse()
-proportion_glm_model = function(d, ..., window = 14, frequency = "1 day", predict = TRUE) { #, output_unit = "1 day") {
+proportion_glm_model = function(d, ..., window = 14, frequency = "1 day") { #, output_unit = "1 day") {
 
   .exact_cols(d,"time", "count", "denom")
 
@@ -163,7 +162,7 @@ proportion_glm_model = function(d, ..., window = 14, frequency = "1 day", predic
 #'   group_by(serotype) %>%
 #'   group_modify(poisson_model, df=4) %>%
 #'   glimpse()
-poisson_glm_model = function(d, ..., window = 14, frequency = "1 day", predict = TRUE) {
+poisson_glm_model = function(d, ..., window = 14, frequency = "1 day") {
 
   # TODO:
   # Extract the gradient from the spline.

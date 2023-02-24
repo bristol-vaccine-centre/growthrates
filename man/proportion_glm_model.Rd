@@ -4,7 +4,7 @@
 \alias{proportion_glm_model}
 \title{Binomial time-series model.}
 \usage{
-proportion_glm_model(d, ..., window = 14, frequency = "1 day", predict = TRUE)
+proportion_glm_model(d, ..., window = 14, frequency = "1 day")
 }
 \arguments{
 \item{d}{input dataframe with: \code{time} (as a \code{time_period}), \code{count}, and \code{denom} columns.
@@ -16,8 +16,6 @@ This must be ungrouped (but can be combined with a \code{group_modify})}
 less smoothing, large value in more.}
 
 \item{frequency}{the density of the output estimates.}
-
-\item{predict}{result a prediction. If false we return the model.}
 }
 \value{
 a new dataframe with \code{time} (as a time period), and \code{proportion.0.5} plus quantiles, or a model object
