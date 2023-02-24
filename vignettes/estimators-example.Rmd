@@ -13,62 +13,145 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 library(tidyverse)
-library(growthrates)
+devtools::load_all()
+# library(growthrates)
 here::i_am("vignettes/estimators-example.Rmd")
 source(here::here("vignettes/vignette-utils.R"))
 ggplot2::theme_set(ggplot2::theme_minimal())
 ```
 
+* TODO change .test_data to be a regular data frame and give example of the 
+conversion to the timeseries.
+* have a date based data frame as input.
 
+# Poisson model
+
+* Absolute counts 
 
 ```{r}
 data = .test_data()
-tmp = data %>% estimate_poisson_rate(window=7*8, deg = 1)
 
-ggplot(tmp,ggplot2::aes(x=date,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975))+
+tmp = data %>% select(-r,-rate) %>% poisson_locfit_model(window=7, deg = 2)
+
+ggplot(tmp,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975))+
   ggplot2::geom_line()+
   ggplot2::geom_ribbon(alpha=0.2)+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=date,y=count), data=data, colour="red",inherit.aes = FALSE)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=date,y=rate), data=data, colour="red",inherit.aes = FALSE)
+  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=count), data=data, colour="red",inherit.aes = FALSE)+
+  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=rate), data=data, colour="red",inherit.aes = FALSE)
 ```
 
+* Absolute growth rate
+
 ```{r}
-ggplot(tmp,ggplot2::aes(x=date,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975))+
+ggplot(tmp,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975))+
   ggplot2::geom_line()+ggplot2::geom_ribbon(alpha=0.2)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=date,y=r), data=data, colour="red",inherit.aes = FALSE)
+  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=r), data=data, colour="red",inherit.aes = FALSE)
 ```
+
+* Multiple classes absolute count
 
 ```{r}
 data2 = .test_multinomial()
-tmp2 = data2 %>% estimate_poisson_rate(window=7*8, deg = 1)
+tmp2 = data2 %>% select(-r,-rate) %>% group_by(class) %>% group_modify(poisson_locfit_model, window=7, deg = 1)
 
-ggplot(tmp2,ggplot2::aes(x=date,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975, colour=class, group=class))+
+ggplot(tmp2,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975, colour=class, group=class))+
   ggplot2::geom_line()+
   ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=date,y=count, group=class), data=data2, colour="red",inherit.aes = FALSE)
+  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=count, color=class), data=data2,inherit.aes = FALSE)+
+  scale_y_log1p()
 ```
 
+* Multiple classes absolute growth rate
+
 ```{r}
-ggplot(tmp2,ggplot2::aes(x=date,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975,colour=class,groups=class))+
+ggplot(tmp2,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975,colour=class,groups=class))+
   ggplot2::geom_line()+ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=date,y=r, group=class), data=data2, colour="red",inherit.aes = FALSE)
+  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=r, colour=class), data=data2,inherit.aes = FALSE)+facet_wrap(vars(class), ncol=1)
 ```
 
+# One versus others binomial model 
+
+* Relative growth rate
+
 ```{r}
 
-tmp3 = data2 %>% dplyr::select(-total) %>% estimate_binomial_proportion(window=7*8, deg = 1)
+#devtools::load_all()
 
-data3 = dplyr::bind_rows(
-  data2 %>% dplyr::select(date,r,class) %>% tidyr::pivot_wider(names_from = class, values_from = r) %>%
-  dplyr::mutate(r_diff = variant2-variant1) %>% dplyr::mutate(class="variant2"),
-  data2 %>% dplyr::select(date,r,class) %>% tidyr::pivot_wider(names_from = class, values_from = r) %>%
-  dplyr::mutate(r_diff = variant1-variant2) %>% dplyr::mutate(class="variant1")
-)
+# This will reinterpret total to be the total of positives
+tmp3 = data2 %>% 
+  group_by(time) %>% 
+  mutate(denom = sum(count)) %>%
+  group_by(class) %>% 
+  group_modify(proportion_locfit_model, window=14, deg = 2)
 
 
-ggplot(tmp3,ggplot2::aes(x=date,y=relative.growth.0.5, ymin=relative.growth.0.025, ymax=relative.growth.0.975,colour=class,group=class))+
-  ggplot2::geom_line()+ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=date,y=r_diff, group=class), data=data3, colour="red",inherit.aes = FALSE)+
-  ggplot2::facet_wrap(dplyr::vars(class))
+
+ggplot(tmp3,ggplot2::aes(x=time,y=relative.growth.0.5, ymin=relative.growth.0.025, ymax=relative.growth.0.975,colour=class,group=class))+
+  ggplot2::geom_line()+
+  ggplot2::geom_ribbon(alpha=0.2, color=NA)+
+  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=relative.r, colour=class), data=data2, inherit.aes = FALSE)+
+  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+
+```
+
+* Absolute proportions
+
+```{r}
+ggplot(tmp3,ggplot2::aes(x=time,y=proportion.0.5, ymin=proportion.0.025, ymax=proportion.0.975,colour=class,group=class))+
+  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
+  ggplot2::geom_line()+
+  ggplot2::geom_ribbon(alpha=0.2, color=NA)+
+  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+```
+
+
+# Multinomial model
+
+* Absolute proportions only
+
+```{r}
+
+# we don;t need to calculate the denominator as it is done automatically by the 
+tmp4 = data2 %>% multinomial_nnet_model()
+
+ggplot(tmp4,ggplot2::aes(x=time,y=proportion.0.5, colour=class,group=class))+
+  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
+  ggplot2::geom_line()+
+  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+
+```
+
+# GLM poisson model
+
+* Spline currently only good for incidence
+
+```{r}
+
+tmp5 = data %>% poisson_glm_model(window=7)
+
+ggplot(tmp5,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975))+
+  ggplot2::geom_line()+
+  ggplot2::geom_ribbon(alpha=0.2)+
+  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=count), data=data, colour="red",inherit.aes = FALSE)+
+  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=rate), data=data, colour="red",inherit.aes = FALSE)
+```
+
+# GLM poisson model
+
+* Absolute proportions only
+
+```{r}
+
+# we don;t need to calculate the denominator as it is done automatically by the 
+tmp6 = data2 %>%
+  group_by(time) %>% 
+  mutate(denom = sum(count)) %>%
+  group_by(class) %>% 
+  group_modify(proportion_glm_model, window=14, deg = 2)
+
+ggplot(tmp6,ggplot2::aes(x=time,y=proportion.0.5, colour=class,group=class))+
+  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
+  ggplot2::geom_line()+
+  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
 
 ```

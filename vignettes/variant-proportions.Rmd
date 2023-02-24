@@ -31,9 +31,14 @@ lineages = .download("https://raw.githubusercontent.com/cov-lineages/pango-desig
 lineage_keys = jsonlite::read_json(lineages)
 
 # filter out recombinant species
-
+recombinants = lineage_keys %>% magrittr::extract(lapply(.,length)>1)
 lineage_keys = lineage_keys %>% magrittr::extract(lapply(.,length)==1)
+# TODO::
+
 lineage_key_df = tibble::tibble(prefix = names(lineage_keys), expanded = unlist(unname(lineage_keys)))
+recombinant_key_df = tibble::tibble(prefix = names(recombinants), expanded = names(recombinants))
+
+lineage_key_df = bind_rows(lineage_key_df, recombinant_key_df)
 
 # replace e.g. AY with B.1.617.2
 variants2 = variants %>% 
@@ -56,7 +61,8 @@ variants2 = variants %>%
       full_tree %>% stringr::str_starts("B.1.1.529.2") ~ "Omicron (BA.2)",
       full_tree %>% stringr::str_starts("B.1.1.529.4") ~ "Omicron (BA.4)",
       full_tree %>% stringr::str_starts("B.1.1.529.5") ~ "Omicron (BA.5)",
-      # full_tree %>% stringr::str_starts("B.1.1.529") ~ "Omicron",
+      full_tree %>% stringr::str_starts("XBB.1.5") ~ "Kraken (XBB.1.5)",
+      full_tree %>% stringr::str_starts("XBB") ~ "XBB (Other)",
       TRUE ~ "Other"
     ),
     who_class = dplyr::case_when(
@@ -64,9 +70,12 @@ variants2 = variants %>%
       full_tree %>% stringr::str_starts("B.1.1.7") ~ "Alpha",
       full_tree %>% stringr::str_starts("B.1.617.2") ~ "Delta",
       full_tree %>% stringr::str_starts("B.1.1.529") ~ "Omicron",
+      full_tree %>% stringr::str_starts("XBB.1.5") ~ "Kraken",
       TRUE ~ "Other"
     )
   ) #%>% dplyr::select(-prefix,-suffix,-expanded)
+
+# variants2 %>% filter(lineage_class == "Unclassified") %>% filter(WeekEndDate > "2022-12-01") %>% view()
 
 ```
 
@@ -77,6 +86,7 @@ variants2 = variants %>%
 # The count data is at LTLA level. Firstly lets aggregate to England (LTLAs) that
 # start with "E"
 variants_uk = variants2 %>% 
+  dplyr::filter(lineage_class != "Unclassified") %>% 
   dplyr::filter(stringr::str_starts(LTLA,"E")) %>% 
   dplyr::select(
     date = WeekEndDate,
@@ -89,6 +99,7 @@ variants_uk = variants2 %>%
   dplyr::mutate(place = "England")
 
 variants_bristol = variants2 %>% 
+  dplyr::filter(lineage_class != "Unclassified") %>% 
   dplyr::filter(LTLA %in% c("E06000023","E06000025","E06000022","E06000024")) %>% 
   dplyr::select(
     date = WeekEndDate,
@@ -103,26 +114,60 @@ variants_bristol = variants2 %>%
 variants_data = dplyr::bind_rows(
     variants_uk,
     variants_bristol
-  ) %>% dplyr::group_by(place) %>% 
-  as.timeseries(grp_label = "{place}")
+  ) %>% 
+  mutate(time = as.time_period(date)) %>% 
+  dplyr::group_by(place)
 ```
 
 * Calculate the probabilities in a group wise fashion
 
 ```{r}
 # debug(estimate_multinomial_proportion)
-probs = variants_data %>% estimate_multinomial_proportion()
+# devtools::load_all()
+probs = variants_data %>% select(-date) %>% group_modify(multinomial_nnet_model, window = 28) %>% 
+  # This is needed to map the "time period" in time back to a normal "date"
+  mutate(date = time_to_date(time))
 
-```
 
-* Plot the proportions:
-
-```{r}
-ggplot(probs, ggplot2::aes(x=date,y=probability,fill=class))+ggplot2::geom_area(color="black")+
-  ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
+ggplot(probs, ggplot2::aes(x=date,y=proportion.0.5,fill=class))+ggplot2::geom_area(color="black")+
+  # ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
   ggplot2::scale_fill_viridis_d()+
-  ggplot2::facet_wrap(dplyr::vars(group), ncol=1)+
+  ggplot2::facet_wrap(dplyr::vars(place), ncol=1)+
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,vjust = 1,hjust=1))
 ```
 
+```{r}
 
+probs2 = variants_data %>% select(-date) %>% 
+  group_by(place,time) %>% 
+  mutate(denom = sum(count)) %>%
+  group_by(place,class) %>%
+  group_modify(proportion_locfit_model, window = 14) %>% 
+  # This is needed to map the "time period" in time back to a normal "date"
+  mutate(date = time_to_date(time))
+
+ggplot2::ggplot(probs2, ggplot2::aes(x=date,y=proportion.0.5,ymin=proportion.0.025,ymax=proportion.0.975,fill=class,colour=class))+
+  ggplot2::geom_ribbon(colour=NA,alpha=0.2)+
+  ggplot2::geom_line()+
+  # ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
+  ggplot2::scale_fill_viridis_d(aesthetics = c("fill","colour"))+
+  ggplot2::facet_wrap(dplyr::vars(place), ncol=1)+
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,vjust = 1,hjust=1))
+
+```
+
+
+```{r}
+
+ggplot2::ggplot(probs2, ggplot2::aes(x=time,y=relative.growth.0.5,ymin=relative.growth.0.025,ymax=relative.growth.0.975,fill=class,colour=class))+
+  ggplot2::geom_ribbon(colour=NA,alpha=0.2)+
+  ggplot2::geom_line()+
+  # ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
+  ggplot2::scale_fill_viridis_d(aesthetics = c("fill","colour"))+
+  ggplot2::facet_wrap(dplyr::vars(place), ncol=1, scales = "free_y")+
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,vjust = 1,hjust=1))+
+  ggplot2::coord_cartesian(ylim=c(-1,1))
+
+```
+
+```

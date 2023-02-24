@@ -14,9 +14,8 @@
     dplyr::mutate(rate = initial*exp(cumsum(r))) %>%
     dplyr::mutate(
       count = stats::rpois(dplyr::n(),rate),
-      total = max(count)*2
-    ) %>% as.timeseries(
-      days_in_period = 7, start_date="2020-01-01"
+      denom = max(count)*2,
+      time = as.time_period(time, unit = "7 days",start_date = "2020-01-01")
     )
 }
 
@@ -25,23 +24,41 @@
     changes = tibble::tibble(
       time = c(0,20,40,60,80),
       variant1 = c(0.1,0,-0.1,0,0.1),
-      variant2 = c(0.15,0.05,-0.05,-0.01,0.05)
-    ), initial=c(100,1), ...) {
+      variant2 = c(0.15,0.05,-0.05,-0.01,0.05),
+      variant3 = c(0,0.05,-0.05,+0.05,-0.05),
+    ), initial=c(100,1,100), ...) {
   cols = setdiff(colnames(changes),"time")
   out = tibble::tibble()
   i = 1
   for (col in cols) {
     out = dplyr::bind_rows(
       out,
-      .test_data(changes = changes %>% dplyr::select(time, r=!!col), initial=initial[[i]], ...) %>% dplyr::mutate(class = col, time=as.numeric(time)) %>% tibble::as_tibble()
+      .test_data(changes = changes %>% dplyr::select(time, r=!!col), initial=initial[[i]], ...) %>%
+        dplyr::mutate(class = col, time=as.numeric(time)) %>% tibble::as_tibble()
     )
   }
 
-  out = out %>% as.timeseries(
-    days_in_period = 7, start_date="2020-01-01"
-  )
+  out = out %>%
+    mutate(time = as.time_period(time, unit = "7 days",start_date = "2020-01-01")) %>%
+    group_by(time) %>%
+    # The relative growth rate of one variant is the weighted average growth rate of the other variants (excluding current one)
+    mutate(
+      proportion = rate/sum(rate),
+      proportion.obs = count/sum(count),
+      relative.r = r - (sum(r*rate)-r*rate)/(sum(rate)-rate)
+    ) %>%
+    ungroup()
 
   return(out)
+}
+
+
+.multinomial_waves = function(profile, waves=5, delay=20) {
+  sim_len = length(profile+(waves-1)*delay)
+  times = 1:sim_len
+  tibble(
+    time = as.time_period(times, unit = "7 days",start_date = "2020-01-01")
+  )
 }
 
 

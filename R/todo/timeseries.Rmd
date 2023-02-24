@@ -1,0 +1,38 @@
+---
+title: "timeseries-example"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{timeseries-example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(tidyverse)
+devtools::load_all()
+# library(growthrates)
+here::i_am("vignettes/timeseries-example.Rmd")
+source(here::here("vignettes/vignette-utils.R"))
+ggplot2::theme_set(ggplot2::theme_minimal())
+```
+
+# Line lists and time series
+
+ID data either comes as a set of individual observations with some sort of 
+timestamp (a line list) or as a count of events happening within a specific 
+period (day, week, month etc.) as an incidence tmie series.
+
+For both these data types there may also be a class associated with each 
+observation which could be for example the variant of a virus, or a particular
+test type, for example. It may make sense to compare the relative growth of the
+different classes.
+
+```{r}
+dates = seq(as.Date("2020-01-01"),by=7,length.out = 52)
+
+as.time_period(dates)
+```

@@ -6,320 +6,164 @@
 # return NA for errors
 .opt = function(expr) tryCatch(expr,error=function(e) NA_real_)
 
-.nn_from_window = function(window, timeseries) {
-  d = attributes(timeseries$time)$days_in_period
-  nn = 2*window/nrow(timeseries)/d
-  if (nn < 8/nrow(timeseries)) {
-    nn = 8/nrow(timeseries)
-    warning("window is too small for data. using: ", nn/2*d*nrow(timeseries))
-  }
-  return(nn)
+# check colums are present in df
+.has_cols = function(df, ...) {
+  cols = unlist(rlang::list2(...))
+  if (is.symbol(cols)) cols = rlang::as_label(cols)
+  return(all(cols %in% colnames(df)))
 }
 
-## Estimators ----
-
-#' Estimate an incidence rate from count data using a poisson regression
-#'
-#' takes a list of times and counts based on a quasi-poisson model fitted to
-#' count data using local regression. expects timed_df to contain time and count
-#' columns only.
-#'
-#' @param timeseries a timeseries including a `count` column. Any `group` or `class`
-#'   columsn are used for grouping and treated as independent time series
-#' @param window the width of the window of data to choose in days. If your data
-#'   is weekly you probably will want to up this from it default value of 14.
-#'   Larger numbers give fewer wiggles.
-#' @param deg the polynomial degree to fit (higher numbers give more wiggles)
-#' @param daily_incidence Do you want to return estimates of the incidence as a daily
-#'   rate regardless of the periodicity of the input, or stick with the time unit of
-#'   the input? regardless of this setting results will be returned as a daily
-#'   frequency (but might be in cases per week if the input data was weekly).
-#'
-#' @return a new timeseries with time, date, and various incidence and growth
-#'   rate metrics
-#' @export
-#'
-#' @examples
-#' if (FALSE) {
-#'   utils::vignette("estimators-example", package="growthrates")
-#' }
-estimate_poisson_rate = function(timeseries, window=14, deg=2, daily_incidence = FALSE) {
-
-  timeseries %>% .check_timeseries("count")
-
-  # deal with multiple timeseries.
-  # mulitple classes are also dealt with seperately
-  grps = .ts_groups(timeseries,time=FALSE)
-  if(length(grps)>0) {
-    return(
-      timeseries %>%
-        dplyr::group_by(!!!grps) %>%
-        # does group_modify preserve the attributes of the time column?
-        dplyr::group_modify(function(d,g,...) {
-          # no
-          d %>% as.timeseries() %>% estimate_poisson_rate(window, deg, daily_incidence)
-        }) %>%
-        dplyr::ungroup() %>%
-        .copy_metadata(timeseries) %>%
-        as.timeseries()
-    )
+# check for additional columns and chuck a warning
+.exact_cols = function(df, ..., .ignore = NULL) {
+  if (!.has_cols(df,...)) stop("Missing column(s): ", paste(..., sep=", ", collapse=", "))
+  expected = c(unlist(c(...)),.ignore)
+  if (!all(colnames(df) %in% expected)) {
+    extra = setdiff(colnames(df), expected)
+    xcols = paste0(extra,collapse=", ")
+    rlang::warn(c("!"="Removing unsupported column(s): ","*" = xcols,"*" = "Did you mean to group beforehand?"), .frequency = "once", .frequency_id = xcols)
+    df = df %>% select(any_of(expected)) # any of because of ignored columns.
   }
-
-  nn = .nn_from_window(window, timeseries)
-
-  fit = locfit::locfit(count~locfit::lp(time,nn=nn,deg=deg),data = timeseries,family="qpoisson", link="log")
-  deriv = locfit::locfit(count~locfit::lp(time,nn=nn,deg=deg),deriv=1,data = timeseries,family="qpoisson", link="log")
-
-  new_time = .daily_times(timeseries$time)
-
-  tmp = stats::preplot(fit,newdata=new_time, se.fit = TRUE, band="local", maxit = 5000, maxk=5000)
-  # transformer function:
-  t = tmp$tr
-
-  tmp2 = stats::preplot(deriv,newdata=new_time, se.fit = TRUE, band="local", maxit = 5000, maxk=5000)
-
-  # if the original timeseries is weekly and we want to get out a daily rate
-  # we need to adjust the estimated mean by x=x-log(7) before transformation
-  # (i.e. the same as x/7 after transformation). This preserves confidence limits
-  if (daily_incidence) {
-    period = attributes(timeseries$time)$days_in_period
-  } else {
-    period = 1
-  }
-
-  out = tibble::tibble(
-    time = new_time,
-    incidence.0.025 = .opt(t(stats::qnorm(0.025, tmp$fit-log(period), tmp$se.fit))),
-    incidence.0.5 = t(stats::qnorm(0.5, tmp$fit-log(period), tmp$se.fit)),
-    incidence.0.975 = .opt(t(stats::qnorm(0.975,tmp$fit-log(period),tmp$se.fit))),
-    growth.0.025 = .opt(stats::qnorm(0.025, tmp2$fit, tmp2$se.fit)),
-    growth.0.5 = .opt(stats::qnorm(0.5, tmp2$fit, tmp2$se.fit)),
-    growth.0.975 = .opt(stats::qnorm(0.975, tmp2$fit, tmp2$se.fit))
-  )
-  out %>% as.timeseries()
+  invisible(NULL)
 }
 
 
-
-
-
-#' A binomial proportion estimate and associated exponential growth rate
+#' Summarise data from a line list to a time-series of counts.
 #'
-#' takes a list of times and counts based on and fits a
-#' quasi-binomial model fitted with a logit link function to proportion data
-#' using local regression. Behaviour depends on inputs a bit.
+#' Summarises by group, class and time/date.
 #'
-#' This expects timeseries to contain one combination of:
-#' * time and proportion columns (+/- class), and in this case fits
-#' independent models to any classes and with proportion as the response and
-#' time as the predictor. This format assumes you have pre-calculated proportions
-#' for each day, but does not take into account sample size for individual days
-#' when calculating confidence intervals.
-#' * time and count and total columns - Total for example might be all tests
-#' conducted for example. In this case if `quick=TRUE` it calculates
-#' the proportion and proceeds as above. If `quick=FALSE` it expands the
-#' time-series of counts to a line list of individuals with either 1 for
-#' positive or 0 for negative outcome (count positives, total-count negatives).
-#' The model is then fitted to individuals with a outcome predicted by time. This
-#' is only worth doing if numbers are small. If class is present, then each
-#' class will be treated as an independent time series.
-#' * time and class and count, without total columns. In this case the class
-#' columns are treated as a complete set of observations, and the algorithm
-#' calculates a total based on the sum of the class counts. This results in a one
-#' versus others comparison, which is only strictly valid is class is binomial
-#' but will work for multinomial. Once the total is defined the algorithm
-#' proceeds as above depending on the `quick` parameter.
+#' @param df a line list of data you want to summarise, optionally grouped.
+#'   If this is grouped then each group is treated independently. The remaining
+#'   columns must contain a `date` column and may contain a `class` column.
+#' @inheritParams cut_date
+#' @param rectangular should the resulting time series be the same length for
+#'   all groups. This is only the case if you can be sure that all data has been
+#'   provided from all otherwise missing data will be treated as zero counts.
+#' @param ... a spec for a dplyr::summary(...) - optional, and if not provided a
+#'   `count = dplyr::n()` or a `count = sum(count)` is performed.
+#' @param .fill a list similar to tidyr::complete for values to fill
+#'   variables with
 #'
-#' @param timeseries a timeseries, which must have a `time` and one combination of
-#' `proportion` OR `count` and `total` OR `class` and `count`. Optionally it may
-#' have a `group` column which is treated as independent timeseries,
-#' @param ... not used. Allows use in a group modify
-#' @param window the number fo days data to include, Should be upped for weekly
-#'   time series.
-#' @param deg the polynomial degree (higher = more wiggly)
-#' @param quick should rely solely on count data wherever possible.
-#'
-#' @return a timeseries including `proportion` columns, and `relative.growth`
-#'   columns. The growth is relative to whatever end up in the `total` column.
-#'   This might be the total number of tests (which can be complex to interpret
-#'   in the situation where testing is changing), or might be the total number
-#'   of all variants of the class (e.g. when comparing genomic variants).
+#' @return a timeseries dataframe grouped by time period,
 #' @export
-#'
-#' @examples
-#' if (FALSE) {
-#'   utils::vignette("estimators-example", package="growthrates")
-#' }
-estimate_binomial_proportion = function(timeseries, ... ,window=14,deg=2, quick=FALSE) {
+time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., .fill = list(count = 0)) {
 
-  timeseries %>% .check_timeseries()
+  # TODO: a line list with no data at the end is either missing data or there were no observations.
+  # A date at which the observations are complete up to may be needed for each
+  # group.
 
-  # deal with multiple timeseries.
-  if(.has_cols(timeseries,"group")) {
-    return(
-      timeseries %>%
-        dplyr::group_by(group) %>%
-        # does group_modify preserve the attributes of the time column? no
-        dplyr::group_modify(function(d,g,..) {
-          d %>% as.timeseries() %>% estimate_binomial_proportion(window=window, deg=deg, quick=quick)
-        }) %>%
-        dplyr::ungroup() %>%
-        .copy_metadata(timeseries) %>%
-        as.timeseries()
-    )
+  if (!.has_cols(df,"date")) stop("a date column must be present")
+  if (.has_cols(df,"time")) warning("time_summarise ignores existing time_period columns")
+
+  has_class = .has_cols(df,"class")
+  grps = df %>% groups()
+
+  df = df %>% mutate(time = cut_date(date, unit=  unit, anchor = anchor, output="time_period"))
+  if (has_class) df = df %>% group_by(class, .add = TRUE)
+  df = df %>% group_by(time, .add = TRUE)
+
+  dots = dplyr::enexprs(...)
+
+  if (length(dots)==0) {
+    if (.has_cols(df,"count")) {
+      dots=list(count=rlang::expr(sum(count, na.rm=TRUE)))
+    } else {
+      dots=list(count=rlang::expr(dplyr::n()))
+    }
+    .fill = list(count=0)
   }
 
-  if (is.multinomial_ts(timeseries)) {
-    # so this is a one versus many. it maybe proportion is already calculated
-    # but if not:
-    if (!.has_cols(timeseries,"proportion")) {
-      if (!.has_cols(timeseries,"total")) {
-        if (!.has_cols(timeseries,"count")) {
-          stop("not enough data, at a minimum multinomial data must have a class and count column")
-        } else {
-          # count and class only
-          # create a total column. proportion will be calculates as a
-          # one versus others binomial
-          timeseries = timeseries %>% dplyr::group_by(time) %>% dplyr::mutate(total = sum(count))
+  # when rectangular the full sequence is for all the obseverations
+  times = full_seq.time_period(df$time)
+
+  # df grouped by grps, class(?), and time at this point
+  tmp = df %>%
+    dplyr::summarise(!!!dots, .groups="drop_last") %>%
+    dplyr::group_by(!!!grps) %>%
+    dplyr::group_modify(function(d,g,...) {
+      if (!rectangular) times = full_seq.time_period(d$time)
+      if (has_class) {
+        dtmp = d %>% tidyr::complete(class, time = times, fill = .fill)
+        if (!.has_cols(d, "denom") & .has_cols(d,"count")) {
+          # calculate a classwise denominator if class and count are present and no denom column
+          # created by the summarise.
+          dtmp = dtmp %>%
+            group_by(time) %>%
+            mutate(denom = sum(count, na.rm = TRUE)) %>%
+            ungroup()
         }
+      } else {
+        dtmp = d %>% tidyr::complete(time = times, fill = .fill)
       }
-    }
-    return(
-      timeseries %>%
-        dplyr::group_by(class) %>%
-        # does group_modify preserve the attributes of the time column?
-        dplyr::group_modify(function(d,g,..) {
-          d %>% as.timeseries() %>% estimate_binomial_proportion(window=window, deg=deg, quick=quick)
-        }) %>%
-        dplyr::ungroup() %>%
-        .copy_metadata(timeseries) %>%
-        as.timeseries()
+
+    })
+
+
+  return(tmp %>% ungroup())
+}
+
+
+.result_from_fit = function(new_data, type, fit, se.fit, inv = function(x) x) {
+  .opt_inv = function(x) {
+    tryCatch(
+      inv(x),
+      error = function(e) rep(NA,length(x))
     )
   }
 
-  if (
-    !.has_cols(timeseries,"proportion") &&
-    !.has_cols(timeseries,"count","total")
-  ) stop("not enough data we need at least time (integer, seqeuential), count, total columns, or time, proportion columns")
+  return(new_data %>% mutate(
+    !!(paste0(type,".fit")) := unname(fit),
+    !!(paste0(type,".se.fit")) := unname(se.fit),
+    !!(paste0(type,".0.025")) := .opt_inv(qnorm(0.025, fit, se.fit)),
+    !!(paste0(type,".0.5")) := .opt_inv(fit),
+    !!(paste0(type,".0.975")) := .opt_inv(qnorm(0.975, fit, se.fit))
+  ))
+}
 
-  nn = .nn_from_window(window, timeseries)
-  new_time = .daily_times(timeseries$time)
+.has_time = function(df) {
+  return(.has_cols(df, "time") && is.time_period(df$time))
+}
 
-  if (!.has_cols(timeseries,"count","total")) {
-    # if we only have proportion we cannot do the slower method
-    quick=TRUE
-  } else if (sum(timeseries$total) > 10000) {
-    quick=TRUE
-  }
-  if (quick) {
-    if (!.has_cols(timeseries,"proportion")) {
-      # we know count and total must be present
-      timeseries = timeseries %>% dplyr::mutate(proportion = count/total)
+preprocess_data = function(df, multinom, ...,  date_col = "date") {
+
+  grps = df %>% groups()
+
+  # Is this a dated line list? i.e. a datafram with a date, or a time, but no count:
+  if (!.has_cols(df, "count")) {
+
+    if (.has_time(df) && !.has_cols(df, "date")) {
+      # need a date column to summarise
+      df = df %>% mutate(date = as.Date(time))
+    } else {
+      dateVar = ensym(date_col)
+      df = df %>% rename(date = !!dateVar)
     }
-  }
 
-  if (!quick) {
-    message("using the slower maybe more accurate (for small numbers) method")
-    linelist = timeseries %>%
-      dplyr::mutate(positive = count, negative = total-count) %>%
-      dplyr::select(time,positive,negative) %>%
-      tidyr::pivot_longer(cols = c(positive,negative), names_to = "class", values_to = "count") %>%
-      dplyr::group_by(group,time,class) %>%
-      # this next line changes a dataframe with single (time,class,count=n) row to one
-      # where (time,class,count=1)*n rows:
-      dplyr::group_modify(function(d,g,..) {
-        if (nrow(d) > 1) stop("timed_df had some duplicate rows in it (probably for time)")
-        return(tibble::tibble(count = rep(1,d$count)))
-      }) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(class_bool = ifelse(class=="positive",1,0))
-    # now we can fit the qbinomial model using locfit
-    fit = locfit::locfit(class_bool~locfit::lp(time,nn=nn,deg=deg),data = linelist,family="qbinomial", link="logit", maxit = 5000, maxk=5000)
-    deriv = locfit::locfit(class_bool~locfit::lp(time,nn=nn,deg=deg),deriv=1,data = linelist,family="qbinomial", link="logit", maxit = 5000, maxk=5000)
+    # this does everything:
+    df = df %>% time_summarise(...)
+
   } else {
-    message("using the quicker inaccurate method")
-    fit = locfit::locfit(proportion~locfit::lp(time,nn=nn,deg=deg),data = timeseries,family="qbinomial", link="logit", maxit = 5000, maxk=5000)
-    deriv = locfit::locfit(proportion~locfit::lp(time,nn=nn,deg=deg),deriv=1,data = timeseries,family="qbinomial", link="logit", maxit = 5000, maxk=5000)
+
+    # this is a time series already with a count column
+    # could check here it is complete and fill it?
+
+    # make sure there is a time column.
+    if (!.has_time(df)) {
+      dateVar = ensym(date_col)
+      df = df %>% mutate(time = as.time_period(!!dateVar, ...))
+    }
+
+    if (.has_cols(df, "class") && !.has_cols(df, "denom")) {
+      df = df %>%
+        group_by(!!!grps, time) %>%
+        mutate(denom = sum(count)) %>%
+        group_by(!!!grps)
+    }
+
   }
 
-  tmp = stats::preplot(fit,newdata=new_time, se.fit = TRUE, band="local")
-  # logit transformer function:
-  t = tmp$tr
+  if (!multinom) {df = df %>% group_by(class, .add = TRUE)}
 
-  tmp2 = stats::preplot(deriv,newdata=new_time, se.fit = TRUE, band="local")
-
-  tibble::tibble(
-    time = new_time,
-    proportion.0.025 = .opt(t(stats::qnorm(0.025, tmp$fit, tmp$se.fit))),
-    proportion.0.5 = .opt(t(stats::qnorm(0.5, tmp$fit, tmp$se.fit))),
-    proportion.0.975 = .opt(t(stats::qnorm(0.975,tmp$fit,tmp$se.fit))),
-    relative.growth.0.025 = .opt(stats::qnorm(0.025, tmp2$fit, tmp2$se.fit)),
-    relative.growth.0.5 = .opt(stats::qnorm(0.5, tmp2$fit, tmp2$se.fit)),
-    relative.growth.0.975 = .opt(stats::qnorm(0.975, tmp2$fit, tmp2$se.fit))
-  ) %>% as.timeseries()
+  return(df)
 }
 
 
-
-#' Estimate the probabilities of a multinomial class based on count data
-#'
-#' takes a list of times, classes and counts, e.g. a COGUK variant like data set
-#' with time, (multinomial) class (e.g. variant) and count being the count in
-#' that time period. Fits a quadratic B-spline on time to the proportion of the
-#' data using `nnet::multinom`.
-#'
-#' @param timeseries a timeseries of `class` and `count` data where class has
-#'   2 or more levels. The classwise counts are used to assess a time varying
-#'   probability using spline terms.
-#' @param deg the degree of the polynomial spline
-#' @inheritDotParams splines::bs
-#'
-#' @return a timeseries of `class` and `proportion` columns where the proportion
-#'   is an estimate of the multinomial class probability at any given time.
-#' @export
-#'
-#' @examples
-#' if (FALSE) {
-#'   utils::vignette("variant-proportions", package="growthrates")
-#' }
-estimate_multinomial_proportion = function(timeseries, deg=2, ... ) {
-
-  timeseries %>% .check_timeseries()
-  # deal with multiple timeseries.
-  if(.has_cols(timeseries,"group")) {
-    return(
-      timeseries %>%
-        dplyr::group_by(group) %>%
-        # does group_modify preserve the attributes of the time column? no
-        dplyr::group_modify(function(d,g,..) {
-          d %>% as.timeseries() %>% estimate_multinomial_proportion()
-        }) %>%
-        dplyr::ungroup() %>%
-        .copy_metadata(timeseries) %>%
-        as.timeseries()
-    )
-  }
-  if (!is.multinomial_ts(timeseries)) stop("must be a multinomial time series")
-
-  # remove zero count time points as these crash the algorithm
-  tmp2 = timeseries %>% dplyr::group_by(time) %>% dplyr::filter(sum(count)>0) %>% dplyr::ungroup()
-  tmp2 = tmp2 %>% tidyr::pivot_wider(names_from = class, values_from = count, values_fill = 0)
-
-  response = tmp2 %>% dplyr::select(-time,-date) %>% as.matrix()
-  predictor = tmp2 %>% dplyr::pull(time)
-
-  model = nnet::multinom(class_count ~ splines::bs(time,degree=deg, ...), data = tibble::tibble(class_count=response,time=predictor))
-
-  # https://cran.r-project.org/web/packages/survival/vignettes/splines.pdf
-
-  new_time = .daily_times(timeseries$time)
-
-  times = tibble::tibble(time = new_time)
-  probs = dplyr::bind_cols(times,as.data.frame(stats::predict(model,newdata = times,type = "probs")))
-  # probs %>% glimpse()
-  plot_data = probs %>%
-    tidyr::pivot_longer(cols = -time, names_to = "class", values_to = "probability") %>%
-    as.timeseries()
-
-  plot_data
-}
