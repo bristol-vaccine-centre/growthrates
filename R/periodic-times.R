@@ -85,6 +85,7 @@ fdmy = function(date) {
 #'   With the vector of dates in `x` it will find a reference date for the
 #'   time-series. If this is `NULL` and `start_date` is also `NULL` it will fall back to
 #'   `getOption("day_zero","2019-12-29")`
+#' @param ... used for subtype implementations
 #'
 #' @return a `time_period` class, consisting of a vector of numbers, with
 #'   attributes for time period and `start_date`
@@ -92,9 +93,7 @@ fdmy = function(date) {
 #'
 #' @example inst/examples/time-period-example.R
 as.time_period = function(x, unit = NULL, start_date = NULL, anchor = NULL, ...) {
-
   UseMethod("as.time_period")
-
 }
 
 #' @export
@@ -123,7 +122,8 @@ as.time_period.time_period = function(x, unit = NULL, start_date = NULL, ...) {
 
 .make_unit = function(unit) {
   if (lubridate::is.period(unit)) return(unit)
-  if (is.numeric(unit)) return(lubridate::days(unit))
+  if (is.numeric(unit) && unit>=1) return(lubridate::days(unit))
+  if (is.numeric(unit) && unit<1) return(lubridate::seconds(floor(unit*24*60*60)))
   return(lubridate::period(unit))
 }
 
@@ -142,9 +142,9 @@ as.time_period.Date = function(x, unit = NULL, start_date = NULL, anchor = NULL,
 
 # numerics need a start date and unit.
 #' @export
-as.time_period.numeric = function(times, unit, start_date = getOption("day_zero","2019-12-29"), ...) {
+as.time_period.numeric = function(x, unit, start_date = getOption("day_zero","2019-12-29"), ...) {
   start_date = as.Date(start_date)
-  times = as.numeric(times)
+  times = as.numeric(x)
   return(structure(
     times,
     start_date = start_date,
@@ -170,7 +170,7 @@ as.Date.time_period = function(x, ...) {
 as.POSIXct.time_period = function(x,...) {
   unit = attributes(x)$unit
   start_date = attributes(x)$start_date
-  return(as.POSIXct.numeric(x*unit*24*60*60, origin=start_date))
+  return(as.POSIXct.numeric(as.numeric(x)*as.numeric(unit), origin=start_date))
 }
 
 #' @describeIn as.time_period Combine `time_period`
@@ -428,7 +428,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @export
 #'
 #' @examples
-#' full_seq.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA), "2 days")
+#' full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
 full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
   dates = x
   if (all(is.na(x))) stop("No non-NA dates provided to full_seq")
@@ -475,8 +475,11 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #'   dates, with the boundaries defined by the anchor.
 #' @export
 #'
+#' @importFrom tidyr full_seq
+#'
 #' @examples
-#' full_seq.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA), "2 days")
+#' tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
+#' full_seq(tmp, "7 days")
 full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE, ...) {
 
   if (all(is.na(x))) stop("No non-NA times provided to full_seq")
@@ -485,7 +488,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
   if (period == attributes(x)$unit) {
     # no change of unit.
     new_times = tidyr::full_seq(as.numeric(x),1)
-    return(.clone_time_period(new_times, original))
+    return(.clone_time_period(new_times, x))
   }
 
   times = x
@@ -549,9 +552,11 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #'   and the anchor
 #' @export
 #'
+#' @importFrom tidyr full_seq
+#'
 #' @examples
 #' dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-#' fs = full_seq_dates(dates, "2 days")
+#' fs = full_seq(dates, "2 days")
 #' dates - cut_date(dates, "2 days")
 #' cut_date(dates,unit="2 days", output="time_period")
 #'
@@ -561,12 +566,6 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #' # in this specific situation the final date is not truncated because the
 #' # input data is seen as an exact match for the whole output period.
 #' cut_date(dates2, "1 week", "sun", output="factor")
-#'
-#' # if the input dates don't line up with the output dates
-#' # there may be incomplete coverage of the first and last category.
-#' # where the cutting results in short periods. In this
-#' # instance the first and last periods are truncated to prevent them
-#' # being counted as complete when they are in fact potentially missing a few days worth of data:
 #' cut_date(dates2, dfmt = "%d/%b", output="factor", unit = "2 weeks", anchor="sun")
 #'
 cut_date = function(dates, unit, anchor = "start", output = c("date","factor","time_period"), dfmt = "%d/%b/%y", ifmt = "%s \u2014 %s", ...) {
@@ -574,8 +573,17 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
   output = match.arg(output)
   start_date = .start_from_anchor(dates, anchor)
 
-  times = date_to_time(dates,unit,start_date)
+  times = floor(date_to_time(dates,unit,start_date))
   out = .labelled_date_from_times(times, dfmt, ifmt)
+
+  if (output == "date") {
+    return(out)
+  }
+
+  if (output == "time_period") {
+    names(times) = names(out)
+    return(times)
+  }
 
   # TODO: cutting dates in this way really gives you a time_period but with
   # factor rather than integer / numeric. to decide whether this is worth pursuing
@@ -587,15 +595,10 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
     labelled_dates = .labelled_date_from_times(complete_times, dfmt, ifmt)
     if (anyDuplicated(names(labelled_dates))) stop("The formatting of the labels (`dfmt` and `ifmt`) does not result in unique factor levels.")
     out = factor(names(out), levels = names(labelled_dates), ordered = TRUE)
+    return(out)
   }
 
-  if (output == "time_period") {
-    names(times) = names(out)
-    return(floor(times))
-  }
-
-  # output == "date"
-  return(out)
+  stop("output format not known")
 }
 
 .start_from_anchor = function(dates, anchor) {
@@ -620,7 +623,7 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
 
 .labelled_date_from_times = function(times, dfmt = "%d/%b", ifmt = "%s \u2014 %s", na.value="Unknown") {
   out = time_to_date(times)
-  names(out) = .time_label(times, dfmt=dfmt, ifmt=ifmt, na.value = na.value)
+  names(out) = .time_labels(times, dfmt=dfmt, ifmt=ifmt, na.value = na.value)
   return(out)
 }
 
@@ -628,10 +631,10 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
 #
 .time_labels = function(times, dfmt = "%d/%b", ifmt = "%s \u2014 %s", na.value="Unknown") {
 
-  if (any(na.omit(floor(times) != times))) warning("Labelling applied to non-integer times. The result will be unexpected.")
+  if (any(na.omit(abs(floor(times)-times))>0.01)) warning("Labelling applied to non-integer times. The result will be unexpected.")
 
   start_dates = time_to_date(times)
-  end_dates = start_dates + attribute(times)$unit - lubridate::days(1)
+  end_dates = start_dates + attributes(times)$unit - lubridate::days(1)
 
   start_label = format(start_dates,format = dfmt)
   end_label = format(end_dates,format = dfmt)

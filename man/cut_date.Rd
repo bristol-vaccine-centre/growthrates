@@ -49,7 +49,7 @@ relies on a numeric representation of the date or duration from the anchor.
 }
 \examples{
 dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-fs = full_seq_dates(dates, "2 days")
+fs = full_seq(dates, "2 days")
 dates - cut_date(dates, "2 days")
 cut_date(dates,unit="2 days", output="time_period")
 
@@ -59,12 +59,6 @@ dates2 = Sys.Date() + floor(runif(50,max=10))*7
 # in this specific situation the final date is not truncated because the
 # input data is seen as an exact match for the whole output period.
 cut_date(dates2, "1 week", "sun", output="factor")
-
-# if the input dates don't line up with the output dates
-# there may be incomplete coverage of the first and last category.
-# where the cutting results in short periods. In this
-# instance the first and last periods are truncated to prevent them
-# being counted as complete when they are in fact potentially missing a few days worth of data:
 cut_date(dates2, dfmt = "\%d/\%b", output="factor", unit = "2 weeks", anchor="sun")
 
 }

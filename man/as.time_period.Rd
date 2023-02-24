@@ -43,6 +43,8 @@ date. If the \code{x} input is already a \code{time_period} and this is differen
 With the vector of dates in \code{x} it will find a reference date for the
 time-series. If this is \code{NULL} and \code{start_date} is also \code{NULL} it will fall back to
 \code{getOption("day_zero","2019-12-29")}}
+
+\item{...}{used for subtype implementations}
 }
 \value{
 a \code{time_period} class, consisting of a vector of numbers, with

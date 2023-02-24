@@ -36,13 +36,6 @@
 #'
 #' @return a new dataframe with `time` (as a time period), `class`, and `proportion.0.5`, or a model object
 #' @export
-#' @examples
-#' data4 %>%
-#'   mutate(time = cut_date(date, unit = "1 week", anchor="start", output="time_period")) %>%
-#'   group_by(time, class = serotype) %>%
-#'   summarise(count = n(), .groups="drop_last") %>%
-#'   multinomial_model(df=4) %>%
-#'   glimpse()
 multinomial_nnet_model = function(d, ..., window = 14, frequency = "1 day", predict = TRUE) { #, output_unit="1 day") {
 
   .exact_cols(d, "time", "class", "count")
@@ -107,16 +100,6 @@ multinomial_nnet_model = function(d, ..., window = 14, frequency = "1 day", pred
 #'
 #' @return a new dataframe with time (as a time period)
 #' @export
-#'
-#' @examples
-#' data4 %>%
-#'   mutate(time = cut_date(date, unit = "1 week", anchor="start", output="time_period") %>%
-#'   group_by(time, serotype) %>%
-#'   summarise(count = n(), .groups="drop_last")
-#'   mutate(denom = sum(count)) %>%
-#'   group_by(serotype) %>%
-#'   group_modify(proportion_model, df=4) %>%
-#'   glimpse()
 proportion_glm_model = function(d, ..., window = 14, frequency = "1 day") { #, output_unit = "1 day") {
 
   .exact_cols(d,"time", "count", "denom")
@@ -153,15 +136,6 @@ proportion_glm_model = function(d, ..., window = 14, frequency = "1 day") { #, o
 #'
 #' @return a new dataframe with time (as a time period)
 #' @export
-#'
-#' @examples
-#' data4 %>%
-#'   mutate(time = cut_date(date, unit = "1 week", anchor="start", output="time_period") %>%
-#'   group_by(time, serotype) %>%
-#'   summarise(count = n(), .groups="drop_last") %>%
-#'   group_by(serotype) %>%
-#'   group_modify(poisson_model, df=4) %>%
-#'   glimpse()
 poisson_glm_model = function(d, ..., window = 14, frequency = "1 day") {
 
   # TODO:

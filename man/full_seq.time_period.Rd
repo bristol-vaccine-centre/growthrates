@@ -4,7 +4,7 @@
 \alias{full_seq.time_period}
 \title{Expand a \code{time_period} vector to the full range of possible timess}
 \usage{
-full_seq.time_period(x, period = attributes(x)$unit, complete = FALSE, ...)
+\method{full_seq}{time_period}(x, period = attributes(x)$unit, complete = FALSE, ...)
 }
 \arguments{
 \item{x}{a time period vector}
@@ -36,5 +36,6 @@ incomplete starting and end periods, which may not be comparable to other
 periods, and we may need to exclude these from the result.
 }
 \examples{
-full_seq.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA), "2 days")
+tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
+full_seq(tmp, "7 days")
 }

@@ -34,11 +34,3 @@ with time, (multinomial) class (e.g. variant) and count being the count in
 that time period. Fits a quadratic B-spline on time to the proportion of the
 data using \code{nnet::multinom}.
 }
-\examples{
-data4 \%>\%
-  mutate(time = cut_date(date, unit = "1 week", anchor="start", output="time_period")) \%>\%
-  group_by(time, class = serotype) \%>\%
-  summarise(count = n(), .groups="drop_last") \%>\%
-  multinomial_model(df=4) \%>\%
-  glimpse()
-}

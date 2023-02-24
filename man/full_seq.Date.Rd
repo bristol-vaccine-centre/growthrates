@@ -4,13 +4,7 @@
 \alias{full_seq.Date}
 \title{Expand a date vector to the full range of possible dates}
 \usage{
-full_seq.Date(
-  x,
-  period = .day_interval(x),
-  anchor = "start",
-  complete = FALSE,
-  ...
-)
+\method{full_seq}{Date}(x, period = .day_interval(x), anchor = "start", complete = FALSE, ...)
 }
 \arguments{
 \item{x}{a vector of dates, possibly including NA values}
@@ -46,5 +40,5 @@ incomplete starting and end periods, which may not be comparable to other
 periods, and we may need to exclude these from the result.
 }
 \examples{
-full_seq.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA), "2 days")
+full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
 }

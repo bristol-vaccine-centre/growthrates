@@ -50,7 +50,7 @@
 #'   2 locfit model objects (one for proportion and one for relative growth rate)
 #' @export
 #'
-#' @example inst/examples/time-period-example.R
+#' @example inst/examples/locfit-example.R
 proportion_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 day", predict = TRUE) {
 
   .exact_cols(d, "time", "count", "denom")
@@ -112,7 +112,7 @@ proportion_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 
 #' @return a new dataframe with time (as a time period)
 #' @export
 #'
-#' @example inst/examples/time-period-example.R
+#' @example inst/examples/locfit-example.R
 poisson_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 day", predict = TRUE) {
 
   .exact_cols(d, "time", "count", .ignore = "denom")

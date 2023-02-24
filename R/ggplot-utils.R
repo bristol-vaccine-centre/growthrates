@@ -12,7 +12,7 @@
 #' library(tidyverse)
 #' ggplot(diamonds, aes(x=price))+
 #'   geom_density()+
-#'   scale_x_continuous(trans="log1p", breaks=ggrrr::breaks_log1p)
+#'   scale_x_continuous(trans="log1p", breaks=breaks_log1p())
 breaks_log1p = function(n=5,base=10) {
   #scales::force_all(n, base)
   n_default = n
