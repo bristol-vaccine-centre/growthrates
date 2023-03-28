@@ -57,7 +57,9 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
   has_class = .has_cols(df,"class")
   grps = df %>% dplyr::groups()
 
-  df = df %>% dplyr::mutate(time = cut_date(date, unit=  unit, anchor = anchor, output="time_period"))
+  start_date = .start_from_anchor(df$date, anchor)
+
+  df = df %>% dplyr::mutate(time = cut_date(date, unit=unit, anchor = start_date, output="time_period"))
   if (has_class) df = df %>% dplyr::group_by(class, .add = TRUE)
   df = df %>% dplyr::group_by(time, .add = TRUE)
 
