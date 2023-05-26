@@ -4,7 +4,7 @@
 \alias{full_seq.time_period}
 \title{Expand a \code{time_period} vector to the full range of possible timess}
 \usage{
-\method{full_seq}{time_period}(x, period = attributes(x)$unit, tol = 1e-06, complete = FALSE, ...)
+\method{full_seq}{time_period}(x, period = attributes(x)$unit, complete = FALSE, ...)
 }
 \arguments{
 \item{x}{a time period vector}
@@ -12,8 +12,6 @@
 \item{period}{the gap between observations as a number of days or as a natural
 language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 If not given this will be derived from the dates.}
-
-\item{tol}{for consistency with \code{tidyr::full_seq}}
 
 \item{complete}{truncate incomplete start and end periods}
 
@@ -39,5 +37,5 @@ periods, and we may need to exclude these from the result.
 }
 \examples{
 tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
-tidyr::full_seq(tmp, "7 days")
+full_seq(tmp, "7 days")
 }

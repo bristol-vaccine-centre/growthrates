@@ -399,7 +399,39 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 }
 
 
+#' Create the full sequence of values in a vector
+#'
+#' This is useful if you want to fill in missing values that should have been observed but weren't. For example, full_seq(c(1, 2, 4, 6), 1) will return 1:6.
+#'
+#' @param x a numeric or date vector
+#' @param period Gap between each observation. The existing data will be checked to ensure that it is actually of this periodicity.
+#' @param ... for subtype methods
+#'
+#' @return a vector of the same type as the input
+#' @export
+#'
+#' @examples
+#' full_seq(c(1, 2, 4, 5, 10), 1)
+full_seq = function(x, period, ...) {
+  UseMethod("full_seq")
+}
 
+
+#' @inherit full_seq
+#' @param tol Numerical tolerance for checking periodicity.
+#' @export
+full_seq.numeric = function(x, period, tol=1e-06, ...) {
+  #check_number_decimal(period)
+  #check_number_decimal(tol, min = 0)
+  rng <- range(x, na.rm = TRUE)
+  if (any(((x - rng[1])%%period > tol) & (period - (x - rng[1])%%period > tol))) {
+    stop("x is not a regular sequence.")
+  }
+  if (period - ((rng[2] - rng[1])%%period) <= tol) {
+    rng[2] <- rng[2] + tol
+  }
+  seq(rng[1], rng[2], by = period)
+}
 
 #' Expand a date vector to the full range of possible dates
 #'
@@ -420,7 +452,6 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @param period the gap between observations as a number of days or as a natural
 #'   language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 #'   If not given this will be derived from the dates.
-#' @param tol for consistency with `tidyr::full_seq`
 #' @param anchor defines a day that appears in the sequence (if it were to
 #'   extend that far). Given either as a date, or "start", "end" or a day of the
 #'   week, e.g. "mon".
@@ -432,8 +463,8 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @export
 #'
 #' @examples
-#' tidyr::full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
-full_seq.Date = function(x, period=.day_interval(x), tol=1e-06, anchor = "start", complete = FALSE, ...) {
+#' full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
+full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
   dates = x
   if (all(is.na(x))) stop("No non-NA dates provided to full_seq")
   start_date = .start_from_anchor(dates,anchor)
@@ -472,7 +503,6 @@ full_seq.Date = function(x, period=.day_interval(x), tol=1e-06, anchor = "start"
 #' @param period the gap between observations as a number of days or as a natural
 #'   language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 #'   If not given this will be derived from the dates.
-#' @param tol for consistency with `tidyr::full_seq`
 #' @param complete truncate incomplete start and end periods
 #' @param ... ignored
 #'
@@ -480,19 +510,17 @@ full_seq.Date = function(x, period=.day_interval(x), tol=1e-06, anchor = "start"
 #'   dates, with the boundaries defined by the anchor.
 #' @export
 #'
-#' @importFrom tidyr full_seq
-#'
 #' @examples
 #' tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
-#' tidyr::full_seq(tmp, "7 days")
-full_seq.time_period = function(x, period = attributes(x)$unit, tol=1e-06,  complete = FALSE, ...) {
+#' full_seq(tmp, "7 days")
+full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE, ...) {
 
   if (all(is.na(x))) stop("No non-NA times provided to full_seq")
 
   period = .make_unit(period)
   if (period == attributes(x)$unit) {
     # no change of unit.
-    new_times = tidyr::full_seq(as.numeric(x),1)
+    new_times = full_seq.numeric(as.numeric(x),1)
     return(.clone_time_period(new_times, x))
   }
 
@@ -557,11 +585,10 @@ full_seq.time_period = function(x, period = attributes(x)$unit, tol=1e-06,  comp
 #'   and the anchor
 #' @export
 #'
-#' @importFrom tidyr full_seq
 #'
 #' @examples
 #' dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-#' fs = tidyr::full_seq(dates, "2 days")
+#' fs = full_seq(dates, "2 days")
 #' dates - cut_date(dates, "2 days")
 #' cut_date(dates,unit="2 days", output="time_period")
 #'
