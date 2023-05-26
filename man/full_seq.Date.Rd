@@ -4,7 +4,14 @@
 \alias{full_seq.Date}
 \title{Expand a date vector to the full range of possible dates}
 \usage{
-\method{full_seq}{Date}(x, period = .day_interval(x), anchor = "start", complete = FALSE, ...)
+\method{full_seq}{Date}(
+  x,
+  period = .day_interval(x),
+  tol = 1e-06,
+  anchor = "start",
+  complete = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{a vector of dates, possibly including NA values}
@@ -12,6 +19,8 @@
 \item{period}{the gap between observations as a number of days or as a natural
 language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 If not given this will be derived from the dates.}
+
+\item{tol}{for consistency with \code{tidyr::full_seq}}
 
 \item{anchor}{defines a day that appears in the sequence (if it were to
 extend that far). Given either as a date, or "start", "end" or a day of the

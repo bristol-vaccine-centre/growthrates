@@ -420,6 +420,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @param period the gap between observations as a number of days or as a natural
 #'   language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 #'   If not given this will be derived from the dates.
+#' @param tol for consistency with `tidyr::full_seq`
 #' @param anchor defines a day that appears in the sequence (if it were to
 #'   extend that far). Given either as a date, or "start", "end" or a day of the
 #'   week, e.g. "mon".
@@ -432,7 +433,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #'
 #' @examples
 #' tidyr::full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
-full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
+full_seq.Date = function(x, period=.day_interval(x), tol=1e-06, anchor = "start", complete = FALSE, ...) {
   dates = x
   if (all(is.na(x))) stop("No non-NA dates provided to full_seq")
   start_date = .start_from_anchor(dates,anchor)
@@ -471,6 +472,7 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #' @param period the gap between observations as a number of days or as a natural
 #'   language definition of the period such as "1 week", '2 weeks', '1 month', etc.
 #'   If not given this will be derived from the dates.
+#' @param tol for consistency with `tidyr::full_seq`
 #' @param complete truncate incomplete start and end periods
 #' @param ... ignored
 #'
@@ -483,7 +485,7 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #' @examples
 #' tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
 #' tidyr::full_seq(tmp, "7 days")
-full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE, ...) {
+full_seq.time_period = function(x, period = attributes(x)$unit, tol=1e-06,  complete = FALSE, ...) {
 
   if (all(is.na(x))) stop("No non-NA times provided to full_seq")
 

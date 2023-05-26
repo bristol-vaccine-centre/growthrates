@@ -1,6 +1,6 @@
 Package: growthrates
 Title: Estimate Incidence, Proportions and Exponential Growth Rates
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: 
     person(given = "Robert",
            family = "Challen",

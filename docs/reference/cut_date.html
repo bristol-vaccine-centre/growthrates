@@ -23,7 +23,7 @@ relies on a numeric representation of the date or duration from the anchor."><!-
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">growthrates</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.3</span>
       </span>
     </div>
 
@@ -149,39 +149,19 @@ and the anchor</p>
 <span class="r-in"><span><span class="co"># in this specific situation the final date is not truncated because the</span></span></span>
 <span class="r-in"><span><span class="co"># input data is seen as an exact match for the whole output period.</span></span></span>
 <span class="r-in"><span><span class="fu">cut_date</span><span class="op">(</span><span class="va">dates2</span>, <span class="st">"1 week"</span>, <span class="st">"sun"</span>, output<span class="op">=</span><span class="st">"factor"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 16/Apr/23 — 22/Apr/23 16/Apr/23 — 22/Apr/23 19/Mar/23 — 25/Mar/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] 19/Mar/23 — 25/Mar/23 23/Apr/23 — 29/Apr/23 02/Apr/23 — 08/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 02/Apr/23 — 08/Apr/23 26/Feb/23 — 04/Mar/23 19/Mar/23 — 25/Mar/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] 09/Apr/23 — 15/Apr/23 26/Mar/23 — 01/Apr/23 19/Feb/23 — 25/Feb/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 19/Feb/23 — 25/Feb/23 12/Mar/23 — 18/Mar/23 19/Mar/23 — 25/Mar/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16] 09/Apr/23 — 15/Apr/23 26/Mar/23 — 01/Apr/23 09/Apr/23 — 15/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] 12/Mar/23 — 18/Mar/23 19/Mar/23 — 25/Mar/23 19/Mar/23 — 25/Mar/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 05/Mar/23 — 11/Mar/23 26/Mar/23 — 01/Apr/23 12/Mar/23 — 18/Mar/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 23/Apr/23 — 29/Apr/23 26/Mar/23 — 01/Apr/23 19/Feb/23 — 25/Feb/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28] 12/Mar/23 — 18/Mar/23 26/Feb/23 — 04/Mar/23 26/Mar/23 — 01/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] 19/Mar/23 — 25/Mar/23 16/Apr/23 — 22/Apr/23 09/Apr/23 — 15/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [34] 09/Apr/23 — 15/Apr/23 12/Mar/23 — 18/Mar/23 19/Mar/23 — 25/Mar/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] 23/Apr/23 — 29/Apr/23 02/Apr/23 — 08/Apr/23 19/Feb/23 — 25/Feb/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [40] 09/Apr/23 — 15/Apr/23 26/Mar/23 — 01/Apr/23 09/Apr/23 — 15/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 12/Mar/23 — 18/Mar/23 12/Mar/23 — 18/Mar/23 23/Apr/23 — 29/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [46] 05/Mar/23 — 11/Mar/23 26/Mar/23 — 01/Apr/23 16/Apr/23 — 22/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 05/Mar/23 — 11/Mar/23 02/Apr/23 — 08/Apr/23</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 Levels: 19/Feb/23 — 25/Feb/23 &lt; ... &lt; 30/Apr/23 — 06/May/23</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Labelling applied to non-integer times. The result will be unexpected.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [46] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 Levels: 26/May/23 — 01/Jun/23 &lt; ... &lt; 28/Jul/23 — 03/Aug/23</span>
 <span class="r-in"><span><span class="fu">cut_date</span><span class="op">(</span><span class="va">dates2</span>, dfmt <span class="op">=</span> <span class="st">"%d/%b"</span>, output<span class="op">=</span><span class="st">"factor"</span>, unit <span class="op">=</span> <span class="st">"2 weeks"</span>, anchor<span class="op">=</span><span class="st">"sun"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 16/Apr — 29/Apr 16/Apr — 29/Apr 19/Mar — 01/Apr 19/Mar — 01/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] 16/Apr — 29/Apr 02/Apr — 15/Apr 02/Apr — 15/Apr 19/Feb — 04/Mar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] 19/Mar — 01/Apr 02/Apr — 15/Apr 19/Mar — 01/Apr 19/Feb — 04/Mar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 19/Feb — 04/Mar 05/Mar — 18/Mar 19/Mar — 01/Apr 02/Apr — 15/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17] 19/Mar — 01/Apr 02/Apr — 15/Apr 05/Mar — 18/Mar 19/Mar — 01/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [21] 19/Mar — 01/Apr 05/Mar — 18/Mar 19/Mar — 01/Apr 05/Mar — 18/Mar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 16/Apr — 29/Apr 19/Mar — 01/Apr 19/Feb — 04/Mar 05/Mar — 18/Mar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 19/Feb — 04/Mar 19/Mar — 01/Apr 19/Mar — 01/Apr 16/Apr — 29/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [33] 02/Apr — 15/Apr 02/Apr — 15/Apr 05/Mar — 18/Mar 19/Mar — 01/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] 16/Apr — 29/Apr 02/Apr — 15/Apr 19/Feb — 04/Mar 02/Apr — 15/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [41] 19/Mar — 01/Apr 02/Apr — 15/Apr 05/Mar — 18/Mar 05/Mar — 18/Mar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [45] 16/Apr — 29/Apr 05/Mar — 18/Mar 19/Mar — 01/Apr 16/Apr — 29/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 05/Mar — 18/Mar 02/Apr — 15/Apr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 Levels: 19/Feb — 04/Mar &lt; 05/Mar — 18/Mar &lt; ... &lt; 30/Apr — 13/May</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Labelling applied to non-integer times. The result will be unexpected.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [46] &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 Levels: 26/May — 08/Jun &lt; 09/Jun — 22/Jun &lt; ... &lt; 04/Aug — 17/Aug</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -197,7 +177,7 @@ and the anchor</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
