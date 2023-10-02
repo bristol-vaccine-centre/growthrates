@@ -118,11 +118,11 @@ poisson_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 day
   .exact_cols(d, "time", "count", .ignore = "denom")
 
   nn = .nn_from_window(window, d)
-  new_time = .daily_times(d$time)
+  output_times = full_seq.time_period(d$time, period = frequency)
 
   # Not enough non zero results
   if(sum(stats::na.omit(d$count) != 0) < deg) {
-    return(.null_result(new_time, incidence=c(0,0,0), growth=c(NA,0,NA)))
+    return(.null_result(output_times, incidence=c(0,0,0), growth=c(NA,0,NA)))
   }
 
   fit = locfit::locfit(count~locfit::lp(time,nn=nn,deg=deg),data = d,family="qpoisson", link="log")
@@ -130,15 +130,15 @@ poisson_locfit_model = function(d, ..., window = 14, deg = 2, frequency = "1 day
 
   if (!predict) return(list(incidence = fit, growth = deriv))
 
-  tmp = stats::preplot(fit,newdata=new_time, se.fit = TRUE, band="local", maxit = 5000, maxk=5000)
+  tmp = stats::preplot(fit,newdata=output_times, se.fit = TRUE, band="local", maxit = 5000, maxk=5000)
   # transformer function:
   t = tmp$tr
 
-  tmp2 = stats::preplot(deriv, newdata=new_time, se.fit = TRUE, band="local", maxit = 5000, maxk=5000)
+  tmp2 = stats::preplot(deriv, newdata=output_times, se.fit = TRUE, band="local", maxit = 5000, maxk=5000)
   t2 = function(x) x
 
   new_data = tibble::tibble(
-    time = new_time
+    time = output_times
   ) %>%
     .result_from_fit(type = "incidence", tmp$fit, tmp$se.fit, t) %>%
     .result_from_fit(type = "growth", tmp2$fit, tmp2$se.fit, t2)
