@@ -105,11 +105,9 @@ time_summarise = function(df, unit, anchor = "start", rectangular = FALSE, ..., 
 
 
 .result_from_fit = function(new_data, type, fit, se.fit, inv = function(x) x) {
+  
   .opt_inv = function(x) {
-    tryCatch(
-      inv(x),
-      error = function(e) rep(NA,length(x))
-    )
+    purrr::map_dbl(x, ~ tryCatch(inv(.x) %>% ifelse(is.finite(.), ., NA_real_), error=function(e) NA_real_))
   }
 
   return(new_data %>% dplyr::mutate(
