@@ -1,0 +1,213 @@
+---
+title: "Data wrangling and working with `growthrates`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Data wrangling and working with `growthrates`}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(tidyverse)
+devtools::load_all()
+# library(growthrates)
+here::i_am("vignettes/time-periods.Rmd")
+source(here::here("vignettes/vignette-utils.R"))
+ggplot2::theme_set(ggplot2::theme_minimal())
+```
+
+
+`growthrates` assumes a consistent naming scheme for significant columns,
+notably `time` and `count`, and additionally `class`, `denom`, `population`
+columns. Data needs to be supplied using these column names and to make sure the
+data is formatted correctly it undergoes quite rigorous checks. One area where
+this can pose problems is in correct grouping, which must make sure that each
+group is a single time series of unique `time` and minimally `count` columns.
+
+# Line lists vs. time series
+
+Infectious disease data usually either comes as a set of individual observations
+with some sort of timestamp (a line list) or as a count of events (e.g. positive
+tests, hospitalisations, deaths) happening within a specific period (day, week,
+month etc.) as a time series.
+
+For count data there may also be a denominator known. For testing this could be
+the number of tests performed, or the number of patients at risk of
+hospitalisation.
+
+For both these data types there may also be a class associated with each
+observation, defining a subgroup of interest which could be for example the
+variant of a virus, or an age group, for example. It may make sense to compare
+the different classes. In this case the denominator may be the total of counts 
+among all groups per unit time. Additionally there may be information about the 
+size of the population for each subgroup.
+
+`growthrates` assumes for the most part that the input data is in the form of
+a set of time series of counts, each of which has a unique set of times, which
+are usually complete. To create datasets like this from linelists ` growthrates`
+provides some infrastructure for dealing with time series:
+
+# Time periods
+
+A weekly case rate represents a time slice of seven days with a start and finish
+date. Dates are however a continuous quantity, and `cut_dates()` can classify
+them into periods of equal duration, with a start date:
+
+```{r}
+random_dates = Sys.Date()+sample.int(21,50,replace = TRUE)
+cut_date( random_dates, unit = "1 week", anchor = "start", dfmt = "%d %b")
+```
+
+Performing calculations using interval censored dates as is mathematically
+inconvenient. A numeric version of dates is useful that can keep track of both
+the start date of a time series and its intrinsic duration, as a numeric. This
+is the purpose of the `time_period` class:
+
+```{r}
+dates = seq(as.Date("2020-01-01"),by=7,length.out = 5)
+tmp = as.time_period(dates)
+tmp
+```
+
+The `time_period` defaults to using a date at the beginning of the COVID-19 
+pandemic as its origin and calculating a duration unit based on the data (in this
+case weekly).
+
+Various methods are available such as labelling:
+
+```{r}
+suppressWarnings(labels(tmp))
+```
+
+A weekly time series can be recast to a different frequency, or start date:
+
+```{r}
+
+tmp2 = as.time_period(tmp, unit = "2 days", start_date = "2020-01-01")
+tmp2
+
+```
+
+and the original dates should be recoverable:
+
+```{r}
+as.Date(tmp2)
+```
+
+`full_seq()` can be used to make sure a set of periodic times is complete:
+
+```{r}
+
+tmp3 = as.time_period(Sys.Date()+c(0:2,4:5)*7,anchor = "start")
+as.Date(full_seq(tmp3))
+
+```
+
+`time_periods` can be used with any monthly or yearly data but they are not
+regular. This is handled and irregular date periods are generally OK but some
+functions like `full_seq` may not work as anticipated.
+
+Two time series can be aligned to make them comparable:
+
+```{r}
+
+orig_dates = Sys.Date()+1:10*7
+
+# a 2 daily time series based on weekly dates
+t1 = as.time_period(orig_dates, unit = "2 days", start_date = "2021-01-01")
+t1
+
+# a weekly with different start date
+t2 = as.time_period(orig_dates, unit = "1 week", start_date = "2022-01-01")
+t2
+
+# rebase t1 into the same format as t2
+# as t1 and t2 based on the same original dates converting t2 onto the same
+# peridicty as t1 results in an identical set of times
+t3 = as.time_period(t1,t2)
+t3
+```
+
+# Times in `growthrates` and conversion of line-lists
+
+`growthrates` uses the `time_period` class internally extensively. Casting dates
+to and from `time_periods` is all that generally needs to be done before using 
+`growthrates`. Most of the functions in `growthrates` operate on time series data
+which expect a unique (and usually complete) set of data on a periodic time.
+
+To help prepare line-list data into time series there is the `time_summarise()` 
+function. A minimal line-list will have a date column and nothing else.
+
+
+```{r}
+
+random_dates = Sys.Date()+sample.int(21,50,replace = TRUE)
+linelist = tibble::tibble(date = random_dates)
+linelist %>% time_summarise(unit="1 week") %>% glimpse()
+
+```
+
+If the line-list contains a `class` column it is interpreted as a complete record of 
+all possible options from which we can calculate a denominator. In this case the 
+positive and negative results of a test:
+
+```{r}
+
+random_dates = Sys.Date()+sample.int(21,200,replace = TRUE)
+linelist2 = tibble::tibble(
+  date = random_dates,
+  class = rbinom(200, 1, 0.04) %>% ifelse("positive","negative")
+)
+linelist2 %>% time_summarise(unit="1 week") %>% glimpse()
+
+
+```
+
+In this specific example subsequent analysis with `growthrates` may focus on the 
+`positive` subgroup only. `class` however may not be test results, it could for example
+be any other major subdivision e.g. the variant of a disease, additional grouping
+other than `class` columns are preserved but not included automatically in the 
+denominator, which may need to be manually calculated:
+
+```{r}
+
+random_dates = Sys.Date()+sample.int(21,200,replace = TRUE)
+variant = apply(rmultinom(200, 1, c(0.1,0.3,0.6)), MARGIN = 2, function(x) which(x==1))
+
+linelist3 = tibble::tibble(
+  date = random_dates,
+  class = c("variant1","variant2","variant3")[variant],
+  gender = ifelse(rbinom(200,1,0.5),"male","female")
+)
+  
+count_by_gender = linelist3 %>% 
+  group_by(gender) %>% 
+  time_summarise(unit="1 week") %>% 
+  arrange(time, gender, class) %>%
+  glimpse()
+
+```
+
+# Aggregating time series datasets.
+
+In the case of a time series with additional grouping present, removing a level
+of grouping whilst retaining time is made easier with `time_aggregate()`. In
+this case we wish to sum `count` and `denom` by gender, retaining the class
+grouping.
+
+```{r}
+
+count_by_gender %>% 
+  group_by(class,gender) %>% 
+  time_aggregate() %>%
+  glimpse()
+
+```
+
+by default `time_aggregate` will sum any of `count`, `denom` and `population` columns
+but any other behaviour can be specified by passing `dplyr::summarise` style
+directives to the function.

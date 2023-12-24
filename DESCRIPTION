@@ -1,6 +1,6 @@
 Package: growthrates
 Title: Estimate Incidence, Proportions and Exponential Growth Rates
-Version: 0.0.4
+Version: 0.1.0
 Authors@R: 
     person(given = "Robert",
            family = "Challen",
@@ -23,8 +23,11 @@ Suggests:
     readr,
     tidyverse,
     stringr,
-    testthat,
-    devtools
+    testthat (>= 3.0.0),
+    devtools,
+    patchwork,
+    memoise
+Remotes: github::bristol-vaccine-centre/interfacer
 VignetteBuilder: knitr
 Imports: 
     dplyr,
@@ -39,7 +42,15 @@ Imports:
     lubridate,
     scales,
     tidyselect,
-    ggplot2
+    ggplot2,
+    interfacer (>= 0.1.2.9006),
+    ggrepel,
+    glue,
+    purrr
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,
     https://doi.org/10.5281/zenodo.7242761
+Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
+LazyData: true

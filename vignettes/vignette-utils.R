@@ -1,10 +1,19 @@
+# Set general theme
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 8)+
+   ggplot2::theme(
+     axis.text.x.bottom = ggplot2::element_text(angle=30,vjust = 1,hjust=1),
+     axis.text.x.top = ggplot2::element_text(angle=30,vjust = 0,hjust=0),
+     legend.key.size = ggplot2::unit(0.1,"inches")
+   )
+)
+
 
 # .test_data()
 # ggplot2::ggplot(.test_data(),ggplot2::aes(x=date,y=count))+ggplot2::geom_point()+ggplot2::scale_y_continuous(trans="log1p")
 .test_data = function(
     changes = tibble::tibble(time = c(0,20,40,60,80), r = c(0.1,0,-0.1,0,0.1)),
     initial = 100,
-    duration = 100,
+    duration = 104,
     seed=100
 ) {
   set.seed(seed)

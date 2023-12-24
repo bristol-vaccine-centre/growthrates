@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">growthrates</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -32,10 +32,19 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/estimators-example.html">estimators-example</a>
+      <a href="../articles/covid-timeseries.html">England COVID-19 cases</a>
     </li>
     <li>
-      <a href="../articles/variant-proportions.html">variant-proportions</a>
+      <a href="../articles/estimators-example.html">Simulation tests for growth rate estimators</a>
+    </li>
+    <li>
+      <a href="../articles/incidence-trends.html">Population comparisons and incidence</a>
+    </li>
+    <li>
+      <a href="../articles/time-periods.html">Data wrangling and working with `growthrates`</a>
+    </li>
+    <li>
+      <a href="../articles/variant-proportions.html">Multinomial proportions models for genomic variants</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -73,6 +82,10 @@
         </td>
         <td><p>A scales breaks generator for log1p scales</p></td>
       </tr><tr><td>
+          <p><code><a href="covid_infectivity_profile.html">i_infectivity_profile</a></code> </p>
+        </td>
+        <td><p>The covid_infectivity_profile dataframe structure specification</p></td>
+      </tr><tr><td>
           <p><code><a href="cut_date.html">cut_date()</a></code> </p>
         </td>
         <td><p>Places a set of dates within a regular time series</p></td>
@@ -80,6 +93,38 @@
           <p><code><a href="date_to_time.html">date_to_time()</a></code> </p>
         </td>
         <td><p>Convert a set of dates to numeric timepoints</p></td>
+      </tr><tr><td>
+          <p><code><a href="doubling_time.html">doubling_time()</a></code> </p>
+        </td>
+        <td><p>Doubling time from growth rate</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_consensus_growth_rate.html">england_consensus_growth_rate</a></code> </p>
+        </td>
+        <td><p>The england_consensus_growth_rate dataset</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_consensus_rt.html">england_consensus_rt</a></code> </p>
+        </td>
+        <td><p>The england_consensus_rt dataset</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_covid.html">england_covid</a></code> </p>
+        </td>
+        <td><p>Daily COVID-19 case counts by age group in England</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_covid_pcr_positivity.html">england_covid_pcr_positivity</a></code> </p>
+        </td>
+        <td><p>The england_covid_pcr_positivity dataset</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_demographics.html">england_demographics</a></code> </p>
+        </td>
+        <td><p>England demographics</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_events.html">england_events</a></code> </p>
+        </td>
+        <td><p>The england_events dataset</p></td>
+      </tr><tr><td>
+          <p><code><a href="england_variants.html">england_variants</a></code> </p>
+        </td>
+        <td><p>The england_variants dataset</p></td>
       </tr><tr><td>
           <p><code><a href="fdmy.html">fdmy()</a></code> </p>
         </td>
@@ -101,9 +146,25 @@
         </td>
         <td><p>Expand a <code>time_period</code> vector to the full range of possible timess</p></td>
       </tr><tr><td>
+          <p><code><a href="geom_events.html">geom_events()</a></code> </p>
+        </td>
+        <td><p>Add time series event markers to a timeseries plot.</p></td>
+      </tr><tr><td>
+          <p><code><a href="germany_covid.html">germany_covid</a></code> </p>
+        </td>
+        <td><p>Weekly COVID-19 case counts by age group in Germany</p></td>
+      </tr><tr><td>
+          <p><code><a href="germany_demographics.html">germany_demographics</a></code> </p>
+        </td>
+        <td><p>Germany demographics</p></td>
+      </tr><tr><td>
           <p><code><a href="is.Date.html">is.Date()</a></code> </p>
         </td>
         <td><p>Check whether vector is a date</p></td>
+      </tr><tr><td>
+          <p><code><a href="labels.time_period.html">labels(<i>&lt;time_period&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Label a time period</p></td>
       </tr><tr><td>
           <p><code><a href="logit_trans.html">logit_trans()</a></code> </p>
         </td>
@@ -121,6 +182,38 @@
         </td>
         <td><p>Multinomial time-series model.</p></td>
       </tr><tr><td>
+          <p><code><a href="normalise_incidence.html">normalise_incidence()</a></code> </p>
+        </td>
+        <td><p>Calculate a normalised incidence rate per capita</p></td>
+      </tr><tr><td>
+          <p><code><a href="normalise_proportion.html">normalise_proportion()</a></code> </p>
+        </td>
+        <td><p>Calculate a normalised risk ration from proportions</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot_growth_phase.html">plot_growth_phase()</a></code> </p>
+        </td>
+        <td><p>Plot an incidence or proportion vs. growth phase diagram</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot_growth_rate.html">plot_growth_rate()</a></code> </p>
+        </td>
+        <td><p>Growth rate timeseries diagram</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot_incidence.html">plot_incidence()</a></code> </p>
+        </td>
+        <td><p>Plot an incidence timeseries</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot_multinomial.html">plot_multinomial()</a></code> </p>
+        </td>
+        <td><p>Plot a mulitnomial proportions mode</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot_proportion.html">plot_proportion()</a></code> </p>
+        </td>
+        <td><p>Plot a proportions timeseries</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot_rt.html">plot_rt()</a></code> </p>
+        </td>
+        <td><p>Reproduction number timeseries diagram</p></td>
+      </tr><tr><td>
           <p><code><a href="poisson_glm_model.html">poisson_glm_model()</a></code> </p>
         </td>
         <td><p>Poisson time-series model.</p></td>
@@ -136,6 +229,26 @@
           <p><code><a href="proportion_locfit_model.html">proportion_locfit_model()</a></code> </p>
         </td>
         <td><p>A binomial proportion estimate and associated exponential growth rate</p></td>
+      </tr><tr><td>
+          <p><code><a href="reband_discrete.html">reband_discrete()</a></code> </p>
+        </td>
+        <td><p>Reband any discrete distribution</p></td>
+      </tr><tr><td>
+          <p><code><a href="rt_from_growth_rate.html">rt_from_growth_rate()</a></code> </p>
+        </td>
+        <td><p>Wallinga-Teunis reproduction number</p></td>
+      </tr><tr><td>
+          <p><code><a href="scale_y_log1p.html">scale_y_log1p()</a></code> </p>
+        </td>
+        <td><p>A log1p y scale</p></td>
+      </tr><tr><td>
+          <p><code><a href="scale_y_logit.html">scale_y_logit()</a></code> </p>
+        </td>
+        <td><p>A logit y scale</p></td>
+      </tr><tr><td>
+          <p><code><a href="time_aggregate.html">time_aggregate()</a></code> </p>
+        </td>
+        <td><p>Aggregate time series data preserving the time series</p></td>
       </tr><tr><td>
           <p><code><a href="time_summarise.html">time_summarise()</a></code> </p>
         </td>

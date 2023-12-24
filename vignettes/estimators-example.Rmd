@@ -1,8 +1,8 @@
 ---
-title: "estimators-example"
+title: "Simulation tests for growth rate estimators"
 output: html_document
 vignette: >
-  %\VignetteIndexEntry{estimators-example}
+  %\VignetteIndexEntry{Simulation tests for growth rate estimators}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,145 +13,161 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 library(tidyverse)
-devtools::load_all()
-# library(growthrates)
+# devtools::load_all()
+library(growthrates)
 here::i_am("vignettes/estimators-example.Rmd")
 source(here::here("vignettes/vignette-utils.R"))
-ggplot2::theme_set(ggplot2::theme_minimal())
 ```
 
-* TODO change .test_data to be a regular data frame and give example of the 
-conversion to the timeseries.
-* have a date based data frame as input.
 
-# Poisson model
+This test data is based around a known time varying exponential growth rate
+with an initial epidemic seed size of 100. The data is simulated with weekly
+periodicity.
 
-* Absolute counts 
+# Locfit models
+
+## Simple incidence test with a poisson model
+
+An incidence mode based on absolute counts:
 
 ```{r}
 data = .test_data()
-
-tmp = data %>% dplyr::select(-r,-rate) %>% poisson_locfit_model(window=7, deg = 2)
-
-ggplot(tmp,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975))+
-  ggplot2::geom_line()+
-  ggplot2::geom_ribbon(alpha=0.2)+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=count), data=data, colour="red",inherit.aes = FALSE)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=rate), data=data, colour="red",inherit.aes = FALSE)
+data %>% glimpse()
 ```
 
-* Absolute growth rate
 
 ```{r}
-ggplot(tmp,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975))+
-  ggplot2::geom_line()+ggplot2::geom_ribbon(alpha=0.2)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=r), data=data, colour="red",inherit.aes = FALSE)
+tmp = data %>% poisson_locfit_model(window=7, deg = 2)
+
+plot_incidence(tmp, data)+ggplot2::geom_line(
+  mapping=ggplot2::aes(x=as.Date(time),y=rate), data=data, colour="red",inherit.aes = FALSE)
 ```
 
-* Multiple classes absolute count
-
-```{r}
-data2 = .test_multinomial()
-tmp2 = data2 %>% dplyr::select(-r,-rate) %>% dplyr::group_by(class) %>% dplyr::group_modify(poisson_locfit_model, window=7, deg = 1)
-
-ggplot(tmp2,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975, colour=class, group=class))+
-  ggplot2::geom_line()+
-  ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=count, color=class), data=data2,inherit.aes = FALSE)+
-  scale_y_log1p()
-```
-
-* Multiple classes absolute growth rate
-
-```{r}
-ggplot(tmp2,ggplot2::aes(x=time,y=growth.0.5, ymin=growth.0.025, ymax=growth.0.975,colour=class,groups=class))+
-  ggplot2::geom_line()+ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=r, colour=class), data=data2,inherit.aes = FALSE)+ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
-```
-
-# One versus others binomial model 
-
-* Relative growth rate
+Estimted absolute growth rate versus simulation (red)
 
 ```{r}
 
-#devtools::load_all()
+plot_growth_rate(tmp)+
+  ggplot2::geom_line(mapping=ggplot2::aes(x=as.Date(time),y=r), data=data, colour="red",inherit.aes = FALSE)
+```
 
-# This will reinterpret total to be the total of positives
-tmp3 = data2 %>% 
+```{r}
+
+plot_growth_phase(tmp)
+
+```
+
+## Multinomial data
+
+Multiple classes are simulated as 3 independent epdiemics ('variant1',
+'variant2' and 'variant3') with known growth rates and initial sample size
+resulting in 3 parallel time series. These are combined to give an overall
+epidemic and a proportional distribution of each 'variant' as a fraction of the
+whole. A relative growth rate is calculated based on set parameters.
+
+```{r}
+data2 = .test_multinomial() %>% dplyr::group_by(class) %>% glimpse()
+```
+
+### Poisson model
+
+Firstly fitting the same incidence model in a groupwise fashion:
+
+```{r}
+tmp2 = data2 %>% poisson_locfit_model(window=7, deg = 1)
+
+plot_incidence(tmp2, data2)+scale_y_log1p()
+```
+
+And the absolute growth rates:
+
+```{r}
+plot_growth_rate(modelled = tmp2)+
+   ggplot2::geom_line(mapping=ggplot2::aes(x=as.Date(time),y=r, colour=class), data=data2, inherit.aes = FALSE)+
+   ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+
+```
+
+### One versus others Binomial model 
+
+This looks at the proportions of the three variants and their growth rate relative
+to each other:
+
+```{r}
+# This will reinterpret total to be the total of positives across all variants
+data3 = data2 %>% 
   dplyr::group_by(time) %>% 
   dplyr::mutate(denom = sum(count)) %>%
-  dplyr::group_by(class) %>% 
-  dplyr::group_modify(proportion_locfit_model, window=14, deg = 2)
+  dplyr::group_by(class) %>%
+  dplyr::glimpse()
+```
 
 
+Firstly proportions:
 
-ggplot(tmp3,ggplot2::aes(x=time,y=relative.growth.0.5, ymin=relative.growth.0.025, ymax=relative.growth.0.975,colour=class,group=class))+
-  ggplot2::geom_line()+
-  ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=relative.r, colour=class), data=data2, inherit.aes = FALSE)+
+```{r}
+
+tmp3 = data3 %>% proportion_locfit_model(window=14, deg = 2)
+
+plot_proportion(modelled = tmp3,raw = data3)+
   ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
 
 ```
 
-* Absolute proportions
+And secondly relative growth rate:
 
 ```{r}
-ggplot(tmp3,ggplot2::aes(x=time,y=proportion.0.5, ymin=proportion.0.025, ymax=proportion.0.975,colour=class,group=class))+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
-  ggplot2::geom_line()+
-  ggplot2::geom_ribbon(alpha=0.2, color=NA)+
-  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+
+
+plot_growth_rate(modelled = tmp3)+
+   ggplot2::geom_line(mapping=ggplot2::aes(x=as.Date(time),y=relative.r, colour=class), data=data2, inherit.aes = FALSE)+
+   ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+
 ```
 
-
-# Multinomial model
-
-* Absolute proportions only
-
 ```{r}
 
-# we don;t need to calculate the denominator as it is done automatically by the 
+plot_growth_phase(tmp3)
+
+```
+
+### Multinomial model
+
+The mulitnomial model gives us absolute proportions only (and no growth rates)
+
+```{r}
+# we don't need to calculate the denominator as it is done automatically by the 
+# mulitnomial model
+
 tmp4 = data2 %>% multinomial_nnet_model()
+plot_multinomial(tmp4)
 
-ggplot(tmp4,ggplot2::aes(x=time,y=proportion.0.5, colour=class,group=class))+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
-  ggplot2::geom_line()+
-  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+# plot_multinomial(tmp3, events = event_test,normalise = TRUE)
 
 ```
 
-# GLM poisson model
+# GLM models
+
+## Poisson model
 
 * Spline currently only good for incidence
 
 ```{r}
 
 tmp5 = data %>% poisson_glm_model(window=7)
+plot_incidence(tmp5,data)
 
-ggplot(tmp5,ggplot2::aes(x=time,y=incidence.0.5, ymin=incidence.0.025, ymax=incidence.0.975))+
-  ggplot2::geom_line()+
-  ggplot2::geom_ribbon(alpha=0.2)+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=count), data=data, colour="red",inherit.aes = FALSE)+
-  ggplot2::geom_line(mapping=ggplot2::aes(x=time,y=rate), data=data, colour="red",inherit.aes = FALSE)
 ```
 
-# GLM poisson model
+## Binomial model
 
-* Absolute proportions only
+Absolute proportions only
 
 ```{r}
 
-# we don;t need to calculate the denominator as it is done automatically by the 
-tmp6 = data2 %>%
-  dplyr::group_by(time) %>% 
-  dplyr::mutate(denom = sum(count)) %>%
-  dplyr::group_by(class) %>% 
-  dplyr::group_modify(proportion_glm_model, window=14, deg = 2)
-
-ggplot(tmp6,ggplot2::aes(x=time,y=proportion.0.5, colour=class,group=class))+
-  ggplot2::geom_point(mapping=ggplot2::aes(x=time,y=proportion.obs, colour=class), data=data2, inherit.aes = FALSE, size = 0.5)+
-  ggplot2::geom_line()+
-  ggplot2::facet_wrap(dplyr::vars(class), ncol=1)
+tmp6 = data3 %>% proportion_glm_model(window=14, deg = 2)
+plot_proportion(tmp6,data3)
 
 ```
+
+

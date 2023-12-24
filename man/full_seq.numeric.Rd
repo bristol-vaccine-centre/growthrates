@@ -4,7 +4,7 @@
 \alias{full_seq.numeric}
 \title{Create the full sequence of values in a vector}
 \usage{
-\method{full_seq}{numeric}(x, period, tol = 1e-06, ...)
+\method{full_seq}{numeric}(x, period = 1, tol = 1e-06, ...)
 }
 \arguments{
 \item{x}{a numeric or date vector}

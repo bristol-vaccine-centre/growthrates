@@ -10,10 +10,19 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
+    <loc>/articles/covid-timeseries.html</loc>
+  </url>
+  <url>
     <loc>/articles/estimators-example.html</loc>
   </url>
   <url>
+    <loc>/articles/incidence-trends.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/time-periods.html</loc>
   </url>
   <url>
     <loc>/articles/variant-proportions.html</loc>
@@ -40,10 +49,37 @@
     <loc>/reference/breaks_log1p.html</loc>
   </url>
   <url>
+    <loc>/reference/covid_infectivity_profile.html</loc>
+  </url>
+  <url>
     <loc>/reference/cut_date.html</loc>
   </url>
   <url>
     <loc>/reference/date_to_time.html</loc>
+  </url>
+  <url>
+    <loc>/reference/doubling_time.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_consensus_growth_rate.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_consensus_rt.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_covid.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_covid_pcr_positivity.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_demographics.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_events.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_variants.html</loc>
   </url>
   <url>
     <loc>/reference/estimate_binomial_proportion.html</loc>
@@ -70,6 +106,15 @@
     <loc>/reference/full_seq.time_period.html</loc>
   </url>
   <url>
+    <loc>/reference/geom_events.html</loc>
+  </url>
+  <url>
+    <loc>/reference/germany_covid.html</loc>
+  </url>
+  <url>
+    <loc>/reference/germany_demographics.html</loc>
+  </url>
+  <url>
     <loc>/reference/group_by.timed_df.html</loc>
   </url>
   <url>
@@ -80,6 +125,9 @@
   </url>
   <url>
     <loc>/reference/is.Date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/labels.time_period.html</loc>
   </url>
   <url>
     <loc>/reference/logit_trans.html</loc>
@@ -94,7 +142,31 @@
     <loc>/reference/multinomial_nnet_model.html</loc>
   </url>
   <url>
+    <loc>/reference/normalise_incidence.html</loc>
+  </url>
+  <url>
+    <loc>/reference/normalise_proportion.html</loc>
+  </url>
+  <url>
     <loc>/reference/pipe.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_growth_phase.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_growth_rate.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_incidence.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_multinomial.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_proportion.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_rt.html</loc>
   </url>
   <url>
     <loc>/reference/poisson_glm_model.html</loc>
@@ -109,7 +181,22 @@
     <loc>/reference/proportion_locfit_model.html</loc>
   </url>
   <url>
+    <loc>/reference/reband_discrete.html</loc>
+  </url>
+  <url>
     <loc>/reference/restore_groups.html</loc>
+  </url>
+  <url>
+    <loc>/reference/rt_from_growth_rate.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scale_y_log1p.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scale_y_logit.html</loc>
+  </url>
+  <url>
+    <loc>/reference/time_aggregate.html</loc>
   </url>
   <url>
     <loc>/reference/time_decompose.html</loc>

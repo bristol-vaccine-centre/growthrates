@@ -1,0 +1,204 @@
+---
+title: "England COVID-19 cases"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{England COVID-19 cases}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+here::i_am("vignettes/covid-timeseries.Rmd")
+source(here::here("vignettes/vignette-utils.R"))
+library(tidyverse)
+library(growthrates)
+```
+
+# Incidence and growth rate from case positive counts
+
+This method uses a case positive count dataset bundled with growth rates which
+is age stratified (age grouping is in the `class` column). We will look at the
+age stratification in different vignettes but in this instance we want to
+aggregate it into an England wide rate. This is the purpose of `time_aggregate()`
+which performs a simple summarisation.
+
+```{r}
+england_covid %>% glimpse()
+
+tmp = growthrates::england_covid %>%
+  time_aggregate(count=sum(count))
+```
+
+The raw covid case count on a `log1p` scale is the total detected cases per day.
+
+
+```{r}
+fit = tmp %>%
+   poisson_locfit_model() 
+
+plot_incidence(fit,raw = tmp, colour="blue",size=0.025)+
+  scale_y_log1p(n=7)
+```
+
+Major events in the timeseries can be plotted on the axes. We've focussed on the first 2 
+years of the pandemic:
+
+```{r}
+plot_incidence(fit, raw = tmp,events = england_events, colour="blue",size=0.025)+
+  scale_y_log1p(n=7) + coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")))
+
+```
+
+The incidence model assumes case rates result from a Poisson process and the
+rate is estimated with a time varying locally fitted polynomial with degree
+defined by the `deg` parameter, using a log link function, according to the
+methods of Loader et al. (see `citation("locfit")`). The fitting process is a
+local maximum likelihood estimation and uses a bandwidth defined to account for
+the data points within `window` of the time point being estimated.
+
+The gradient of the fitted polynomial on the log scale, is the exponential
+growth rate. This is a scale independent view of the rate of growth of the
+epidemic. This estimation methodology is compared to consensus estimates from
+the SPI-M-O UK government advisory group in red, shifted forward in time by 21
+days. The SPI-M-O estimates made during the pandemic were retrospective whereas
+these ones can use information from before and after the time point and now may
+better represent the timing of changes.
+
+```{r}
+
+plot_growth_rate(fit,events = england_events, colour="blue")+
+  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(-0.15,0.15))+
+  geom_errorbar(data=england_consensus_growth_rate,aes(x=date-21,ymin=low,ymax=high),colour="red")
+
+```
+
+The state of the epidemic is described by both incidence and growth, and the phase plots
+allow us to see both at different time points. In this case the epidemic state in 
+the 10 weeks leading up to Christmas in 2021, 2022 and 2023:
+
+```{r}
+
+
+plot_growth_phase(fit,
+    timepoints = as.Date(c("Xmas 2020"="2020-12-25","Xmas 2021"="2021-12-25","Xmas 2022"="2022-12-25")),
+    duration = 70, 
+    interval = 7,
+    colour="blue"
+)
+
+```
+
+# Reproduction estimation from growth rates
+
+The growth rate has a unit or "per day" in this example. From it we can derive
+the reproduction number. Using the methods of Wallinga and Lipsitch and an
+estimate of the infectivity profile of COVID-19. This describes the probability
+that an infectee is infected x days after the infector, and includes a temporal
+dimension rendering the reproduction number a dimensionless quantity reflecting 
+the average number of infectees resulting from each infector.
+
+`growthrates` has an estimate of the infectivity profile based on a
+meta-analysis of serial interval estimates of COVID-19. The infectivity profile
+is a bootstrapped set of discrete probability distributions. It is truncated at
+14 days.
+
+```{r}
+
+
+
+ggplot2::ggplot()+
+  geom_violin(
+    data = growthrates::covid_infectivity_profile %>% tidyr::complete(time=0:max(time), fill = list(probability=0)),
+    mapping = ggplot2::aes(x=as.factor(time),y=probability),
+    colour="blue",
+    alpha=0.1
+  )+
+  geom_line(
+    data = growthrates::covid_infectivity_profile %>% 
+      tidyr::complete(time=0:max(time), fill = list(probability=0)) %>%
+      dplyr::group_by(time) %>%
+      dplyr::summarise(m = mean(probability)) %>% 
+      dplyr::ungroup(),
+    mapping = ggplot2::aes(x=as.factor(time),y=m, group=1),
+    inherit.aes = FALSE
+  )
+
+
+```
+
+For each growth rate estimate this methods uses 1000 bootstraps to propagate
+uncertainty and is hence somewhat slow. Here we use `memoise` to cache the
+result. As with before effective $R_t$ estimates are compared to consensus
+values from the SPI-M-O group (red):
+
+```{r}
+
+.cache = memoise::cache_filesystem(rappdirs::user_cache_dir("growthrates"))
+
+cached_rt_from_growth_rate = memoise::memoise(
+  growthrates::rt_from_growth_rate,
+  cache = .cache
+)
+
+
+rt_fit = fit %>% cached_rt_from_growth_rate(ip = covid_infectivity_profile)
+
+plot_rt(rt_fit, events = england_events, colour="blue")+
+  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(0.6,1.6))+
+  geom_errorbar(data=england_consensus_rt,aes(x=date-21,ymin=low,ymax=high),colour="red")
+```
+
+# Prevalence and growth rate from test positivity rates
+
+Test availability was not consistent during the pandemic. In the early stages 
+PCR tests were difficult to obtain and case positive incidence estimates are
+thought to be a vast underestimate. During cetain parts of the pandemic targetted
+testing of high risk groups occurred. Test positivity is a different view
+on the pandemic and accounts for some of these biases and introduces others 
+of its own. For this the data must contain a `denom` column which in this
+case represents the number of tests conducted:
+
+```{r}
+england_covid_pcr_positivity %>% glimpse()
+
+
+```
+
+
+```{r}
+
+fit2 = england_covid_pcr_positivity %>% 
+  growthrates::proportion_locfit_model()
+
+plot_proportion(fit2, england_covid_pcr_positivity, events = england_events, size=0.25, colour="blue")+
+  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")))
+
+```
+
+In this case the gradient of the proportion on the logistic scale is an estimate
+of the growth rate. It is in some senses relative to the growth of the testing
+effort but in this case produces an answer very similar to the incidence model.
+
+```{r}
+
+plot_growth_rate(fit2, events = england_events, colour="blue")+
+  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(-0.15,0.15))+
+  geom_errorbar(data=england_consensus_growth_rate,aes(x=date-21,ymin=low,ymax=high),colour="red")
+```
+
+With similar growth rate estimates this method can also theoretically be used to
+calculate estimates of $R_t$. Growth-proportion phase diagrams can also compare
+different points in times or as we will see elsewhere, between different
+populations.
+
+```{r}
+
+plot_growth_phase(fit2,
+    timepoints = as.Date(c("Xmas 2020"="2020-12-25","Xmas 2021"="2021-12-25","Xmas 2022"="2022-12-25")),
+    duration = 70, 
+    interval = 7,
+    colour="blue"
+)
+
+```

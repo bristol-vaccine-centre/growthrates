@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>variant-proportions • growthrates</title>
+<title>Multinomial proportions models for genomic variants • growthrates</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="variant-proportions">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Multinomial proportions models for genomic variants">
 <meta property="og:description" content="growthrates">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">growthrates</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -50,10 +50,19 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/estimators-example.html">estimators-example</a>
+      <a href="../articles/covid-timeseries.html">England COVID-19 cases</a>
     </li>
     <li>
-      <a href="../articles/variant-proportions.html">variant-proportions</a>
+      <a href="../articles/estimators-example.html">Simulation tests for growth rate estimators</a>
+    </li>
+    <li>
+      <a href="../articles/incidence-trends.html">Population comparisons and incidence</a>
+    </li>
+    <li>
+      <a href="../articles/time-periods.html">Data wrangling and working with `growthrates`</a>
+    </li>
+    <li>
+      <a href="../articles/variant-proportions.html">Multinomial proportions models for genomic variants</a>
     </li>
   </ul>
 </li>
@@ -78,7 +87,8 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>variant-proportions</h1>
+      <h1 data-toc-skip>Multinomial proportions models for genomic
+variants</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/bristol-vaccine-centre/growthrates/blob/HEAD/vignettes/variant-proportions.Rmd" class="external-link"><code>vignettes/variant-proportions.Rmd</code></a></small>
@@ -89,199 +99,104 @@
     
     
 <div class="section level2">
-<h2 id="sanger-lineage-data">Sanger lineage data<a class="anchor" aria-label="anchor" href="#sanger-lineage-data"></a>
+<h2 id="covid-19-proportions-in-england">COVID-19 proportions in England<a class="anchor" aria-label="anchor" href="#covid-19-proportions-in-england"></a>
 </h2>
-<ul>
-<li>The sanger centre / COGUK citation</li>
-<li>Sequencing background</li>
-<li>Pango lineage background citation</li>
-<li>WHO classification of lineages background</li>
-</ul>
+<p>The Sanger Centre &amp; COGUK performed a large amount of sequencing
+of COVID-19 during the pandemic, to identify emerging genomic variants.
+This was scaled up in the second half of 2021 and continued through to
+the beginning of 2023. Lineages were assigned using the Pango lineage
+system and important ones given nicknames by the WHO.</p>
+<p>The Sanger variants data has been discontinued, but were still
+available for download. The code to download, process these data sets
+and determine the full lineage is in the
+<code>data-raw/variants.R</code> file, but the output of this has been
+bundled as a data set here. There are many caveats to the data here in
+terms of bias and it should not be regarded as definitive:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># get and cache data</span></span>
-<span><span class="va">raw_lineages</span> <span class="op">=</span> <span class="fu">.download</span><span class="op">(</span><span class="st">"https://covid-surveillance-data.cog.sanger.ac.uk/download/lineages_by_ltla_and_week.tsv"</span>,<span class="st">"lineages.tsv"</span><span class="op">)</span></span>
-<span><span class="va">variants</span> <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="va">raw_lineages</span>,na <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lineage data suppressed"</span>,<span class="st">"Unassigned"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">206136</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">4</span></span></span>
-<span><span class="co">## <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span></span>
-<span><span class="co">## <span style="font-weight: bold;">Delimiter:</span> "\t"</span></span>
-<span><span class="co">## <span style="color: #BB0000;">chr</span>  (2): LTLA, Lineage</span></span>
-<span><span class="co">## <span style="color: #00BB00;">dbl</span>  (1): Count</span></span>
-<span><span class="co">## <span style="color: #0000BB;">date</span> (1): WeekEndDate</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span></code></pre>
+<code class="sourceCode R"><span><span class="co"># tidy copy of the sanger weekly variants count data aggregated to England level</span></span>
+<span><span class="fu">growthrates</span><span class="fu">::</span><span class="va"><a href="../reference/england_variants.html">england_variants</a></span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Rows: 479</span></span>
+<span><span class="co">## Columns: 6</span></span>
+<span><span class="co">## Groups: class [10]</span></span>
+<span><span class="co">## $ date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2020-09-05, 2020-09-05, 2020-09-12, 2020-09-12, 2020-09-19,…</span></span>
+<span><span class="co">## $ time      <span style="color: #949494; font-style: italic;">&lt;time_prd&gt;</span> 0, 0, 7, 7, 14, 14, 21, 21, 28, 28, 35, 35, 42, 42, 49,…</span></span>
+<span><span class="co">## $ class     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> Other, Alpha (B.1.1.7), Other, Alpha (B.1.1.7), Other, Alpha…</span></span>
+<span><span class="co">## $ who_class <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> Other, Alpha, Other, Alpha, Other, Alpha, Other, Alpha, Othe…</span></span>
+<span><span class="co">## $ count     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1182, 371, 1439, 588, 837, 429, 1685, 1157, 1208, 823, 1501,…</span></span>
+<span><span class="co">## $ denom     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1553, 1553, 2027, 2027, 1266, 1266, 2842, 2842, 2031, 2031, …</span></span></code></pre>
+<p>The data must have a <code>class</code> column defining the main
+categorisation of the data (in this case it is the main pango variant).
+The <code>time</code> column is a <code>time_period</code> derived from
+the date (which is weekly). The other necessary column is the
+<code>count</code> column which is integer counts of each
+<code>class</code>. The data must be grouped by <code>class</code>.
+Multiple models can be fitted simultaneously if the data is grouped by
+other columns.</p>
+</div>
+<div class="section level2">
+<h2 id="multinomial-proportions-model-">Multinomial proportions model.<a class="anchor" aria-label="anchor" href="#multinomial-proportions-model-"></a>
+</h2>
+<p>Genomic testing happened only in a subset of cases. The testing
+effort varied significantly over time. The frequency of each variant
+over time can be determined with a multinomial model.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lineages</span> <span class="op">=</span> <span class="fu">.download</span><span class="op">(</span><span class="st">"https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json"</span>, <span class="st">"lineage-keys.json"</span><span class="op">)</span></span>
-<span><span class="va">lineage_keys</span> <span class="op">=</span> <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/read_json.html" class="external-link">read_json</a></span><span class="op">(</span><span class="va">lineages</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># filter out recombinant species</span></span>
-<span><span class="va">recombinants</span> <span class="op">=</span> <span class="va">lineage_keys</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">magrittr</span><span class="fu">::</span><span class="fu"><a href="https://magrittr.tidyverse.org/reference/aliases.html" class="external-link">extract</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">.</span>,<span class="va">length</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">lineage_keys</span> <span class="op">=</span> <span class="va">lineage_keys</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">magrittr</span><span class="fu">::</span><span class="fu"><a href="https://magrittr.tidyverse.org/reference/aliases.html" class="external-link">extract</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">.</span>,<span class="va">length</span><span class="op">)</span><span class="op">==</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co"># TODO::</span></span>
-<span></span>
-<span><span class="va">lineage_key_df</span> <span class="op">=</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">lineage_keys</span><span class="op">)</span>, expanded <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">lineage_keys</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">recombinant_key_df</span> <span class="op">=</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">recombinants</span><span class="op">)</span>, expanded <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">recombinants</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">lineage_key_df</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">lineage_key_df</span>, <span class="va">recombinant_key_df</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># replace e.g. AY with B.1.617.2</span></span>
-<span><span class="va">variants2</span> <span class="op">=</span> <span class="va">variants</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    prefix <span class="op">=</span> <span class="va">Lineage</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html" class="external-link">str_extract</a></span><span class="op">(</span><span class="st">"^[A-Z]+"</span><span class="op">)</span>,</span>
-<span>    suffix <span class="op">=</span> <span class="va">Lineage</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_sub.html" class="external-link">str_sub</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_length.html" class="external-link">str_length</a></span><span class="op">(</span><span class="va">prefix</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">lineage_key_df</span>, by<span class="op">=</span><span class="st">"prefix"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>full_tree <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">expanded</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">expanded</span> <span class="op">!=</span> <span class="st">""</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">expanded</span>,<span class="va">suffix</span><span class="op">)</span>,</span>
-<span>    <span class="cn">TRUE</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">prefix</span>,<span class="va">suffix</span><span class="op">)</span></span>
-<span>  <span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    lineage_class <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Lineage</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Unclassified"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.7"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Alpha (B.1.1.7)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.617.2.4"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Delta (AY.4)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.617.2"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Delta (B.1.617.2)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.529.1"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Omicron (BA.1)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.529.2"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Omicron (BA.2)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.529.4"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Omicron (BA.4)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.529.5"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Omicron (BA.5)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"XBB.1.5"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Kraken (XBB.1.5)"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"XBB"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"XBB (Other)"</span>,</span>
-<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"Other"</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    who_class <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Lineage</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Unclassified"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.7"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Alpha"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.617.2"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Delta"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"B.1.1.529"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Omicron"</span>,</span>
-<span>      <span class="va">full_tree</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="st">"XBB.1.5"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Kraken"</span>,</span>
-<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"Other"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="co">#%&gt;% dplyr::select(-prefix,-suffix,-expanded)</span></span>
-<span></span>
-<span><span class="co"># variants2 %&gt;% dplyr::filter(lineage_class == "Unclassified") %&gt;% dplyr::filter(WeekEndDate &gt; "2022-12-01") %&gt;% tibble::view()</span></span></code></pre></div>
-<ul>
-<li>Prepare the data</li>
-</ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># The count data is at LTLA level. Firstly lets aggregate to England (LTLAs) that</span></span>
-<span><span class="co"># start with "E"</span></span>
-<span><span class="va">variants_uk</span> <span class="op">=</span> <span class="va">variants2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">lineage_class</span> <span class="op">!=</span> <span class="st">"Unclassified"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_starts.html" class="external-link">str_starts</a></span><span class="op">(</span><span class="va">LTLA</span>,<span class="st">"E"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
-<span>    date <span class="op">=</span> <span class="va">WeekEndDate</span>,</span>
-<span>    class <span class="op">=</span> <span class="va">lineage_class</span>,</span>
-<span>    count <span class="op">=</span> <span class="va">Count</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">date</span>,<span class="va">class</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span>,na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>place <span class="op">=</span> <span class="st">"England"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## `summarise()` has grouped output by 'date'. You can override using the</span></span>
-<span><span class="co">## `.groups` argument.</span></span></code></pre>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">variants_bristol</span> <span class="op">=</span> <span class="va">variants2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">lineage_class</span> <span class="op">!=</span> <span class="st">"Unclassified"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">LTLA</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E06000023"</span>,<span class="st">"E06000025"</span>,<span class="st">"E06000022"</span>,<span class="st">"E06000024"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
-<span>    date <span class="op">=</span> <span class="va">WeekEndDate</span>,</span>
-<span>    class <span class="op">=</span> <span class="va">lineage_class</span>,</span>
-<span>    count <span class="op">=</span> <span class="va">Count</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">date</span>,<span class="va">class</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span>,na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>place <span class="op">=</span> <span class="st">"Bristol"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## `summarise()` has grouped output by 'date'. You can override using the</span></span>
-<span><span class="co">## `.groups` argument.</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">variants_data</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
-<span>    <span class="va">variants_uk</span>,</span>
-<span>    <span class="va">variants_bristol</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>time <span class="op">=</span> <span class="fu"><a href="../reference/as.time_period.html">as.time_period</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">place</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## No `start_date` (or `anchor`) specified. Using default: 2019-12-29</span></span>
-<span><span class="co">## No unit given. Guessing a sensible value from the dates gives: 7d 0H 0M 0S</span></span></code></pre>
-<ul>
-<li>Calculate the probabilities in a group wise fashion</li>
-</ul>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># debug(estimate_multinomial_proportion)</span></span>
 <span><span class="co"># devtools::load_all()</span></span>
-<span><span class="va">probs</span> <span class="op">=</span> <span class="va">variants_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">date</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_map.html" class="external-link">group_modify</a></span><span class="op">(</span><span class="va">multinomial_nnet_model</span>, window <span class="op">=</span> <span class="fl">28</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="co"># This is needed to map the "time period" in time back to a normal "date"</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="../reference/time_to_date.html">time_to_date</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## # weights:  30 (18 variable)</span></span>
-<span><span class="co">## initial  value 73634.368689 </span></span>
-<span><span class="co">## iter  10 value 37122.715817</span></span>
-<span><span class="co">## iter  20 value 23955.371820</span></span>
-<span><span class="co">## iter  30 value 19477.540700</span></span>
-<span><span class="co">## iter  40 value 19038.740111</span></span>
-<span><span class="co">## iter  50 value 18790.465905</span></span>
-<span><span class="co">## iter  60 value 18691.428217</span></span>
-<span><span class="co">## iter  70 value 18632.800996</span></span>
-<span><span class="co">## iter  80 value 18631.447761</span></span>
-<span><span class="co">## iter  90 value 18631.196422</span></span>
-<span><span class="co">## iter  90 value 18631.196319</span></span>
-<span><span class="co">## iter  90 value 18631.196319</span></span>
-<span><span class="co">## final  value 18631.196319 </span></span>
-<span><span class="co">## converged</span></span>
-<span><span class="co">## # weights:  40 (27 variable)</span></span>
+<span><span class="va">probs</span> <span class="op">=</span> <span class="va">england_variants</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="../reference/multinomial_nnet_model.html">multinomial_nnet_model</a></span><span class="op">(</span>window <span class="op">=</span> <span class="fl">28</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## # weights:  40 (27 variable)</span></span>
 <span><span class="co">## initial  value 3583520.087982 </span></span>
-<span><span class="co">## iter  10 value 1754817.785052</span></span>
-<span><span class="co">## iter  20 value 1014977.438885</span></span>
-<span><span class="co">## iter  30 value 891431.872722</span></span>
-<span><span class="co">## iter  40 value 737509.727518</span></span>
-<span><span class="co">## iter  50 value 729578.583488</span></span>
-<span><span class="co">## iter  60 value 728086.934954</span></span>
-<span><span class="co">## iter  70 value 726918.717837</span></span>
-<span><span class="co">## iter  80 value 716054.319680</span></span>
-<span><span class="co">## iter  90 value 710062.457238</span></span>
-<span><span class="co">## iter 100 value 708462.346994</span></span>
-<span><span class="co">## final  value 708462.346994 </span></span>
+<span><span class="co">## iter  10 value 1562162.620103</span></span>
+<span><span class="co">## iter  20 value 1380207.974679</span></span>
+<span><span class="co">## iter  30 value 959088.555929</span></span>
+<span><span class="co">## iter  40 value 742507.401972</span></span>
+<span><span class="co">## iter  50 value 731767.878753</span></span>
+<span><span class="co">## iter  60 value 729647.595800</span></span>
+<span><span class="co">## iter  70 value 726795.599565</span></span>
+<span><span class="co">## iter  80 value 716309.116515</span></span>
+<span><span class="co">## iter  90 value 709310.968378</span></span>
+<span><span class="co">## iter 100 value 707285.617997</span></span>
+<span><span class="co">## final  value 707285.617997 </span></span>
 <span><span class="co">## stopped after 100 iterations</span></span></code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">probs</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">date</span>,y<span class="op">=</span><span class="va">proportion.0.5</span>,fill<span class="op">=</span><span class="va">class</span><span class="op">)</span><span class="op">)</span><span class="op">+</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_area</a></span><span class="op">(</span>color<span class="op">=</span><span class="st">"black"</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="co"># ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">place</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle<span class="op">=</span><span class="fl">60</span>,vjust <span class="op">=</span> <span class="fl">1</span>,hjust<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_multinomial.html">plot_multinomial</a></span><span class="op">(</span><span class="va">probs</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">"cividis"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## plotting incidence gr</span></span></code></pre>
+<p><img src="variant-proportions_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="binomial-proportions-model">Binomial proportions model<a class="anchor" aria-label="anchor" href="#binomial-proportions-model"></a>
+</h2>
+<p>The binomial proportions are not very different to the multinomial
+probabilities calculated above, but come with confidence intervals,
+however the median values do not necessarily sum to 1.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">probs2</span> <span class="op">=</span> <span class="va">england_variants</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/proportion_locfit_model.html">proportion_locfit_model</a></span><span class="op">(</span>window <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_proportion.html">plot_proportion</a></span><span class="op">(</span><span class="va">probs2</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_colour_viridis_d</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">"cividis"</span>,aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"colour"</span>,<span class="st">"fill"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## plotting proportion</span></span></code></pre>
 <p><img src="variant-proportions_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">probs2</span> <span class="op">=</span> <span class="va">variants_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">date</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">place</span>,<span class="va">time</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>denom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">place</span>,<span class="va">class</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_map.html" class="external-link">group_modify</a></span><span class="op">(</span><span class="va">proportion_locfit_model</span>, window <span class="op">=</span> <span class="fl">14</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="co"># This is needed to map the "time period" in time back to a normal "date"</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="../reference/time_to_date.html">time_to_date</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">probs2</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">date</span>,y<span class="op">=</span><span class="va">proportion.0.5</span>,ymin<span class="op">=</span><span class="va">proportion.0.025</span>,ymax<span class="op">=</span><span class="va">proportion.0.975</span>,fill<span class="op">=</span><span class="va">class</span>,colour<span class="op">=</span><span class="va">class</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>colour<span class="op">=</span><span class="cn">NA</span>,alpha<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="co"># ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fill"</span>,<span class="st">"colour"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">place</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle<span class="op">=</span><span class="fl">60</span>,vjust <span class="op">=</span> <span class="fl">1</span>,hjust<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The rate of change of the proportion of each individual variant
+versus the others on a logistic scale can be used to work out the
+exponential growth rate of one variant relative to the others. Because
+this is a relative growth rate taken togehter the esimates of all
+variants at a given time are centred around zero. If one variant has a
+growth advantage, by definition others have a growth disadvantage
+despite potentially causing a larger disease burden and having
+increasing numbers in a growing epidemic.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_growth_rate.html">plot_growth_rate</a></span><span class="op">(</span><span class="va">probs2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">"cividis"</span>,aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"colour"</span>,<span class="st">"fill"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## plotting prop gr</span></span></code></pre>
 <p><img src="variant-proportions_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">probs2</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>,y<span class="op">=</span><span class="va">relative.growth.0.5</span>,ymin<span class="op">=</span><span class="va">relative.growth.0.025</span>,ymax<span class="op">=</span><span class="va">relative.growth.0.975</span>,fill<span class="op">=</span><span class="va">class</span>,colour<span class="op">=</span><span class="va">class</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>colour<span class="op">=</span><span class="cn">NA</span>,alpha<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="co"># ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fill"</span>,<span class="st">"colour"</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">place</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle<span class="op">=</span><span class="fl">60</span>,vjust <span class="op">=</span> <span class="fl">1</span>,hjust<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning</span></span>
-<span><span class="co">## -Inf</span></span>
-<span></span>
-<span><span class="co">## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning</span></span>
-<span><span class="co">## -Inf</span></span></code></pre>
-<p><img src="variant-proportions_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
-<p>```</p>
+<p>The binomial relative growth rate per day is a growth advantage over
+existing variants. This has a dependency on the unit of time which is
+controlled by the <code>time_period</code> configuration. In the data
+provided here the <code>time_period</code> is defined on a daily basis
+despite the data being provided weekly. Doubling time does not make
+strict sense when describing relative growth rates and is not shown
+here.</p>
 </div>
   </div>
 

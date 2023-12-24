@@ -107,13 +107,21 @@ as.time_period.time_period = function(x, unit = NULL, start_date = NULL, ...) {
   times = x
   orig_unit = attributes(times)$unit
   orig_start_date = as.Date(attributes(times)$start_date)
-  if (is.null(start_date)) start_date = orig_start_date
   if (is.null(unit)) unit = orig_unit
+  if (is.time_period(unit)) {
+    # If a second timeseries is given it is a reference
+    start_date = .get_meta(unit)$start_date
+    unit = .get_meta(unit)$unit
+  } else {
+    if (is.null(start_date)) start_date = orig_start_date
+  }
+
   start_date = as.Date(start_date)
   if (orig_unit != unit || orig_start_date != start_date) {
     # time period needs conversion from one periodicity to another
     dates = time_to_date(times)
     new_times = date_to_time(dates, unit, start_date)
+    names(new_times) = names(x)
     return(new_times)
   } else {
     return(times)
@@ -137,7 +145,9 @@ as.time_period.Date = function(x, unit = NULL, start_date = NULL, anchor = NULL,
     message("No unit given. Guessing a sensible value from the dates gives: ",unit)
   }
 
-  return(date_to_time(dates,unit = unit,start_date = start_date))
+  tmp = date_to_time(dates,unit = unit,start_date = start_date)
+  names(tmp) = names(x)
+  return(tmp)
 }
 
 # numerics need a start date and unit.
@@ -145,12 +155,14 @@ as.time_period.Date = function(x, unit = NULL, start_date = NULL, anchor = NULL,
 as.time_period.numeric = function(x, unit, start_date = getOption("day_zero","2019-12-29"), ...) {
   start_date = as.Date(start_date)
   times = as.numeric(x)
-  return(structure(
+  tmp = structure(
     times,
     start_date = start_date,
     unit = unit %>% .make_unit(),
     class = unique(c("time_period",class(times)))
-  ))
+  )
+  names(tmp) = names(x)
+  return(tmp)
 }
 
 #' Convert time period to dates
@@ -278,8 +290,66 @@ is.time_period = function(x) {
 print.time_period = function(x,...) {
   unit = attributes(x)$unit
   start_date = attributes(x)$start_date
-  cat(sprintf("time unit: %s, origin: %s (a %s)\n",unit, start_date, weekdays(start_date)))
+  cat(sprintf("time unit: %s, origin: %s (a %s)\n", .fmt_unit(x), start_date, weekdays(start_date)))
   print(as.numeric(x),...)
+}
+
+#' Label a time period
+#'
+#' Create a set of labels for a time period based on the start and duration of
+#' the period. The format is configurable using the start and end dates and the
+#' `dfmt` and `ifmt` parameters, however if the time period has names then these
+#' are used in preference.
+#'
+#' @param object a set of decimal times as a time_period
+#' @param dfmt a `strptime` format specification for the format of the date
+#' @param ifmt a glue spec referring to `start` and `end` of the period as a
+#'   formatted date
+#' @param na.value a label for `NA` times
+#' @param ... not used
+#'
+#' @return a set of character labels for the time
+#' @export
+#'
+#' @examples
+#' eg = as.time_period(Sys.Date()+0:10*7, anchor="start")
+#' labels(eg)
+#' labels(eg, ifmt="{start}", dfmt="%d/%b/%y")
+#' labels(eg, ifmt="until {end}", dfmt="%d %b %Y")
+#'
+#' # labels retained in constructor:
+#' eg2 = Sys.Date()+0:10*7
+#' names(eg2) = paste0("week ",0:10)
+#' labels(eg2)
+#' labels(as.time_period(eg2, anchor="start"))
+labels.time_period = function(object, ..., dfmt = "%d/%b", ifmt = "{start} \u2014 {end}", na.value="Unknown") {
+  x=object
+  if (!is.null(names(x))) return(names(x))
+  return(.time_labels(x,...,dfmt = dfmt, ifmt = ifmt, na.value=na.value))
+}
+
+.get_meta = function(x) {
+  attributes(x)[c("unit","start_date")]
+}
+
+.fmt_unit = function(x,...) {
+  tmp = attributes(x)$unit
+  tf = function(u, d) if(d==1) u else sprintf("%d %ss", d, u)
+  return(dplyr::case_when(
+    tmp@year != 0 && tmp@month == 0 && tmp@day ==0 && tmp@hour == 0 && tmp@minute == 0 && tmp@.Data == 0 ~ tf("year",tmp@year),
+    tmp@year == 0 && tmp@month != 0 && tmp@day ==0 && tmp@hour == 0 && tmp@minute == 0 && tmp@.Data == 0 ~ tf("month",tmp@month),
+    tmp@year == 0 && tmp@month == 0 && tmp@day !=0 && tmp@hour == 0 && tmp@minute == 0 && tmp@.Data == 0 && tmp@day %% 7 ==0 ~ tf("week",tmp@day %/% 7),
+    tmp@year == 0 && tmp@month == 0 && tmp@day !=0 && tmp@hour == 0 && tmp@minute == 0 && tmp@.Data == 0 && tmp@day %% 7 !=0 ~ tf("day",tmp@day),
+    tmp@year == 0 && tmp@month == 0 && tmp@day ==0 && tmp@hour != 0 && tmp@minute == 0 && tmp@.Data == 0 ~ tf("hour",tmp@hour),
+    TRUE ~ as.character(tmp)
+  ))
+}
+
+
+.fmt_pop = function(x) {
+  if (x >= 1000000) return( sprintf("%.0fM",x/1000000) )
+  if (x >= 1000) return( sprintf("%.0fK",x/1000) )
+  sprintf("%.0f",x)
 }
 
 #' Convert a set of dates to numeric timepoints
@@ -420,9 +490,9 @@ full_seq = function(x, period, ...) {
 #' @inherit full_seq
 #' @param tol Numerical tolerance for checking periodicity.
 #' @export
-full_seq.numeric = function(x, period, tol=1e-06, ...) {
-  #check_number_decimal(period)
-  #check_number_decimal(tol, min = 0)
+full_seq.numeric = function(x, period=1, tol=1e-06, ...) {
+  #dplyr::check_number_decimal(period)
+  #dplyr::check_number_decimal(tol, min = 0)
   rng <- range(x, na.rm = TRUE)
   if (any(((x - rng[1])%%period > tol) & (period - (x - rng[1])%%period > tol))) {
     stop("x is not a regular sequence.")
@@ -520,7 +590,9 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
   period = .make_unit(period)
   if (period == attributes(x)$unit) {
     # no change of unit.
-    new_times = full_seq.numeric(as.numeric(x),1)
+
+
+    new_times = full_seq.numeric(as.numeric(x), .step(as.numeric(x)))
     return(.clone_time_period(new_times, x))
   }
 
@@ -547,6 +619,12 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 
 .gcd <- function(...) {
   Reduce(.gcd2, c(...))
+}
+
+.step = function(x) {
+  y = sort(unique(x))
+  dy = stats::na.omit(y[-1]-utils::head(y,-1))
+  return(min(dy))
 }
 
 # lubridate period round trip to string
@@ -588,7 +666,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #'
 #' @examples
 #' dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-#' fs = full_seq(dates, "2 days")
+#' fs = growthrates::full_seq(dates, "2 days")
 #' dates - cut_date(dates, "2 days")
 #' cut_date(dates,unit="2 days", output="time_period")
 #'
@@ -600,7 +678,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #' cut_date(dates2, "1 week", "sun", output="factor")
 #' cut_date(dates2, dfmt = "%d/%b", output="factor", unit = "2 weeks", anchor="sun")
 #'
-cut_date = function(dates, unit, anchor = "start", output = c("date","factor","time_period"), dfmt = "%d/%b/%y", ifmt = "%s \u2014 %s", ...) {
+cut_date = function(dates, unit, anchor = "start", output = c("date","factor","time_period"), dfmt = "%d/%b/%y", ifmt = "{start} \u2014 {end}", ...) {
 
   output = match.arg(output)
   start_date = .start_from_anchor(dates, anchor)
@@ -653,7 +731,7 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
   return(start_date)
 }
 
-.labelled_date_from_times = function(times, dfmt = "%d/%b", ifmt = "%s \u2014 %s", na.value="Unknown") {
+.labelled_date_from_times = function(times, dfmt = "%d/%b", ifmt = "{start} \u2014 {end}", na.value="Unknown") {
   out = time_to_date(times)
   names(out) = .time_labels(times, dfmt=dfmt, ifmt=ifmt, na.value = na.value)
   return(out)
@@ -661,9 +739,9 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
 
 # get a set of labels based on the values of a time_period.
 #
-.time_labels = function(times, dfmt = "%d/%b", ifmt = "%s \u2014 %s", na.value="Unknown") {
+.time_labels = function(times, dfmt = "%d/%b", ifmt = "{start} \u2014 {end}", na.value="Unknown") {
 
-  if (any(stats::na.omit(abs(floor(times)-times))>0.01)) warning("Labelling applied to non-integer times. The result will be unexpected.")
+  if (any(stats::na.omit(abs(floor(times)-times))>0.01)) warning("labelling applied to non-integer times.")
 
   start_dates = time_to_date(times)
   end_dates = start_dates + attributes(times)$unit - lubridate::days(1)
@@ -672,7 +750,7 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
   end_label = format(end_dates,format = dfmt)
 
   if (! all(start_label == end_label)) {
-    label = sprintf(ifmt, start_label, end_label)
+    label = glue::glue_data(list(start=start_label, end=end_label), ifmt)
   } else {
     label = start_label
   }

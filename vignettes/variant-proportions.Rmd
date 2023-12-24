@@ -1,8 +1,8 @@
 ---
-title: "variant-proportions"
+title: "Multinomial proportions models for genomic variants"
 output: html_document
 vignette: >
-  %\VignetteIndexEntry{variant-proportions}
+  %\VignetteIndexEntry{Multinomial proportions models for genomic variants}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,161 +13,88 @@ here::i_am("vignettes/variant-proportions.Rmd")
 source(here::here("vignettes/vignette-utils.R"))
 library(tidyverse)
 library(growthrates)
-ggplot2::theme_set(ggplot2::theme_minimal())
-```
-
-## Sanger lineage data
-
-* The sanger centre / COGUK citation
-* Sequencing background
-* Pango lineage background citation
-* WHO classification of lineages background
-
-```{r}
-# get and cache data
-raw_lineages = .download("https://covid-surveillance-data.cog.sanger.ac.uk/download/lineages_by_ltla_and_week.tsv","lineages.tsv")
-variants = readr::read_tsv(raw_lineages,na = c("Lineage data suppressed","Unassigned"))
-lineages = .download("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json", "lineage-keys.json")
-lineage_keys = jsonlite::read_json(lineages)
-
-# filter out recombinant species
-recombinants = lineage_keys %>% magrittr::extract(lapply(.,length)>1)
-lineage_keys = lineage_keys %>% magrittr::extract(lapply(.,length)==1)
-# TODO::
-
-lineage_key_df = tibble::tibble(prefix = names(lineage_keys), expanded = unlist(unname(lineage_keys)))
-recombinant_key_df = tibble::tibble(prefix = names(recombinants), expanded = names(recombinants))
-
-lineage_key_df = dplyr::bind_rows(lineage_key_df, recombinant_key_df)
-
-# replace e.g. AY with B.1.617.2
-variants2 = variants %>% 
-  dplyr::mutate(
-    prefix = Lineage %>% stringr::str_extract("^[A-Z]+"),
-    suffix = Lineage %>% stringr::str_sub(start = stringr::str_length(prefix)+1)
-  ) %>% 
-  dplyr::left_join(lineage_key_df, by="prefix") %>%
-  dplyr::mutate(full_tree = dplyr::case_when(
-    !is.null(expanded) & expanded != "" ~ paste0(expanded,suffix),
-    TRUE ~ paste0(prefix,suffix)
-  )) %>%
-  dplyr::mutate(
-    lineage_class = dplyr::case_when(
-      is.na(Lineage) ~ "Unclassified",
-      full_tree %>% stringr::str_starts("B.1.1.7") ~ "Alpha (B.1.1.7)",
-      full_tree %>% stringr::str_starts("B.1.617.2.4") ~ "Delta (AY.4)",
-      full_tree %>% stringr::str_starts("B.1.617.2") ~ "Delta (B.1.617.2)",
-      full_tree %>% stringr::str_starts("B.1.1.529.1") ~ "Omicron (BA.1)",
-      full_tree %>% stringr::str_starts("B.1.1.529.2") ~ "Omicron (BA.2)",
-      full_tree %>% stringr::str_starts("B.1.1.529.4") ~ "Omicron (BA.4)",
-      full_tree %>% stringr::str_starts("B.1.1.529.5") ~ "Omicron (BA.5)",
-      full_tree %>% stringr::str_starts("XBB.1.5") ~ "Kraken (XBB.1.5)",
-      full_tree %>% stringr::str_starts("XBB") ~ "XBB (Other)",
-      TRUE ~ "Other"
-    ),
-    who_class = dplyr::case_when(
-      is.na(Lineage) ~ "Unclassified",
-      full_tree %>% stringr::str_starts("B.1.1.7") ~ "Alpha",
-      full_tree %>% stringr::str_starts("B.1.617.2") ~ "Delta",
-      full_tree %>% stringr::str_starts("B.1.1.529") ~ "Omicron",
-      full_tree %>% stringr::str_starts("XBB.1.5") ~ "Kraken",
-      TRUE ~ "Other"
-    )
-  ) #%>% dplyr::select(-prefix,-suffix,-expanded)
-
-# variants2 %>% dplyr::filter(lineage_class == "Unclassified") %>% dplyr::filter(WeekEndDate > "2022-12-01") %>% tibble::view()
 
 ```
 
-* Prepare the data
+## COVID-19 proportions in England
+
+The Sanger Centre & COGUK performed a large amount of sequencing of COVID-19 
+during the pandemic, to identify emerging genomic variants. This was scaled up in 
+the second half of 2021 and continued through to the beginning of 2023. Lineages
+were assigned using the Pango lineage system and important ones given nicknames
+by the WHO.
+
+The Sanger variants data has been discontinued, but were still available for
+download. The code to download, process these data sets and determine the full
+lineage is in the `data-raw/variants.R` file, but the output of this has been 
+bundled as a data set here. There are many caveats to the data here in terms of 
+bias and it should not be regarded as definitive:
 
 ```{r}  
 
-# The count data is at LTLA level. Firstly lets aggregate to England (LTLAs) that
-# start with "E"
-variants_uk = variants2 %>% 
-  dplyr::filter(lineage_class != "Unclassified") %>% 
-  dplyr::filter(stringr::str_starts(LTLA,"E")) %>% 
-  dplyr::select(
-    date = WeekEndDate,
-    class = lineage_class,
-    count = Count
-  ) %>% 
-  dplyr::group_by(date,class) %>% 
-  dplyr::summarise(count = sum(count,na.rm = TRUE)) %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(place = "England")
+# tidy copy of the sanger weekly variants count data aggregated to England level
+growthrates::england_variants %>% dplyr::glimpse()
 
-variants_bristol = variants2 %>% 
-  dplyr::filter(lineage_class != "Unclassified") %>% 
-  dplyr::filter(LTLA %in% c("E06000023","E06000025","E06000022","E06000024")) %>% 
-  dplyr::select(
-    date = WeekEndDate,
-    class = lineage_class,
-    count = Count
-  ) %>% 
-  dplyr::group_by(date,class) %>% 
-  dplyr::summarise(count = sum(count,na.rm = TRUE)) %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(place = "Bristol")
-
-variants_data = dplyr::bind_rows(
-    variants_uk,
-    variants_bristol
-  ) %>% 
-  dplyr::mutate(time = as.time_period(date)) %>% 
-  dplyr::group_by(place)
 ```
 
-* Calculate the probabilities in a group wise fashion
+The data must have a `class` column defining the main categorisation of the data
+(in this case it is the main pango variant). The `time` column is a
+`time_period` derived from the date (which is weekly). The other necessary
+column is the `count` column which is integer counts of each `class`. The data
+must be grouped by `class`. Multiple models can be fitted simultaneously if the
+data is grouped by other columns.
+
+## Multinomial proportions model.
+
+Genomic testing happened only in a subset of cases. The testing effort varied 
+significantly over time. The frequency of each variant over time can be determined
+with a multinomial model.
 
 ```{r}
 # debug(estimate_multinomial_proportion)
 # devtools::load_all()
-probs = variants_data %>% dplyr::select(-date) %>% dplyr::group_modify(multinomial_nnet_model, window = 28) %>% 
-  # This is needed to map the "time period" in time back to a normal "date"
-  dplyr::mutate(date = time_to_date(time))
+probs = england_variants %>% 
+  multinomial_nnet_model(window = 28)
 
 
-ggplot(probs, ggplot2::aes(x=date,y=proportion.0.5,fill=class))+ggplot2::geom_area(color="black")+
-  # ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
-  ggplot2::scale_fill_viridis_d()+
-  ggplot2::facet_wrap(dplyr::vars(place), ncol=1)+
-  ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,vjust = 1,hjust=1))
+plot_multinomial(probs)+
+  ggplot2::scale_fill_viridis_d(option="cividis")
+  
 ```
+
+## Binomial proportions model
+
+The binomial proportions are not very different to the multinomial probabilities
+calculated above, but come with confidence intervals, however the median values
+do not necessarily sum to 1.
 
 ```{r}
 
-probs2 = variants_data %>% dplyr::select(-date) %>% 
-  dplyr::group_by(place,time) %>% 
-  dplyr::mutate(denom = sum(count)) %>%
-  dplyr::group_by(place,class) %>%
-  dplyr::group_modify(proportion_locfit_model, window = 14) %>% 
-  # This is needed to map the "time period" in time back to a normal "date"
-  dplyr::mutate(date = time_to_date(time))
+probs2 = england_variants %>% proportion_locfit_model(window = 14)
 
-ggplot2::ggplot(probs2, ggplot2::aes(x=date,y=proportion.0.5,ymin=proportion.0.025,ymax=proportion.0.975,fill=class,colour=class))+
-  ggplot2::geom_ribbon(colour=NA,alpha=0.2)+
-  ggplot2::geom_line()+
-  # ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
-  ggplot2::scale_fill_viridis_d(aesthetics = c("fill","colour"))+
-  ggplot2::facet_wrap(dplyr::vars(place), ncol=1)+
-  ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,vjust = 1,hjust=1))
+plot_proportion(probs2)+
+  ggplot2::scale_colour_viridis_d(option="cividis",aesthetics = c("colour","fill"))
 
 ```
 
+The rate of change of the proportion of each individual variant versus the
+others on a logistic scale can be used to work out the exponential growth rate
+of one variant relative to the others. Because this is a relative growth rate
+taken togehter the esimates of all variants at a given time are centred around
+zero. If one variant has a growth advantage, by definition others have a growth
+disadvantage despite potentially causing a larger disease burden and having
+increasing numbers in a growing epidemic.
 
 ```{r}
 
-ggplot2::ggplot(probs2, ggplot2::aes(x=time,y=relative.growth.0.5,ymin=relative.growth.0.025,ymax=relative.growth.0.975,fill=class,colour=class))+
-  ggplot2::geom_ribbon(colour=NA,alpha=0.2)+
-  ggplot2::geom_line()+
-  # ggplot2::scale_x_date(date_breaks = "2 month",date_labels = "%b %y",name = NULL)+
-  ggplot2::scale_fill_viridis_d(aesthetics = c("fill","colour"))+
-  ggplot2::facet_wrap(dplyr::vars(place), ncol=1, scales = "free_y")+
-  ggplot2::theme(axis.text.x = ggplot2::element_text(angle=60,vjust = 1,hjust=1))+
-  ggplot2::coord_cartesian(ylim=c(-1,1))
+plot_growth_rate(probs2) +
+  ggplot2::scale_fill_viridis_d(option="cividis",aesthetics = c("colour","fill"))
 
 ```
 
-```
+The binomial relative growth rate per day is a growth advantage over existing variants.
+This has a dependency on the unit of time which is controlled by the `time_period`
+configuration. In the data provided here the `time_period` is defined on a daily basis
+despite the data being provided weekly. Doubling time does not make strict sense when
+describing relative growth rates and is not shown here.
+
