@@ -89,7 +89,7 @@ plot_growth_phase(fit,
 
 ```
 
-# Reproduction estimation from growth rates
+# Reproduction number estimation from growth rates
 
 The growth rate has a unit or "per day" in this example. From it we can derive
 the reproduction number. Using the methods of Wallinga and Lipsitch and an
@@ -134,15 +134,15 @@ values from the SPI-M-O group (red):
 
 ```{r}
 
-.cache = memoise::cache_filesystem(rappdirs::user_cache_dir("growthrates"))
+# .cache = memoise::cache_filesystem(rappdirs::user_cache_dir("growthrates"))
+# 
+# cached_rt_from_growth_rate = memoise::memoise(
+#   growthrates::rt_from_growth_rate,
+#   cache = .cache
+# )
 
-cached_rt_from_growth_rate = memoise::memoise(
-  growthrates::rt_from_growth_rate,
-  cache = .cache
-)
 
-
-rt_fit = fit %>% cached_rt_from_growth_rate(ip = covid_infectivity_profile)
+rt_fit = fit %>% rt_from_growth_rate(ip = covid_infectivity_profile)
 
 plot_rt(rt_fit, events = england_events, colour="blue")+
   coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(0.6,1.6))+
