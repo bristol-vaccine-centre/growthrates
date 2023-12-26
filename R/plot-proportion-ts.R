@@ -25,7 +25,6 @@ plot_proportion = function(
     events = i_events
 ) {
 
-  message("plotting proportion")
   if (!interfacer::is.iface(raw)) {
     raw = interfacer::ivalidate(raw)
     if (interfacer::is.iface(modelled)) modelled = raw %>% dplyr::group_modify(proportion_locfit_model, ...)

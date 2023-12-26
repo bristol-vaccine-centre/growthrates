@@ -61,7 +61,6 @@ plot_growth_rate.incidence = function(
     events = i_events
 ) {
 
-  message("plotting incidence gr")
   modelled = interfacer::ivalidate(modelled)
 
   my = .glimit(modelled$growth.0.5)
@@ -101,7 +100,7 @@ plot_growth_rate.proportion = function(
     mapping = if (interfacer::is_col_present(modelled, class)) ggplot2::aes(colour = class) else ggplot2::aes(),
     events = i_events
 ) {
-  message("plotting prop gr")
+
   modelled = interfacer::ivalidate(modelled)
 
   my = .glimit(modelled$relative.growth.0.5)

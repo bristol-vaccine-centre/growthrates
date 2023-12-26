@@ -33,7 +33,6 @@ plot_rt = function(
     events = i_events
 ) {
 
-  message("plotting rt")
   modelled = interfacer::ivalidate(modelled)
 
   ggplot2::ggplot()+

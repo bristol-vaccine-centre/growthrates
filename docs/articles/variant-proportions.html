@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">growthrates</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -161,7 +161,6 @@ over time can be determined with a multinomial model.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_multinomial.html">plot_multinomial</a></span><span class="op">(</span><span class="va">probs</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">"cividis"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## plotting incidence gr</span></span></code></pre>
 <p><img src="variant-proportions_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -170,12 +169,11 @@ over time can be determined with a multinomial model.</p>
 <p>The binomial proportions are not very different to the multinomial
 probabilities calculated above, but come with confidence intervals,
 however the median values do not necessarily sum to 1.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">probs2</span> <span class="op">=</span> <span class="va">england_variants</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/proportion_locfit_model.html">proportion_locfit_model</a></span><span class="op">(</span>window <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_proportion.html">plot_proportion</a></span><span class="op">(</span><span class="va">probs2</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_colour_viridis_d</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">"cividis"</span>,aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"colour"</span>,<span class="st">"fill"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## plotting proportion</span></span></code></pre>
 <p><img src="variant-proportions_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 <p>The rate of change of the proportion of each individual variant
 versus the others on a logistic scale can be used to work out the
@@ -185,10 +183,9 @@ variants at a given time are centred around zero. If one variant has a
 growth advantage, by definition others have a growth disadvantage
 despite potentially causing a larger disease burden and having
 increasing numbers in a growing epidemic.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_growth_rate.html">plot_growth_rate</a></span><span class="op">(</span><span class="va">probs2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>option<span class="op">=</span><span class="st">"cividis"</span>,aesthetics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"colour"</span>,<span class="st">"fill"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## plotting prop gr</span></span></code></pre>
 <p><img src="variant-proportions_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 <p>The binomial relative growth rate per day is a growth advantage over
 existing variants. This has a dependency on the unit of time which is

@@ -25,7 +25,7 @@ plot_multinomial = function(
     events = i_events,
     normalise = FALSE
 ) {
-  message("plotting incidence gr")
+
   modelled = interfacer::ivalidate(modelled)
 
   if (normalise) {

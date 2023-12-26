@@ -8,7 +8,10 @@
 <!-- badges: end -->
 
 
-A basic framework and uncomplicated set of statistical models for describing timeseries data, including incidence, proportions, exponential growth rates 
+Simple statistical models and visualisations for calculating the 
+incidence, proportion, exponential growth rate, and reproduction number of 
+infectious disease case time series. This tool kit was largely developed during 
+the COVID-19 pandemic.
 
 ## Installation
 

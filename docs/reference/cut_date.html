@@ -23,7 +23,7 @@ relies on a numeric representation of the date or duration from the anchor."><!-
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">growthrates</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -141,8 +141,7 @@ and the anchor</p>
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dates</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2020-01-01"</span>,<span class="st">"2020-02-01"</span>,<span class="st">"2020-01-15"</span>,<span class="st">"2020-02-03"</span>,<span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fs</span> <span class="op">=</span> <span class="fu"><a href="full_seq.html">full_seq</a></span><span class="op">(</span><span class="va">dates</span>, <span class="st">"2 days"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in full_seq(as.numeric(x), period, tol):</span> `period` must be a number, not the string "2 days".</span>
+<span class="r-in"><span><span class="va">fs</span> <span class="op">=</span> <span class="fu">growthrates</span><span class="fu">::</span><span class="fu"><a href="full_seq.html">full_seq</a></span><span class="op">(</span><span class="va">dates</span>, <span class="st">"2 days"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">dates</span> <span class="op">-</span> <span class="fu">cut_date</span><span class="op">(</span><span class="va">dates</span>, <span class="st">"2 days"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Time differences in days</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 01/Jan/20 — 02/Jan/20 31/Jan/20 — 01/Feb/20 15/Jan/20 — 16/Jan/20 </span>
@@ -159,38 +158,38 @@ and the anchor</p>
 <span class="r-in"><span><span class="co"># in this specific situation the final date is not truncated because the</span></span></span>
 <span class="r-in"><span><span class="co"># input data is seen as an exact match for the whole output period.</span></span></span>
 <span class="r-in"><span><span class="fu">cut_date</span><span class="op">(</span><span class="va">dates2</span>, <span class="st">"1 week"</span>, <span class="st">"sun"</span>, output<span class="op">=</span><span class="st">"factor"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 21/Jan/24 — 27/Jan/24 11/Feb/24 — 17/Feb/24 11/Feb/24 — 17/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] 31/Dec/23 — 06/Jan/24 11/Feb/24 — 17/Feb/24 07/Jan/24 — 13/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 31/Dec/23 — 06/Jan/24 21/Jan/24 — 27/Jan/24 18/Feb/24 — 24/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10] 28/Jan/24 — 03/Feb/24 11/Feb/24 — 17/Feb/24 31/Dec/23 — 06/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 04/Feb/24 — 10/Feb/24 04/Feb/24 — 10/Feb/24 25/Feb/24 — 02/Mar/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16] 11/Feb/24 — 17/Feb/24 14/Jan/24 — 20/Jan/24 28/Jan/24 — 03/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19] 31/Dec/23 — 06/Jan/24 25/Feb/24 — 02/Mar/24 28/Jan/24 — 03/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 28/Jan/24 — 03/Feb/24 07/Jan/24 — 13/Jan/24 31/Dec/23 — 06/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 04/Feb/24 — 10/Feb/24 11/Feb/24 — 17/Feb/24 14/Jan/24 — 20/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [28] 24/Dec/23 — 30/Dec/23 07/Jan/24 — 13/Jan/24 14/Jan/24 — 20/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [31] 11/Feb/24 — 17/Feb/24 31/Dec/23 — 06/Jan/24 14/Jan/24 — 20/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [34] 07/Jan/24 — 13/Jan/24 28/Jan/24 — 03/Feb/24 14/Jan/24 — 20/Jan/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] 25/Feb/24 — 02/Mar/24 31/Dec/23 — 06/Jan/24 18/Feb/24 — 24/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [40] 14/Jan/24 — 20/Jan/24 25/Feb/24 — 02/Mar/24 04/Feb/24 — 10/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 04/Feb/24 — 10/Feb/24 14/Jan/24 — 20/Jan/24 28/Jan/24 — 03/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [46] 07/Jan/24 — 13/Jan/24 04/Feb/24 — 10/Feb/24 28/Jan/24 — 03/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 24/Dec/23 — 30/Dec/23 04/Feb/24 — 10/Feb/24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 Levels: 24/Dec/23 — 30/Dec/23 &lt; ... &lt; 25/Feb/24 — 02/Mar/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 24/Dec/23 — 30/Dec/23 25/Feb/24 — 02/Mar/24 24/Dec/23 — 30/Dec/23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] 04/Feb/24 — 10/Feb/24 21/Jan/24 — 27/Jan/24 28/Jan/24 — 03/Feb/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 14/Jan/24 — 20/Jan/24 21/Jan/24 — 27/Jan/24 11/Feb/24 — 17/Feb/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10] 11/Feb/24 — 17/Feb/24 18/Feb/24 — 24/Feb/24 24/Dec/23 — 30/Dec/23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 31/Dec/23 — 06/Jan/24 07/Jan/24 — 13/Jan/24 21/Jan/24 — 27/Jan/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] 04/Feb/24 — 10/Feb/24 21/Jan/24 — 27/Jan/24 11/Feb/24 — 17/Feb/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] 18/Feb/24 — 24/Feb/24 18/Feb/24 — 24/Feb/24 25/Feb/24 — 02/Mar/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 31/Dec/23 — 06/Jan/24 18/Feb/24 — 24/Feb/24 11/Feb/24 — 17/Feb/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 07/Jan/24 — 13/Jan/24 28/Jan/24 — 03/Feb/24 31/Dec/23 — 06/Jan/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [28] 21/Jan/24 — 27/Jan/24 18/Feb/24 — 24/Feb/24 14/Jan/24 — 20/Jan/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] 21/Jan/24 — 27/Jan/24 24/Dec/23 — 30/Dec/23 25/Feb/24 — 02/Mar/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [34] 11/Feb/24 — 17/Feb/24 14/Jan/24 — 20/Jan/24 31/Dec/23 — 06/Jan/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [37] 11/Feb/24 — 17/Feb/24 31/Dec/23 — 06/Jan/24 31/Dec/23 — 06/Jan/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [40] 04/Feb/24 — 10/Feb/24 25/Feb/24 — 02/Mar/24 11/Feb/24 — 17/Feb/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 31/Dec/23 — 06/Jan/24 04/Feb/24 — 10/Feb/24 07/Jan/24 — 13/Jan/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [46] 28/Jan/24 — 03/Feb/24 18/Feb/24 — 24/Feb/24 25/Feb/24 — 02/Mar/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 11/Feb/24 — 17/Feb/24 04/Feb/24 — 10/Feb/24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 Levels: 24/Dec/23 — 30/Dec/23 &lt; ... &lt; 03/Mar/24 — 09/Mar/24</span>
 <span class="r-in"><span><span class="fu">cut_date</span><span class="op">(</span><span class="va">dates2</span>, dfmt <span class="op">=</span> <span class="st">"%d/%b"</span>, output<span class="op">=</span><span class="st">"factor"</span>, unit <span class="op">=</span> <span class="st">"2 weeks"</span>, anchor<span class="op">=</span><span class="st">"sun"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 21/Jan — 03/Feb 04/Feb — 17/Feb 04/Feb — 17/Feb 24/Dec — 06/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] 04/Feb — 17/Feb 07/Jan — 20/Jan 24/Dec — 06/Jan 21/Jan — 03/Feb</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] 18/Feb — 02/Mar 21/Jan — 03/Feb 04/Feb — 17/Feb 24/Dec — 06/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 04/Feb — 17/Feb 04/Feb — 17/Feb 18/Feb — 02/Mar 04/Feb — 17/Feb</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17] 07/Jan — 20/Jan 21/Jan — 03/Feb 24/Dec — 06/Jan 18/Feb — 02/Mar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [21] 21/Jan — 03/Feb 21/Jan — 03/Feb 07/Jan — 20/Jan 24/Dec — 06/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 04/Feb — 17/Feb 04/Feb — 17/Feb 07/Jan — 20/Jan 24/Dec — 06/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 07/Jan — 20/Jan 07/Jan — 20/Jan 04/Feb — 17/Feb 24/Dec — 06/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [33] 07/Jan — 20/Jan 07/Jan — 20/Jan 21/Jan — 03/Feb 07/Jan — 20/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [37] 18/Feb — 02/Mar 24/Dec — 06/Jan 18/Feb — 02/Mar 07/Jan — 20/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [41] 18/Feb — 02/Mar 04/Feb — 17/Feb 04/Feb — 17/Feb 07/Jan — 20/Jan</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [45] 21/Jan — 03/Feb 07/Jan — 20/Jan 04/Feb — 17/Feb 21/Jan — 03/Feb</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 24/Dec — 06/Jan 04/Feb — 17/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 24/Dec — 06/Jan 18/Feb — 02/Mar 24/Dec — 06/Jan 04/Feb — 17/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] 21/Jan — 03/Feb 21/Jan — 03/Feb 07/Jan — 20/Jan 21/Jan — 03/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] 04/Feb — 17/Feb 04/Feb — 17/Feb 18/Feb — 02/Mar 24/Dec — 06/Jan</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 24/Dec — 06/Jan 07/Jan — 20/Jan 21/Jan — 03/Feb 04/Feb — 17/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] 21/Jan — 03/Feb 04/Feb — 17/Feb 18/Feb — 02/Mar 18/Feb — 02/Mar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [21] 18/Feb — 02/Mar 24/Dec — 06/Jan 18/Feb — 02/Mar 04/Feb — 17/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 07/Jan — 20/Jan 21/Jan — 03/Feb 24/Dec — 06/Jan 21/Jan — 03/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 18/Feb — 02/Mar 07/Jan — 20/Jan 21/Jan — 03/Feb 24/Dec — 06/Jan</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [33] 18/Feb — 02/Mar 04/Feb — 17/Feb 07/Jan — 20/Jan 24/Dec — 06/Jan</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [37] 04/Feb — 17/Feb 24/Dec — 06/Jan 24/Dec — 06/Jan 04/Feb — 17/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [41] 18/Feb — 02/Mar 04/Feb — 17/Feb 24/Dec — 06/Jan 04/Feb — 17/Feb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [45] 07/Jan — 20/Jan 21/Jan — 03/Feb 18/Feb — 02/Mar 18/Feb — 02/Mar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 04/Feb — 17/Feb 04/Feb — 17/Feb</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 Levels: 24/Dec — 06/Jan &lt; 07/Jan — 20/Jan &lt; ... &lt; 03/Mar — 16/Mar</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
