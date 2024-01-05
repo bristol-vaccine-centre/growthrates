@@ -1,6 +1,6 @@
 Package: growthrates
 Title: Estimate Incidence, Proportions and Exponential Growth Rates
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: 
     person(given = "Robert",
            family = "Challen",
@@ -46,10 +46,10 @@ Imports:
     scales,
     tidyselect,
     ggplot2,
-    interfacer (>= 0.1.4),
-    ggrepel,
     glue,
-    purrr
+    purrr,
+    interfacer (>= 0.1.5),
+    EpiEstim
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,
     https://doi.org/10.5281/zenodo.7242761

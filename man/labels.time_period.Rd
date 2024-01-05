@@ -45,3 +45,4 @@ names(eg2) = paste0("week ",0:10)
 labels(eg2)
 labels(as.time_period(eg2, anchor="start"))
 }
+\concept{time_period}

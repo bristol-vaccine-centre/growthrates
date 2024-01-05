@@ -93,3 +93,4 @@ are all present before summarisation so the result may include different numbers
 of input periods (e.g. going from weeks to months may be 4 or 5 weeks in each
 month)
 }
+\concept{time_period}

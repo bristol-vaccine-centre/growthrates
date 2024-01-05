@@ -27,4 +27,5 @@ data(england_demographics)
 \description{
 Population counts by 5 year age group for England only from the 2021 census.
 }
+\concept{datasets}
 \keyword{datasets}

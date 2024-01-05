@@ -3,7 +3,7 @@
 \docType{data}
 \name{england_events}
 \alias{england_events}
-\title{The england_events dataset}
+\title{Key dated in the COVID-19 response in England}
 \format{
 A dataframe containing the following columns:
 \itemize{
@@ -22,6 +22,8 @@ No default value.
 data(england_events)
 }
 \description{
-The england_events dataset
+This includes mainly the dates of lockdowns, releases from social distancing
+measures and the dates new variants were first detected.
 }
+\concept{datasets}
 \keyword{datasets}

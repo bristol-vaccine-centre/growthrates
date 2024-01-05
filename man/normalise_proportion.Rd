@@ -76,3 +76,4 @@ tmp = growthrates::england_covid \%>\%
 plot_growth_phase(tmp)
 
 }
+\concept{models}

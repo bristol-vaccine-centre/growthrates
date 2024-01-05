@@ -26,6 +26,7 @@
 #' 2070 rows and 6 columns
 #'
 #' @docType data
+#' @concept datasets
 #' @keywords datasets
 #' @name germany_covid
 NULL
@@ -34,7 +35,6 @@ NULL
 
 
 ## england_covid definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
 #' Daily COVID-19 case counts by age group in England
 #'
@@ -63,6 +63,7 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_covid
 NULL
 
@@ -70,7 +71,6 @@ NULL
 
 
 ## germany_demographics definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
 #' Germany demographics
 #'
@@ -92,22 +92,26 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name germany_demographics
 NULL
 
 ## germany_demographics definition ends
 ## england_consensus_rt definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
-#' The england_consensus_rt dataset
+#' The SPI-M-O England consensus reproduction number
+#'
+#' SPI-M-O used a range of different statistical and mechanistic models to
+#' produce estimates of the  reproduction number of the epidemic from various data
+#' sources.
 #'
 #' @usage data(england_consensus_rt)
 #'
 #' @format
 #' A dataframe containing the following columns:
-#' - date (as.Date) - the date column
-#' - low (numeric) - the low column
-#' - high (numeric) - the high column
+#' - date (date) - the date of the estimate
+#' - low (numeric) - the lower published estimate of the reproduction number
+#' - high (numeric) - the higher published estimate of the reproduction number
 #'
 #' No mandatory groupings.
 #'
@@ -117,14 +121,18 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_consensus_rt
 NULL
 
 ## england_consensus_rt definition ends
-## england_events definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
-#' The england_events dataset
+## england_events definition ----
+
+#' Key dated in the COVID-19 response in England
+#'
+#' This includes mainly the dates of lockdowns, releases from social distancing
+#' measures and the dates new variants were first detected.
 #'
 #' @usage data(england_events)
 #'
@@ -142,23 +150,28 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_events
 NULL
 
 ## england_events definition ends
 ## england_covid_pcr_positivity definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
-#' The england_covid_pcr_positivity dataset
+#' England COVID-19 PCR test positivity
+#'
+#' The `coronavirus.gov.uk` dashboard published tests conducted and positive
+#' results as separate data sets for a range of geographies. In this case the
+#' data is combined with testing rate as denominator, and positives as count for
+#' England.
 #'
 #' @usage data(england_covid_pcr_positivity)
 #'
 #' @format
 #' A dataframe containing the following columns:
-#' - date (date) - the date column
+#' - date (date) - a daily time series
 #' - time (as.time_period) - the time column
-#' - count (numeric) - the count column
-#' - denom (numeric) - the denom column
+#' - count (numeric) - test positives
+#' - denom (numeric) - total tests
 #'
 #' No mandatory groupings.
 #'
@@ -168,22 +181,26 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_covid_pcr_positivity
 NULL
 
 ## england_covid_pcr_positivity definition ends
 ## england_consensus_growth_rate definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
-#' The england_consensus_growth_rate dataset
+#' The SPI-M-O England consensus growth rate
+#'
+#' SPI-M-O used a range of different statistical and mechanistic models to
+#' produce estimates of the growth rate of the epidemic from various data
+#' sources (including with an early version of `growthrates`).
 #'
 #' @usage data(england_consensus_growth_rate)
 #'
 #' @format
 #' A dataframe containing the following columns:
-#' - date (date) - the date column
-#' - low (numeric) - the low column
-#' - high (numeric) - the high column
+#' - date (date) - the date of the estimate
+#' - low (numeric) - the lower published estimate of the growth rate
+#' - high (numeric) - the higher published estimate of the growth rate
 #'
 #' No mandatory groupings.
 #'
@@ -193,6 +210,7 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_consensus_growth_rate
 NULL
 
@@ -220,35 +238,110 @@ NULL
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_demographics
 NULL
 
 ## england_demographics definition ends
-## england_variants definition ----
-## Generated code. remove this line to prevent manual changes being overwritten
 
-#' The england_variants dataset
+## england_variants definition ----
+
+#' Counts of COVID-19 variants
+#'
+#' Data from the COG-UK and Sanger centre sequencing
+#' programme. The data were made available through the Welcome foundation at
+#' Lower tier local authority level, and is weekly timeseries of counts per
+#' variant. Variants were assigned using the tree structure of the Pango
+#' lineage. Different sub-lineages are aggregated to the major WHO variants of
+#' concern.
 #'
 #' @usage data(england_variants)
 #'
 #' @format
-#' A dataframe containing the following columns: 
-#' - date (date) - the date column
+#' A dataframe containing the following columns:
+#' - date (date) - the end date of the week
 #' - time (as.time_period) - the time column
 #' - class (enum(`Other`,`Alpha (B.1.1.7)`,`Delta (B.1.617.2)`,`Delta (AY.4)`,`Omicron (Other)`,`Omicron (BA.2)`,`Omicron (BA.4)`,`Omicron (BA.5)`,`XBB (Other)`,`Kraken (XBB.1.5)`,`Arcturus (XBB.1.16)`,`Eris (EG.5.1)`)) - the class column
 #' - who_class (enum(`Other`,`Alpha`,`Delta`,`Omicron`,`Kraken`,`Arcturus`,`Eris`)) - the who_class column
-#' - count (numeric) - the count column
-#' - denom (numeric) - the denom column
-#' 
+#' - count (numeric) - the weekly count column
+#' - denom (numeric) - the number of sequences performed in that week
+#'
 #' Must be grouped by: class (and other groupings allowed).
-#' 
+#'
 #' No default value.
-#' 
+#'
 #' 479 rows and 6 columns
 #'
 #' @docType data
 #' @keywords datasets
+#' @concept datasets
 #' @name england_variants
 NULL
 
 ## england_variants definition ends
+## england_nhs_app definition ----
+
+#' NHS COVID-19 app data
+#'
+#' check-in (social activity) and alerts (self isolation instruction) data from
+#' the NHS COVID-19 app, aggregated to country level on a week by week basis.
+#'
+#' @usage data(england_nhs_app)
+#'
+#' @format
+#' A dataframe containing the following columns:
+#' - date (date) - the start date of the week
+#' - alerts (integer) - the count of self-isolation alerts
+#' - visits (integer) - the number of venue check-ins representing visits to
+#' social venues.
+#' - time (as.time_period) - the time column
+#'
+#' No mandatory groupings.
+#'
+#' No default value.
+#'
+#' 137 rows and 4 columns
+#'
+#' @docType data
+#' @keywords datasets
+#' @name england_nhs_app
+NULL
+
+## england_nhs_app definition ends
+## england_covid_proportion definition ----
+
+#' England COVID by age group for ascertainment
+#'
+#' An age group stratified dataset from
+#'
+#' * the coronavirus.gov.uk site for
+#' positive cases aggregated to 10 year age groups and by weekly time.
+#' * NHS test
+#' and trace date which reported regional by age group testing effort aggregated
+#' to country level.
+#' * ONS 2021 census population aggregated to 10 year age
+#' groups.
+#'
+#' @usage data(england_covid_proportion)
+#'
+#' @format
+#' A dataframe containing the following columns:
+#' - class (character) - the age group
+#' - date (date) - the start date of a week
+#' - count (numeric) - the count of COVID positives
+#' - denom (numeric) - the number of COVID tests performed
+#' - population (numeric) - the size of the population at this age group
+#' - time (as.time_period) - the time column (weekly)
+#'
+#' Must be grouped by: class (and other groupings allowed).
+#'
+#' No default value.
+#'
+#' 1050 rows and 6 columns
+#'
+#' @docType data
+#' @keywords datasets
+#' @name england_covid_proportion
+NULL
+
+## england_covid_proportion definition ends

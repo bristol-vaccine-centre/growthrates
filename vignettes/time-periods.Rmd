@@ -30,42 +30,42 @@ group is a single time series of unique `time` and minimally `count` columns.
 
 # Line lists vs. time series
 
-Infectious disease data usually either comes as a set of individual observations
-with some sort of timestamp (a line list) or as a count of events (e.g. positive
-tests, hospitalisations, deaths) happening within a specific period (day, week,
-month etc.) as a time series.
+Infectious disease data usually either comes as a set of observations of an
+individual infection with a time stamp (i.e. a line list) or as a count of
+events (e.g. positive tests, hospitalisations, deaths) happening within a
+specific period (day, week, month etc.) as a time series.
 
 For count data there may also be a denominator known. For testing this could be
 the number of tests performed, or the number of patients at risk of
 hospitalisation.
 
 For both these data types there may also be a class associated with each
-observation, defining a subgroup of interest which could be for example the
-variant of a virus, or an age group, for example. It may make sense to compare
-the different classes. In this case the denominator may be the total of counts 
-among all groups per unit time. Additionally there may be information about the 
-size of the population for each subgroup.
+observation, defining a subgroup of infections of interest. This could be the
+variant of a virus, or the age group, for example. It may make sense to compare
+these different subgroups against each other. In this case the denominator may
+be the total of counts among all groups per unit time. Additionally there may be
+information about the size of the population for each subgroup.
 
 `growthrates` assumes for the most part that the input data is in the form of
 a set of time series of counts, each of which has a unique set of times, which
-are usually complete. To create datasets like this from linelists ` growthrates`
+are usually complete. To create datasets like this from line lists `growthrates`
 provides some infrastructure for dealing with time series:
 
 # Time periods
 
 A weekly case rate represents a time slice of seven days with a start and finish
-date. Dates are however a continuous quantity, and `cut_dates()` can classify
-them into periods of equal duration, with a start date:
+date. Dates are a continuous quantity, and `cut_dates()` can be used to classify
+continuous dates into periods of equal duration, with a start date:
 
 ```{r}
 random_dates = Sys.Date()+sample.int(21,50,replace = TRUE)
 cut_date( random_dates, unit = "1 week", anchor = "start", dfmt = "%d %b")
 ```
 
-Performing calculations using interval censored dates as is mathematically
-inconvenient. A numeric version of dates is useful that can keep track of both
-the start date of a time series and its intrinsic duration, as a numeric. This
-is the purpose of the `time_period` class:
+Performing calculations using interval censored dates is awkward. A numeric
+version of dates is useful that can keep track of both the start date of a time
+series and its intrinsic duration, as a numeric. This is the purpose of the
+`time_period` class:
 
 ```{r}
 dates = seq(as.Date("2020-01-01"),by=7,length.out = 5)
@@ -77,7 +77,8 @@ The `time_period` defaults to using a date at the beginning of the COVID-19
 pandemic as its origin and calculating a duration unit based on the data (in this
 case weekly).
 
-Various methods are available such as labelling:
+A usual set of S3 methods are available such as formatting, printing, labelling,
+and casting `time_period`s to and from dates and POSIXct classes:
 
 ```{r}
 suppressWarnings(labels(tmp))
@@ -107,9 +108,10 @@ as.Date(full_seq(tmp3))
 
 ```
 
-`time_periods` can be used with any monthly or yearly data but they are not
-regular. This is handled and irregular date periods are generally OK but some
-functions like `full_seq` may not work as anticipated.
+`time_periods` can be used with any monthly or yearly data but such data are not
+regular. This is handled and irregular date periods are generally OK to use with
+`growthrates` but some functions like `full_seq` may not work as anticipated
+with irregular dates.
 
 Two time series can be aligned to make them comparable:
 
@@ -151,9 +153,9 @@ linelist %>% time_summarise(unit="1 week") %>% glimpse()
 
 ```
 
-If the line-list contains a `class` column it is interpreted as a complete record of 
-all possible options from which we can calculate a denominator. In this case the 
-positive and negative results of a test:
+If the line-list contains a `class` column it is interpreted as a complete
+record of all possible options from which we can calculate a denominator. In
+this case the positive and negative results of a test:
 
 ```{r}
 
@@ -168,10 +170,12 @@ linelist2 %>% time_summarise(unit="1 week") %>% glimpse()
 ```
 
 In this specific example subsequent analysis with `growthrates` may focus on the 
-`positive` subgroup only. `class` however may not be test results, it could for example
-be any other major subdivision e.g. the variant of a disease, additional grouping
-other than `class` columns are preserved but not included automatically in the 
-denominator, which may need to be manually calculated:
+`positive` subgroup only, as the comparison between `positive` and `negative` test results is trivial. In another example `class` may not be test results, it could be any other major subdivision e.g. the variant of a disease. In this case the 
+comparison between different groups may be much more relevant. The use of
+`class` as the major sub-group is for convenience. Additional grouping other
+than `class` columns is also possible for multi-facetted comparisons, and
+grouping is preserved but not included automatically in the denominator, which
+may need to be manually calculated:
 
 ```{r}
 
@@ -208,6 +212,6 @@ count_by_gender %>%
 
 ```
 
-by default `time_aggregate` will sum any of `count`, `denom` and `population` columns
-but any other behaviour can be specified by passing `dplyr::summarise` style
-directives to the function.
+by default `time_aggregate` will sum any of `count`, `denom` and `population`
+columns but any other behaviour can be specified by passing `dplyr::summarise`
+style directives to the function.

@@ -18,3 +18,4 @@ Check whether vector is a date
 \examples{
 is.Date(Sys.Date())
 }
+\concept{time_period}

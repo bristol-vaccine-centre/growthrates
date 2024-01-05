@@ -31,22 +31,23 @@ is.time_period(x)
 \item{x}{a vector of numbers (may be integer or real) or a time_period}
 
 \item{unit}{the length of one unit of time. This will be either a integer
-number of days, or a specification such as "1 week". If \code{x} is a
-\code{time_period}, and the unit is different then this will recalibrate
-the \code{time_period} to use the new units.}
+number of days, or a specification such as "1 week", or another \code{time_period}.
+If \code{x} is a \code{time_period}, and the unit is different then from that of \code{x}
+this will return a new \code{time_period} using the new units.}
 
 \item{start_date}{the zero time date as something that can be coerced to a
 date. If the \code{x} input is already a \code{time_period} and this is different to its
 \code{start_date} then it will be recalibrated to use the new start date.}
 
-\item{anchor}{only relevant is \code{x} is a vector of dates and \code{start_date} is not specified, this is a date, or "start" or "end" or a weekday name e.g. "mon".
-With the vector of dates in \code{x} it will find a reference date for the
-time-series. If this is \code{NULL} and \code{start_date} is also \code{NULL} it will fall back to
-\code{getOption("day_zero","2019-12-29")}}
+\item{anchor}{only relevant is \code{x} is a vector of dates and \code{start_date} is
+not specified, this is a date, or "start" or "end" or a weekday name e.g.
+"mon". With the vector of dates in \code{x} it will find a reference date for
+the time-series. If this is \code{NULL} and \code{start_date} is also \code{NULL} it will
+fall back to \code{getOption("day_zero","2019-12-29")}}
 
 \item{...}{used for subtype implementations}
 
-\item{recursive}{concate recursively}
+\item{recursive}{concatenate recursively}
 
 \item{value}{the value}
 }
@@ -95,3 +96,4 @@ tmp = as.time_period(0:100, 7, "2020-01-01")
 tmp2 = as.time_period(tmp,1)
 testthat::expect_equal(as.numeric(tmp2), 0:100*7)
 }
+\concept{time_period}

@@ -17,6 +17,7 @@
 #' @return a dataframe with incidence rates per unit capita.
 #'   `r i_incidence_per_capita_model`
 #' @export
+#' @concept models
 #'
 #' @examples
 #' tmp = growthrates::england_covid %>%

@@ -3,14 +3,14 @@
 \docType{data}
 \name{england_covid_pcr_positivity}
 \alias{england_covid_pcr_positivity}
-\title{The england_covid_pcr_positivity dataset}
+\title{England COVID-19 PCR test positivity}
 \format{
 A dataframe containing the following columns:
 \itemize{
-\item date (date) - the date column
+\item date (date) - a daily time series
 \item time (as.time_period) - the time column
-\item count (numeric) - the count column
-\item denom (numeric) - the denom column
+\item count (numeric) - test positives
+\item denom (numeric) - total tests
 }
 
 No mandatory groupings.
@@ -23,6 +23,10 @@ No default value.
 data(england_covid_pcr_positivity)
 }
 \description{
-The england_covid_pcr_positivity dataset
+The \code{coronavirus.gov.uk} dashboard published tests conducted and positive
+results as separate data sets for a range of geographies. In this case the
+data is combined with testing rate as denominator, and positives as count for
+England.
 }
+\concept{datasets}
 \keyword{datasets}

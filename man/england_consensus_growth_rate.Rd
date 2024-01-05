@@ -3,13 +3,13 @@
 \docType{data}
 \name{england_consensus_growth_rate}
 \alias{england_consensus_growth_rate}
-\title{The england_consensus_growth_rate dataset}
+\title{The SPI-M-O England consensus growth rate}
 \format{
 A dataframe containing the following columns:
 \itemize{
-\item date (date) - the date column
-\item low (numeric) - the low column
-\item high (numeric) - the high column
+\item date (date) - the date of the estimate
+\item low (numeric) - the lower published estimate of the growth rate
+\item high (numeric) - the higher published estimate of the growth rate
 }
 
 No mandatory groupings.
@@ -22,6 +22,9 @@ No default value.
 data(england_consensus_growth_rate)
 }
 \description{
-The england_consensus_growth_rate dataset
+SPI-M-O used a range of different statistical and mechanistic models to
+produce estimates of the growth rate of the epidemic from various data
+sources (including with an early version of \code{growthrates}).
 }
+\concept{datasets}
 \keyword{datasets}

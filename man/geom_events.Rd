@@ -7,10 +7,12 @@
 geom_events(
   events = i_events,
   event_label_size = 7,
-  event_label_y = Inf,
   event_label_colour = "black",
+  event_label_angle = -30,
   event_line_colour = "grey50",
   event_fill_colour = "grey50",
+  hide_labels = FALSE,
+  guide_axis = ggplot2::derive(),
   ...
 )
 }
@@ -28,15 +30,98 @@ A default value is defined.}
 
 \item{event_label_size}{how big to make the event label}
 
-\item{event_label_y}{where to place the event label (0 or Inf usually)}
-
 \item{event_label_colour}{the event label colour}
+
+\item{event_label_angle}{the event label colour}
 
 \item{event_line_colour}{the event line colour}
 
 \item{event_fill_colour}{the event area fill}
 
-\item{...}{not used}
+\item{hide_labels}{do not show labels at all}
+
+\item{guide_axis}{a guide axis configuration for the labels
+(see ggplot2::guide_axis and ggplot2::dup_axis). This can be used to
+specify a position amongst other things.}
+
+\item{...}{
+  Arguments passed on to \code{\link[ggplot2:scale_date]{ggplot2::scale_x_date}}
+  \describe{
+    \item{\code{name}}{The name of the scale. Used as the axis or legend title. If
+\code{waiver()}, the default, the name of the scale is taken from the first
+mapping used for that aesthetic. If \code{NULL}, the legend title will be
+omitted.}
+    \item{\code{breaks}}{One of:
+\itemize{
+\item \code{NULL} for no breaks
+\item \code{waiver()} for the breaks specified by \code{date_breaks}
+\item A \code{Date}/\code{POSIXct} vector giving positions of breaks
+\item A function that takes the limits as input and returns breaks as output
+}}
+    \item{\code{date_breaks}}{A string giving the distance between breaks like "2
+weeks", or "10 years". If both \code{breaks} and \code{date_breaks} are
+specified, \code{date_breaks} wins. Valid specifications are 'sec', 'min',
+'hour', 'day', 'week', 'month' or 'year', optionally followed by 's'.}
+    \item{\code{labels}}{One of:
+\itemize{
+\item \code{NULL} for no labels
+\item \code{waiver()} for the default labels computed by the
+transformation object
+\item A character vector giving labels (must be same length as \code{breaks})
+\item An expression vector (must be the same length as breaks). See ?plotmath for details.
+\item A function that takes the breaks as input and returns labels
+as output. Also accepts rlang \link[rlang:as_function]{lambda} function
+notation.
+}}
+    \item{\code{date_labels}}{A string giving the formatting specification for the
+labels. Codes are defined in \code{\link[=strftime]{strftime()}}. If both \code{labels}
+and \code{date_labels} are specified, \code{date_labels} wins.}
+    \item{\code{minor_breaks}}{One of:
+\itemize{
+\item \code{NULL} for no breaks
+\item \code{waiver()} for the breaks specified by \code{date_minor_breaks}
+\item A \code{Date}/\code{POSIXct} vector giving positions of minor breaks
+\item A function that takes the limits as input and returns minor breaks as
+output
+}}
+    \item{\code{date_minor_breaks}}{A string giving the distance between minor breaks
+like "2 weeks", or "10 years". If both \code{minor_breaks} and
+\code{date_minor_breaks} are specified, \code{date_minor_breaks} wins. Valid
+specifications are 'sec', 'min', 'hour', 'day', 'week', 'month' or 'year',
+optionally followed by 's'.}
+    \item{\code{limits}}{One of:
+\itemize{
+\item \code{NULL} to use the default scale range
+\item A numeric vector of length two providing limits of the scale.
+Use \code{NA} to refer to the existing minimum or maximum
+\item A function that accepts the existing (automatic) limits and returns
+new limits. Also accepts rlang \link[rlang:as_function]{lambda} function
+notation.
+Note that setting limits on positional scales will \strong{remove} data outside of the limits.
+If the purpose is to zoom, use the limit argument in the coordinate system
+(see \code{\link[ggplot2:coord_cartesian]{coord_cartesian()}}).
+}}
+    \item{\code{expand}}{For position scales, a vector of range expansion constants used to add some
+padding around the data to ensure that they are placed some distance
+away from the axes. Use the convenience function \code{\link[ggplot2:expansion]{expansion()}}
+to generate the values for the \code{expand} argument. The defaults are to
+expand the scale by 5\% on each side for continuous variables, and by
+0.6 units on each side for discrete variables.}
+    \item{\code{oob}}{One of:
+\itemize{
+\item Function that handles limits outside of the scale limits
+(out of bounds). Also accepts rlang \link[rlang:as_function]{lambda}
+function notation.
+\item The default (\code{\link[scales:oob]{scales::censor()}}) replaces out of
+bounds values with \code{NA}.
+\item \code{\link[scales:oob]{scales::squish()}} for squishing out of bounds values into range.
+\item \code{\link[scales:oob]{scales::squish_infinite()}} for squishing infinite values into range.
+}}
+    \item{\code{guide}}{A function used to create a guide or its name. See
+\code{\link[ggplot2:guides]{guides()}} for more information.}
+    \item{\code{position}}{For position scales, The position of the axis.
+\code{left} or \code{right} for y axes, \code{top} or \code{bottom} for x axes.}
+  }}
 }
 \value{
 a set of geoms for a timeseries.
@@ -44,3 +129,4 @@ a set of geoms for a timeseries.
 \description{
 The x axis must be a date.
 }
+\concept{vis}

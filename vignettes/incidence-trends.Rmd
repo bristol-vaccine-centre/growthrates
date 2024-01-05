@@ -156,5 +156,29 @@ plot_growth_phase(tmp3,
 
 ```
 
+# TODO:
+
+Regional breakdown of testing effort and positivity by age group
+was published as part of test and trace.
+This had a by-age and by-region breakdown, until they shut down test and trace.
+https://www.gov.uk/government/publications/weekly-statistics-for-nhs-test-and-trace-england-2-to-15-june-2022
+From this we could look at by age group proportion and incidence models
+and look into ascertainment bias in age groups.
 
 
+```{r}
+
+prop = growthrates::england_covid_proportion %>%
+  growthrates::proportion_locfit_model(window=5)
+
+plot_proportion(prop)+scale_fill_viridis_d(aesthetics = c("colour","fill"))
+
+tmp_pop = growthrates::england_covid_proportion %>% select(class,population) %>% distinct()
+pois = growthrates::england_covid_proportion %>%
+  growthrates::poisson_locfit_model(window=5) %>%
+  growthrates::normalise_incidence(tmp_pop)
+
+plot_incidence(pois)+scale_fill_viridis_d(aesthetics = c("colour","fill"))
+
+
+```

@@ -1,0 +1,760 @@
+---
+title: "Growth rate estimation"
+author: "Rob Challen"
+date: "25/06/2020"
+output: 
+  pdf_document :
+    fig_caption: yes
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}    
+
+knit: (function(inputFile, encoding,...) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "~/Dropbox/covid19/growth-rates/", output_file='growth-rates.pdf') })
+fig_width: 7
+fig_height: 5
+out.width: "100%"
+bibliography: current-rt.bib
+csl: current-rt.csl
+vignette: >
+  %\VignetteIndexEntry{COVID-19 Growth rate estimation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+
+---
+
+Robert Challen ^1,2^; Krasimira Tsaneva-Atanasova ^1,^3; Leon Danon ^3,4^;
+
+1) EPSRC Centre for Predictive Modelling in Healthcare, University of Exeter, Exeter, Devon, UK.
+2) Taunton and Somerset NHS Foundation Trust, Taunton, Somerset, UK.
+3) The Alan Turing Institute, British Library, 96 Euston Rd, London NW1 2DB, UK.
+4) Data Science Institute, College of Engineering, Mathematics and Physical Sciences, University of Exeter, Exeter, UK. 
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r setup}
+library(tidyverse)
+library(patchwork)
+library(growthrates)
+```
+
+# Wallinga-Lipsitch: Empirical distributions
+
+We can observe the duration of generation intervals in a
+period of exponential epidemic growth, and approximate
+the generation interval distribution $g(a)$ by a histogram of
+the observed durations. We denote the category bounds in
+such a histogram by $a_0, a_1, ., a_n$, and the observed
+relative frequencies of observed generation intervals
+within these bounds as $y_1, y_2, ., y_n$. Substituting the
+observed distribution into the moment generating func-
+tion expression (2.9) and calculating the integral gives
+
+
+$$
+R_t = \frac{r}{\sum_{i=1}^n{y_i}(
+  e^{-ra_{i-1}}-e^{-ra_{i}}
+)/(
+  a_{i}-a_{i-1}
+)}
+$$
+Assuming $a_0, a_1, \dots, a_n = {0 \dots n}$ this simplifies to:
+
+$$
+R_t = \frac{r}{\sum_{i=1}^n{y_i}(
+  e^{-r({i-1})}-e^{-ri}
+)}
+$$
+Assuming $y_0 = 0$ and $y_{n+1} = 0$:
+
+$$
+R_t = \frac{r}{
+  -\sum_{i=0}^n({y_i - y_{i+1}})
+  e^{-ri}
+} \\
+
+log(R_t) = log(r) - log(\sum_{i=0}^n {e^{-ri + log(y_{i+1}- y_i)})
+  
+} \\
+
+$$
+
+We have $k$ bootstraps of $y$:
+
+$$
+R_t = \frac{1}{|k|}\sum_k{
+  \frac{r}{
+  \sum_{i=0}^n({y_{k,i+1} - y_{k,i}})
+  e^{-ri}
+}
+}
+$$
+
+No clear answer here apart from resampling
+
+
+
+
+# Method
+
+We calculate growth rates for two time series. Time series one is artificial, constructed from 100 time points starting form Jan 1st 2020 at 1, and growing exponentially with a day on day increase given by 1.5 for days 1-29 days, followed by 0.8 for 20-49, then 1.1 for 50-69 days, 0.7 for 70-89, then steady at 1 for the last 10 days. Timeseries 2 is based on case counts published on the Public Health England coronavirus website for England. It has a few missing values.
+
+```{r}
+testData = tibble(time = 1:200) %>% mutate(growth_rate = case_when(
+  time < 60 ~ 0.05,
+  time < 80 ~ -0.025,
+  time < 140 ~ -0.025+0.045/40*(time-80),
+  time < 180 ~ -0.05,
+  TRUE ~ 0.03
+), value = growth_rate ) %>% 
+  mutate(type = "incidence", lambda_t = cumsum(growth_rate), date = as.Date("2020-01-01")+time) %>%
+  group_by_all() %>%
+  summarise(tibble(subgroup = 1:10,value=rpois(10,exp(lambda_t)))) %>%
+  ungroup()
+
+testTs = testData %>% mutate(statistic = "case",type = "incidence", code="XYZ", name="Test",codeType = "TEST",source="TEST",gender=NA_character_,ageCat=NA_character_)
+
+
+discGRToR = function(growth_rate, y = Flu2009$si_distr, a = seq(0.5,length.out = length(y),by = 1) ) {
+  
+  p = y/(a - lag(a,default=0))
+  out = sapply(growth_rate, function(r) {
+    r/sum(p*(exp(-r*lag(a,default=0))-exp(-r*a)))
+  })
+  return(out)
+  
+  # R = pmap(list(r,d$a,d$y,d$p), function(r,a,y,p) {
+  #   # tmp = r/sum(y*(exp(-r*lag(a,default=0))-exp(-r*a))/(a - lag(a,default=0)))
+  #   tmp = r/sum(p*(exp(-r*lag(a,default=0))-exp(-r*a)))
+  #   # if(!is.finite(tmp)) browser()
+  #   return(tmp)
+  # })
+  # # browser()
+  # return(unlist(R))
+}
+
+testTs = testTs %>% mutate(Rt = discGRToR(growth_rate))
+
+
+
+
+
+ggplot(testTs,aes(x=date,y=value,group=subgroup))+geom_line(alpha=0.2)
+
+testEst = testTs %>%
+  tsp$logIncidenceStats(growthRateWindow = 28, nocache=TRUE) %>%
+  tsp$estimateGrowthRate(growthRateWindow = 28, nocache=TRUE)
+  
+testEst2 = testTs %>%
+  tsp$estimatePoissonGrowthRate(growthRateWindow = 28, nocache=TRUE)
+  
+testEst3 = testTs %>%
+  tsp$smoothAndSlopeTimeseries(smoothExpr = value,window = 28)
+  
+
+ggplot(testEst, aes(x=date, group=subgroup))+
+  geom_line(aes(y=Growth.windowed.value,colour="dlog/dt (smoothed)"))+
+  geom_ribbon(aes(ymin=Growth.windowed.value-1.96*Growth.windowed.SE.value,ymax=Growth.windowed.value+1.96*Growth.windowed.SE.value,fill="dlog/dt (smoothed)"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))
+
+# ggplot(testEst %>% filter(TRUE), aes(x=date, group=subgroup))+
+#   geom_ribbon(aes(ymin=Est.Quantile.0.025.value,ymax=Est.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
+#   geom_point(aes(y=value,colour="reference"))+
+#   geom_line(aes(y=Est.log(value+,colour="pois (loess)"))
+
+
+
+ggplot(testEst, aes(x=date, group=subgroup))+
+  geom_line(aes(y=Growth.value,colour="pois (loess)"))+
+  geom_ribbon(aes(ymin=Growth.Quantile.0.025.value,ymax=Growth.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))
+
+ggplot(testEst %>% filter(TRUE), aes(x=date, group=subgroup))+
+  geom_ribbon(aes(ymin=Est.Quantile.0.025.value,ymax=Est.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
+  geom_point(aes(y=value,colour="reference"))+
+  geom_line(aes(y=Est.value,colour="pois (loess)"))
+
+
+bayes.window=14
+mu.prior = 0
+var.prior = 1
+
+testEst2 = testEst2 %>% 
+  group_by(subgroup) %>% arrange(date) %>%
+  mutate(
+    subgroup.growth.mu = stats::filter(x = Growth.value/bayes.window, filter = rep(1,bayes.window)),
+  ) %>%
+  fill(subgroup.growth.mu, .direction = "down") %>%
+  mutate(
+    subgroup.growth.var = stats::filter(x = ((Growth.value-subgroup.growth.mu)^2)/(bayes.window-1), filter = rep(1,bayes.window))
+  ) %>%
+  #fill(subgroup.growth.var, .direction = "down") %>%
+  mutate(  
+    # https://towardsdatascience.com/a-bayesian-approach-to-estimating-revenue-growth-55d029efe2dd
+    # bayes normal normal - prior mu = 0, prior variance = 1.
+    subgroup.growth.mu.posterior =
+      (mu.prior/var.prior + bayes.window*subgroup.growth.mu/subgroup.growth.var) /
+      (1/var.prior+bayes.window/subgroup.growth.var),
+    subgroup.growth.var.posterior = 1 /
+      (1/var.prior + bayes.window/subgroup.growth.var)
+  )
+
+ggplot(testEst2 %>% filter(), aes(x=date, group=subgroup))+
+  geom_line(aes(y=Growth.value,colour="pois (unsmoothed)"))+
+  geom_ribbon(aes(ymin=Growth.value-1.96*Growth.SE.value,ymax=Growth.value+1.96*Growth.SE.value,fill="pois (unsmoothed)"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))
+
+
+
+ggplot(testEst2, aes(x=date, group=subgroup))+
+  geom_line(aes(y=subgroup.growth.mu.posterior,colour="pois (bayes normal)"))+
+  geom_ribbon(aes(ymin=subgroup.growth.mu.posterior-1.96*sqrt(subgroup.growth.var.posterior),ymax=subgroup.growth.mu.posterior+1.96*sqrt(subgroup.growth.var.posterior),fill="pois (bayes normal)"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))+
+  coord_cartesian(ylim=c(-0.1,0.1))
+
+ggplot(testEst2, aes(x=date, group=subgroup))+
+  geom_line(aes(y=subgroup.growth.mu.posterior,colour="pois (smoothed)"))+
+  geom_ribbon(aes(ymin=subgroup.growth.mu.posterior-1.96*subgroup.growth.var.posterior,ymax=subgroup.growth.mu.posterior+1.96*subgroup.growth.var.posterior,fill="pois (smoothed)"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))+
+  coord_cartesian(ylim=c(-0.1,0.1))
+
+
+
+
+
+
+ggplot(testEst3, aes(x=date, group=subgroup))+
+  geom_line(aes(y=Ratio.value,colour="dI/dt / I"))+
+  geom_ribbon(aes(ymin=Ratio.value-1.96*Ratio.SE.value,ymax=Ratio.value+1.96*Ratio.SE.value,fill="dI/dt / I"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))+
+  coord_cartesian(ylim=c(-0.1,0.1))
+
+
+ggplot(testEst3 %>% filter(TRUE), aes(x=date, group=subgroup))+
+  geom_ribbon(aes(ymin=Est.value-1.96*Est.SE.value,ymax=Est.value+1.96*Est.SE.value,fill="dI/dt / I"),alpha=0.1)+
+  geom_point(aes(y=value,colour="reference"))+
+  geom_line(aes(y=Est.value,colour="dI/dt / I"))
+
+
+```
+
+```{r fig1, fig.cap="Epidemic curve based on (A) an artifical and (B) a real timeseries of lab positive cases in England as published on the PHE dashboard, on a log1p scale."}
+
+ukts = dpc$datasets$getPHEApiNations() %>% 
+  filter(name=="England" & type=="incidence") %>%
+  tsp$logIncidenceStats(smoothingWindow=14) %>%
+  tsp$estimateGrowthRate(window = 14, nocache=TRUE)
+
+p1=ggplot(testTs,aes(x=date,y=value))+geom_bar(stat="identity", width=0.6)+scale_y_continuous(trans="log1p")+labs(subtitle="Artificial")
+p2= ggplot(ukts,aes(x=date,y=value))+geom_bar(stat="identity", width=0.6)+scale_y_continuous(trans="log1p")+labs(subtitle="PHE England cases")
+(p1+p2+patchwork::plot_annotation(tag_levels = "A") +patchwork::plot_layout(nrow=1)) %>% standardPrintOutput::saveThirdPageFigure("~/Dropbox/covid19/growth-rates/Fig1_EpidemicCurves")
+```
+
+The rate of growth of these distributions is calculated using 3 methods all of which are applied over a rolling window. In all 3 methods the same 14 day window has been chosen, as the real data has a strong weekly cycle and windows shorter than 14 days become unstable.
+
+The 3 methods explored are Poisson distribution fitting, direct estimation of the rate of change incidence as a fraction of incidence, and estimation of the rate of change of the logarithm of incidence.
+
+Poisson fitting is conducted using the R glm library on a 14 day subsection of the data. The rate of change of the log of the rate parameter wrt to time of the Poisson distribution is used as an estimate of the growth rate.
+
+The second method, direct estimation of the rate of change assumes that the incidence is a noisy sample of a smooth function. Estimation of the value and first derivative of that smooth function is done by applying a local regression direct to incidence figures. The regression is linear over the 14 day window, and performed with the locfit R package. The estimate of the growth rate is the estimated gradient at any given timepoint divided by estimated value. The fitting is conducted with a degree 1 polynomial, the locfit alpha parameter is set to ensure that fitting algorithm is using the correct numbers of points of data (alpha = window/N in a timeseries of N points).
+
+$$
+r = \frac{\delta I_t}{\delta t}I_t^{-1}
+$$
+
+The third method assumes that the incidence curve is a smooth function obeying exponential growth dynamics. To estimate this the incidence curve is shifted by 1 and log transformed, and the slope of this curve is estimated, again using the locfit library, with degree 1 and alpha determined as above. The slope of this curve is a direct estimate of the growth rate.
+
+$$
+I_{t+\delta t} \sim I_t(1+e^{r\delta t})
+$$
+$$
+r = \frac{\delta}{\delta t} log(I_t+1)
+$$
+Both approaches 2 & 3 rely on smoothing of the discrete incidence values to a continuous function. These both can be affected by outlying data points, so prior to calculation of the local gradient outlier detection must be applied. This is currently being done using the forecast R package (tsclean) which detects and imputes local values for outlying and missing data in a time series.
+
+# Results
+
+TODO: update this with artificial time-series from projections package
+
+```{r}
+
+#install.packages("projections")
+# 
+# seed = incidence::incidence(dates = as.Date(unlist(lapply(as.Date("2020-01-01"):as.Date("2020-01-10"),function(x) rep(x,runif(1,90,110)))),"1970-01-01"))
+# proj_3 <- projections::project(x = seed, R = c(1,1.2,0.7), si = Flu2009$si_distr, n_days = 60, time_change = c(20,40), R_fix_within = TRUE)
+# 
+# plot(proj_3)
+# 
+# tmp = as.data.frame(proj_3,long=TRUE) %>% group_by(sim) %>% mutate(incidence = as.numeric(incidence))
+```
+
+Figure 2 shows the 3 methods applied to an artificial time series with defined growth rate. In the panel A we see the Poisson method closely estimates the artifical series with a predictable delay introduced by the windowing. The implementation estimates growth rates using values prior to the point of estimation. 
+
+In panel B we see estimates fo the growth rate using a direct method. As mentioned above this method is dependent on the determination of an underlying function, which is assumed to be smooth. The outlier detection algorithm has kicked in (turquoise points in the rug plot) due to the excessive spikiness of the exponential growth phase the early part of the artificial time series.
+
+In panel C we have the estimates based on local exponential fitting. This performs in a similar fashion to A but the timing of the delay is variable as the locally fitted exponential will use points ahead as well as points behind when these are available. This has the somewhat undesirable effect to compressing the resulting time series towards the end. This is less affected by the imputation algorithm as the log incidence curve is less spiky but around the transitions we can again see that the outlier detection function has made changes to the raw data. We need to continue investigation on this.
+
+```{r fig2, fig.cap="Comparison of 3 methods for growth rate estimation in an artificial time series."}
+
+# 
+# p1 = ggplot(testTs, aes(x=date)) +geom_line(aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Mean(Growth rate)`,`Sd(Growth rate)`, colourExpr = "red")+labs(y="r",subtitle="Poisson \U03BB")+coord_cartesian(ylim=c(-1,1))
+# 
+# p2 = ggplot(testTs, aes(x=date)) +geom_line(aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Ratio.value`,`Ratio.SE.value`, "blue")+geom_rug(aes(colour=Imputed.value),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*I,delta*t) * I^-1))+coord_cartesian(ylim=c(-1,1))
+# 
+# p3 = ggplot(testTs, aes(x=date)) +geom_line(aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Growth`,`Growth.SE`,"magenta")+geom_rug(aes(colour=`Imputed.log(value + 1)`),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*log(I+1),delta*t)))+coord_cartesian(ylim=c(-1,1))
+# 
+# (p1+p2+p3+patchwork::plot_annotation(tag_levels = "A") + patchwork::plot_layout(nrow=1)) %>% standardPrintOutput::saveThirdPageFigure("~/Dropbox/covid19/growth-rates/Fig2_ArtificalTest")
+
+```
+
+Figure 3 shows the same 3 algorithms applied to the real incidence curves in figure 1B. 
+
+In panel A the Poisson fitting algorithm demonstrates narrow confidence intervals compared to stability of the underlying value. This is reflecting the reality of reporting delay, but this is despite us employing a 14 day window. The method could be seen as over sensitive, and we also seen this in time series generated with EpiEstim unless they are heavily smoothed.
+
+In panel B the direct estimation method again demonstrates some value but is influenced by our outlier detection algorithm which has been triggered by the noise at the height of the peak, and in the early fall, this has produced an inappropriately smooth and high confidence area. 
+
+In panel C the local fitting of exponential produces a smooth estimate with appropriate confidence intervals. It is difficult to say whether it is over smoothed. We can empirically adjust windowing functions to see what effect that will have in the future.
+
+```{r fig3, fig.cap="Comparison of 3 smoothing methods in a real time series."}
+# p1 = ggplot(ukts, aes(x=date)) + plotRibbons(`Mean(Growth rate)`,`Sd(Growth rate)`, "red")+labs(y="r",subtitle="Poisson \U03BB")+coord_cartesian(ylim=c(-0.25,0.5))
+# p2 = ggplot(ukts, aes(x=date)) + plotRibbons(`Ratio.value`,`Ratio.SE.value`, "blue")+geom_rug(aes(colour=Imputed.value),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*I,delta*t) * I^-1))+coord_cartesian(ylim=c(-0.25,0.5))
+# p3 = ggplot(ukts, aes(x=date)) + plotRibbons(`Growth`,`Growth.SE`,"magenta")+geom_rug(aes(colour=`Imputed.log(value + 1)`),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*log(I+1),delta*t)))+coord_cartesian(ylim=c(-0.25,0.5))
+# 
+# (p1+p2+p3+patchwork::plot_annotation(tag_levels = "A") + patchwork::plot_layout(nrow=1)) %>% standardPrintOutput::saveThirdPageFigure("~/Dropbox/covid19/growth-rates/Fig3_RealTest")
+
+```
+
+# Bayesian method
+
+```{r}
+# https://people.stat.sc.edu/Hitchcock/slides535day5spr2014.pdf
+# https://en.wikipedia.org/wiki/Conjugate_prior#Table_of_conjugate_distributions
+# https://people.stat.sc.edu/Hitchcock/stat535slidesday18.pdf
+
+# assume lambda is fixed over a short window
+# and lambda is a gamma distributed quantity with ?prior mean and ?SD
+# posterior lambda is gamma(Sum(xi) + α, n + β)
+
+# gr is log of ratio of lambda at time t and lambda at t+1
+# https://stats.stackexchange.com/questions/207595/distribution-of-the-ratio-of-two-gamma-random-variables
+# https://rdrr.io/cran/extraDistr/src/R/beta-prime-distribution.R
+
+
+```
+
+
+Assume $I_t$ is a Poisson distributed quantity with a rate parameter which is a function of time:
+
+
+$$
+\begin{aligned}
+E[I_t] &= \lambda_t \\
+
+
+\end{aligned}
+$$
+
+Assuming $\lambda_t$ is constant over $[t-\tau;t+\tau]$ and is assumed to be gamma distributed with shape parameter $\alpha$ and scale parameter $\beta$ then by definition:
+
+
+$$
+\begin{aligned}
+P(I_{t-\tau},\dots,I_{t+\tau}|\lambda_t) = \prod_{s=t-\tau}^{t+\tau}\frac{e^{-\lambda_t}\lambda_t^{I_s}}{I_s!} \\
+\end{aligned}
+$$
+
+
+if $n = 2\tau+1$
+
+$$
+\begin{aligned}
+P(I_{t-\tau},\dots,I_{t+\tau}|\lambda_t) = \frac{e^{-n\lambda_t}\lambda_t^{\sum{I_s}}}{\prod_{s=t-\tau}^{t+\tau}I_s!} \\
+
+p(\lambda_{t}) = \frac{\beta^\alpha}{\Gamma(\alpha)} \lambda_{t}^{\alpha-1}e^{-\beta\lambda_{t}} \\
+
+P(\lambda_t|I_{t-\tau},\dots,I_{t+\tau}) = \frac{P(I_{t-\tau},\dots,I_{t+\tau}|\lambda_t)p(\lambda_{t})}{P(I_{t-\tau},\dots,I_{t+\tau})}\\
+
+P(\lambda_t|I_{t-\tau},\dots,I_{t+\tau}) = \frac{e^{-n\lambda_t}\lambda_t^{\sum{I_s}}}{\prod_{s=t-\tau}^{t+\tau}I_s!}\frac{\beta^\alpha}{\Gamma(\alpha)} \lambda_{t}^{\alpha-1}e^{-\beta\lambda_{t}}\\
+
+P(\lambda_t|I_{t-\tau},\dots,I_{t+\tau}) \propto \lambda_t^{\sum{I_s+\alpha-1}}e^{-(2\tau+1+\beta)\lambda_t} \\
+
+P(\lambda_t|I_{t-\tau},\dots,I_{t+\tau}) \sim \Gamma\big(\sum_{t-\tau}^{t+\tau}{I_s}+\alpha, 2\tau+1+\beta\big)
+\end{aligned}
+$$
+
+The exponential growth rate $r_t$ is the gradient of the logarithm of the incidence ($\frac{d}{dt}log(\lambda_t)$)
+
+$$
+\begin{aligned}
+r_t \approx \frac{1}{2m}(log(E(I_{t+m}))-log(E(I_{t-m}))) \\
+r_t = \frac{1}{2m}log\frac{\lambda_{t+m}}{\lambda_{t-m}} \\
+r_t \sim \frac{1}{2m}log\frac{\Gamma(\sum_{s=t-\tau+m}^{t+\tau+m}{I_s}+\alpha, 2\tau+1+\beta)}{\Gamma(\sum_{r=t-\tau-m}^{t+\tau-m}{I_r}+\alpha, 2\tau+1+\beta)} \\
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(\sum_{s=t-\tau+m}^{t+\tau+m}{I_s}+\alpha, \sum_{r=t-\tau-m}^{t+\tau-m}{I_r}+\alpha\big)\Big) \\
+\end{aligned}
+$$
+
+if $m = \tau$
+
+$$
+\begin{aligned}
+r_t \sim \frac{1}{2\tau}log\Big(\beta'\big(\sum_{t}^{t+2\tau}{I}+\alpha, \sum_{t-2\tau}^{t}{I}+\alpha\big)\Big)
+
+\end{aligned}
+$$
+
+The poisson rate $\lambda$ is gamma distributed by definition but to estimate the true value of $I_t$ we need the posterior predictive distribution
+
+$$
+\begin{aligned}
+p(I_t|I_{t-\tau},\dots,I_{t+\tau}) \sim NB\Big(\sum_{t-\tau}^{t+\tau}{I_s}+\alpha, \frac{2\tau+\beta+1}{2\tau+\beta+2} \Big)\\
+
+E(I_t|I_{t-\tau},\dots,I_{t+\tau}) = \frac{\sum_{t-\tau}^{t+\tau}{I_s}+\alpha}{2\tau+1+\beta} \\
+
+V(I_t|I_{t-\tau},\dots,I_{t+\tau}) = \frac{\sum_{t-\tau}^{t+\tau}{I_s}+\alpha}{(2\tau+1+\beta)^2}(2\tau+\beta+2)
+\end{aligned}
+$$
+
+```{r}
+
+alphaPrior = 1
+betaPrior = 2
+tau = 6
+
+testEst4 = testTs %>%
+  group_by(subgroup) %>%
+  mutate(
+    alpha1 = slider::slide_dbl(value, sum, .after = 2*tau, .complete = TRUE ) + alphaPrior,
+    alpha2 = slider::slide_dbl(value, sum, .before = 2*tau, .complete = TRUE ) + alphaPrior,
+    alpha0 = slider::slide_dbl(value, sum, .before = tau, .after=tau, .complete = TRUE ) + alphaPrior,
+    beta0 = 2*tau+1+betaPrior,
+    betap_mean = alpha1/(alpha2-1),
+    betap_variance = alpha1*(alpha1+alpha2-1)/((alpha2-2)*(alpha2-1)^2),
+    nb_size = alpha0,
+    nb_prob = beta0 / (beta0+1),
+    # https://stats.stackexchange.com/questions/57715/expected-value-and-variance-of-loga
+    # taylor exansion for log
+    Growth.mean = 1/(2*tau)*(log(betap_mean) - betap_variance/(2*betap_mean^2)),
+    Growth.variance = 1/(2*tau)*(betap_variance/(betap_mean^2))
+  ) %>%
+  mutate(
+    Growth.quantile.0.025 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.025, alpha1, alpha2)),
+    Growth.quantile.0.05 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.05, alpha1, alpha2)),
+    Growth.quantile.0.25 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.25, alpha1, alpha2)),
+    Growth.quantile.0.5 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.5, alpha1, alpha2)),
+    Growth.quantile.0.75 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.75, alpha1, alpha2)),
+    Growth.quantile.0.95 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.95, alpha1, alpha2)),
+    Growth.quantile.0.975 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.975, alpha1, alpha2))
+  ) %>%
+  mutate(
+    Est.mean = alpha0/beta0,
+    Est.variance = alpha0/(beta0^2)*(2*tau+2+beta0),
+    Est.quantile.0.025 = qnbinom(p=0.025, nb_size, nb_prob),
+    Est.quantile.0.05 = qnbinom(p=0.05, nb_size, nb_prob),
+    Est.quantile.0.25 = qnbinom(p=0.25, nb_size, nb_prob),
+    Est.quantile.0.5 = qnbinom(p=0.5, nb_size, nb_prob),
+    Est.quantile.0.75 = qnbinom(p=0.75, nb_size, nb_prob),
+    Est.quantile.0.95 = qnbinom(p=0.95, nb_size, nb_prob),
+    Est.quantile.0.975 = qnbinom(p=0.975, nb_size, nb_prob),
+  )
+
+ggplot(testEst4 %>% filter(), aes(x=date, group=subgroup))+
+  geom_line(aes(y=Growth.mean,colour="Beta prime"))+
+  geom_ribbon(aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))+
+  coord_cartesian(ylim=c(-0.1,0.1))
+
+ggplot(testEst4 %>% filter(TRUE), aes(x=date, group=subgroup))+
+  geom_ribbon(aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  geom_point(aes(y=value,colour="reference"))+
+  geom_line(aes(y=Est.mean,colour="Beta prime"))
+  
+  
+
+```
+
+## Alternative with different window sizes & different priors
+
+$\tau_1$ is half width of left hand window
+$\tau_2$ is half width of right hand window
+$\tau_2 < \tau_1$
+$\alpha_1$ is prior shape for left hand window
+$\beta_1$ is prior rate for left hand window
+$\alpha_2$ is prior shape for right hand window
+$\beta_2$ is prior rate for right hand window
+
+
+$$
+\begin{aligned}
+
+r_t \approx \frac{1}{2m}(log(E(I_{t+m}))-log(E(I_{t-m}))) \\
+r_t = \frac{1}{2m}log\frac{\lambda_{t+m}}{\lambda_{t-m}} \\
+
+r_t \sim \frac{1}{2m}log\frac{\Gamma(\sum_{r=t-\tau_2+m}^{t+\tau_2+m}{I_r}+\alpha_2, 2\tau_2+\beta_2+1)}{\Gamma(\sum_{s=t-\tau_1-m}^{t+\tau_1-m}{I_s}+\alpha_1, 2\tau_1+\beta_1+1)} \\
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(\sum_{t-\tau_2+m}^{t+\tau_2+m}{I}+\alpha_2, \sum_{t-\tau_1-m}^{t+\tau_1-m}{I}+\alpha_1,1,\frac{2\tau_1+\beta_1+1}{2\tau_2+\beta_2+1}\big)\Big) \\
+
+\alpha_2 = \sum_{t-\tau_1-m}^{t+\tau_1-m}{I}+\alpha_1 \\
+
+\beta_2 = 2\tau_1+\beta_1+1 \\
+
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(\sum_{t-\tau_2+m}^{t+\tau_2+m}{I}+\sum_{t-\tau_1-m}^{t+\tau_1-m}{I}+\alpha_1, \sum_{t-\tau_1-m}^{t+\tau_1-m}{I}+\alpha_1,1,\frac{2\tau_1+\beta_1+1}{2\tau_2+2\tau_1+\beta_1+2}\big)\Big) \\
+
+
+
+\end{aligned}
+$$
+
+suppose $t+\tau_2+m = t+\tau_1-m$ such that the summed terms end on the same index:
+
+$$
+\begin{aligned}
+\tau_2+2m = \tau_1\\
+
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(\sum_{t-\tau_2+m}^{t+\tau_2+m}{I}+\sum_{t-(\tau_2+2m)-m}^{t+(\tau_2+2m)-m}{I}+\alpha_1, \sum_{t-(\tau_2+2m)-m}^{t+(\tau_2+2m)-m}{I}+\alpha_1,1,\frac{2\tau_2+4m+\beta_1+1}{2\tau_2+2(\tau_2+2m)+\beta_1+2}\big)\Big) \\
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(
+  \sum_{t-\tau_2+m}^{t+\tau_2+m}{I}+\sum_{t-\tau_2-3m}^{t+\tau_2+m}{I}+\alpha_1, 
+  \sum_{t-\tau_2-3m}^{t+\tau_2+m}{I}+\alpha_1,
+  1,
+  \frac{2\tau_2+4m+\beta_1+1}{4\tau_2+4m+\beta_1+2}
+\big)\Big) \\
+
+
+\tau_2 = m \\
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(
+  \sum_{t}^{t+2m}{I}+\sum_{t-4m}^{t+2m}{I}+\alpha_1, 
+  \sum_{t-4m}^{t+2m}{I}+\alpha_1,
+  1,
+  \frac{6m+\beta_1+1}{8m+\beta_1+2}\big)\Big) \\
+
+\end{aligned}
+$$
+
+
+```{r}
+
+# In the article:
+
+
+# In extraDistr::qbetapr this is implemented as
+# $\GeneraliedBetaPrime()
+# shape1 = alpha
+# shape2 = beta
+# 1 = p
+# scale = q
+
+alphaPrior = 2
+betaPrior = 1
+m = 3
+
+testEst4 = testTs %>%
+  group_by(subgroup) %>%
+  mutate(
+    shape2 = slider::slide_dbl(value, sum, .before = 4*m, .after = 2*m, .complete = TRUE ) + alphaPrior,
+    shape1 = slider::slide_dbl(value, sum, .after = 2*m, .complete = TRUE ) + shape2,
+    scale = (6*m+betaPrior+1)/(8*m+betaPrior+2),
+    
+    alpha0 = slider::slide_dbl(value, sum, .before = 2*m, .after=2*m, .complete = TRUE ) + alphaPrior,
+    beta0 = 4*m+1+betaPrior,
+    # this definition is from https://en.wikipedia.org/wiki/Beta_prime_distribution#Generalisation where alpha = alpha1, beta=alpha2, q=sigma and p=1
+    betap_mean = scale*gamma(shape1+1)*gamma(shape2+1)/(gamma(shape1)*gamma(shape2)),
+    betap_variance = scale^2*shape1*(shape1+shape2-1)/((shape2-2)*(shape2-1)^2),
+    nb_size = alpha0,
+    nb_prob = beta0 / (beta0+1),
+    # https://stats.stackexchange.com/questions/57715/expected-value-and-variance-of-loga
+    # taylor exansion for log
+    Growth.mean = 1/(2*m)*(log(betap_mean) - betap_variance/(2*betap_mean^2)),
+    Growth.variance = 1/(2*m)*(betap_variance/(betap_mean^2))
+  ) %>%
+  mutate(
+    Growth.quantile.0.025 = 1/(2*m)*log(extraDistr::qbetapr(p=0.025, shape1, shape2, scale)),
+    Growth.quantile.0.05 = 1/(2*m)*log(extraDistr::qbetapr(p=0.05, shape1, shape2, scale)),
+    Growth.quantile.0.25 = 1/(2*m)*log(extraDistr::qbetapr(p=0.25, shape1, shape2, scale)),
+    Growth.quantile.0.5 = 1/(2*m)*log(extraDistr::qbetapr(p=0.5, shape1, shape2, scale)),
+    Growth.quantile.0.75 = 1/(2*m)*log(extraDistr::qbetapr(p=0.75, shape1, shape2, scale)),
+    Growth.quantile.0.95 = 1/(2*m)*log(extraDistr::qbetapr(p=0.95, shape1, shape2, scale)),
+    Growth.quantile.0.975 = 1/(2*m)*log(extraDistr::qbetapr(p=0.975, shape1, shape2, scale))
+  ) %>%
+  mutate(
+    Est.mean = alpha0/beta0,
+    Est.variance = alpha0/(beta0^2)*(2*m+2+beta0),
+    Est.quantile.0.025 = qnbinom(p=0.025, nb_size, nb_prob),
+    Est.quantile.0.05 = qnbinom(p=0.05, nb_size, nb_prob),
+    Est.quantile.0.25 = qnbinom(p=0.25, nb_size, nb_prob),
+    Est.quantile.0.5 = qnbinom(p=0.5, nb_size, nb_prob),
+    Est.quantile.0.75 = qnbinom(p=0.75, nb_size, nb_prob),
+    Est.quantile.0.95 = qnbinom(p=0.95, nb_size, nb_prob),
+    Est.quantile.0.975 = qnbinom(p=0.975, nb_size, nb_prob),
+  )
+
+ggplot(testEst4 %>% filter(), aes(x=date, group=subgroup))+
+  geom_line(aes(y=Growth.quantile.0.5,colour="Beta prime"))+
+  geom_ribbon(aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))#+
+  #coord_cartesian(ylim=c(-0.1,0.1))
+
+ggplot(testEst4 %>% filter(TRUE), aes(x=date, group=subgroup))+
+  geom_ribbon(aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  geom_point(aes(y=value,colour="reference"))+
+  geom_line(aes(y=Est.mean,colour="Beta prime"))
+  
+  
+
+```
+
+## Alternative with different window sizes & same prior
+
+$\tau_1$ is half width of left hand window
+$\tau_2$ is half width of right hand window
+$\tau_2 < \tau_1$
+$\alpha_1$ is prior shape for left hand window
+$\beta_1$ is prior rate for left hand window
+$\alpha_2$ is prior shape for right hand window
+$\beta_2$ is prior rate for right hand window
+
+
+$$
+\begin{aligned}
+
+r_t \approx \frac{1}{2m}(log(E(I_{t+m}))-log(E(I_{t-m}))) \\
+r_t = \frac{1}{2m}log\frac{\lambda_{t+m}}{\lambda_{t-m}} \\
+
+r_t \sim \frac{1}{2m}log\frac{\Gamma(\sum_{r=t-\tau_2+m}^{t+\tau_2+m}{I_r}+\alpha, 2\tau_2+\beta+1)}{\Gamma(\sum_{s=t-\tau_1-m}^{t+\tau_1-m}{I_s}+\alpha, 2\tau_1+\beta+1)} \\
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(\sum_{t-\tau_2+m}^{t+\tau_2+m}{I}+\alpha, \sum_{t-\tau_1-m}^{t+\tau_1-m}{I}+\alpha,1,\frac{2\tau_1+\beta+1}{2\tau_2+\beta+1}\big)\Big) \\
+
+
+
+
+
+\end{aligned}
+$$
+
+suppose $t+\tau_2+m = t+\tau_1-m$ such that the summed terms end on the same index:
+
+$$
+\begin{aligned}
+\tau_2+2m = \tau_1\\
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(
+  \sum_{t-\tau_2+m}^{t+\tau_2+m}{I}+\alpha, 
+  \sum_{t-(\tau_2+2m)-m}^{t+(\tau_2+2m)-m}{I}+\alpha,
+  1,
+  \frac{2(\tau_2+2m)+\beta+1}{2\tau_2+\beta+1}
+\big)\Big) \\
+
+
+
+\tau_2 = m \\
+
+r_t \sim \frac{1}{2m}log\Big(\beta'\big(
+  \sum_{t}^{t+2m}{I}+\alpha, 
+  \sum_{t-4m}^{t+2m}{I}+\alpha,
+  1,
+  \frac{6m+\beta+1}{2m+\beta+1}
+\big)\Big) \\
+
+\end{aligned}
+$$
+
+
+```{r}
+
+# In the article:
+
+
+# In extraDistr::qbetapr this is implemented as
+# $\GeneraliedBetaPrime()
+# shape1 = alpha
+# shape2 = beta
+# 1 = p
+# scale = q
+
+alphaPrior = 2
+betaPrior = 1
+m = 10
+
+testEst4 = testTs %>%
+  group_by(subgroup) %>%
+  mutate(
+    shape2 = slider::slide_dbl(value, sum, .before = 3*m, .after = 1*m, .complete = TRUE ) + alphaPrior,
+    shape1 = slider::slide_dbl(value, sum, .after = 2*m, .complete = TRUE ) + alphaPrior,
+    scale = (4*m+betaPrior+1)/(2*m+betaPrior+1),
+    
+    alpha0 = slider::slide_dbl(value, sum, .before = 2*m, .after=2*m, .complete = TRUE ) + alphaPrior,
+    beta0 = 4*m+1+betaPrior,
+    # this definition is from https://en.wikipedia.org/wiki/Beta_prime_distribution#Generalisation where alpha = alpha1, beta=alpha2, q=sigma and p=1
+    betap_mean = scale*gamma(shape1+1)*gamma(shape2+1)/(gamma(shape1)*gamma(shape2)),
+    betap_variance = scale^2*shape1*(shape1+shape2-1)/((shape2-2)*(shape2-1)^2),
+    nb_size = alpha0,
+    nb_prob = beta0 / (beta0+1),
+    # https://stats.stackexchange.com/questions/57715/expected-value-and-variance-of-loga
+    # taylor exansion for log
+    Growth.mean = 1/(2*m)*(log(betap_mean) - betap_variance/(2*betap_mean^2)),
+    Growth.variance = 1/(2*m)*(betap_variance/(betap_mean^2))
+  ) %>%
+  mutate(
+    Growth.quantile.0.025 = 1/(2*m)*log(extraDistr::qbetapr(p=0.025, shape1, shape2, scale)),
+    Growth.quantile.0.05 = 1/(2*m)*log(extraDistr::qbetapr(p=0.05, shape1, shape2, scale)),
+    Growth.quantile.0.25 = 1/(2*m)*log(extraDistr::qbetapr(p=0.25, shape1, shape2, scale)),
+    Growth.quantile.0.5 = 1/(2*m)*log(extraDistr::qbetapr(p=0.5, shape1, shape2, scale)),
+    Growth.quantile.0.75 = 1/(2*m)*log(extraDistr::qbetapr(p=0.75, shape1, shape2, scale)),
+    Growth.quantile.0.95 = 1/(2*m)*log(extraDistr::qbetapr(p=0.95, shape1, shape2, scale)),
+    Growth.quantile.0.975 = 1/(2*m)*log(extraDistr::qbetapr(p=0.975, shape1, shape2, scale))
+  ) %>%
+  mutate(
+    Est.mean = alpha0/beta0,
+    Est.variance = alpha0/(beta0^2)*(2*m+2+beta0),
+    Est.quantile.0.025 = qnbinom(p=0.025, nb_size, nb_prob),
+    Est.quantile.0.05 = qnbinom(p=0.05, nb_size, nb_prob),
+    Est.quantile.0.25 = qnbinom(p=0.25, nb_size, nb_prob),
+    Est.quantile.0.5 = qnbinom(p=0.5, nb_size, nb_prob),
+    Est.quantile.0.75 = qnbinom(p=0.75, nb_size, nb_prob),
+    Est.quantile.0.95 = qnbinom(p=0.95, nb_size, nb_prob),
+    Est.quantile.0.975 = qnbinom(p=0.975, nb_size, nb_prob),
+  )
+
+ggplot(testEst4 %>% filter(), aes(x=date, group=subgroup))+
+  geom_line(aes(y=Growth.quantile.0.5,colour="Beta prime"))+
+  geom_ribbon(aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  geom_line(aes(y=growth_rate,colour="reference"))#+
+  #coord_cartesian(ylim=c(-0.1,0.1))
+
+ggplot(testEst4 %>% filter(TRUE), aes(x=date, group=subgroup))+
+  geom_ribbon(aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  geom_point(aes(y=value,colour="reference"))+
+  geom_line(aes(y=Est.mean,colour="Beta prime"))
+  
+  
+
+```
+
+$$
+\begin{aligned}
+L(\lambda_t|I_{t-\tau+1},\dots,I_t) = \Gamma(\alpha_t,\beta_t) \\
+P(R_{t,\tau}) = \frac{R_{t,\tau}^{a-1}e^{\frac{-R_{t,\tau}}{b}}}{\Gamma(a)b^a} \\
+P(I_t | I_{t-\tau+1},\dots,I_{t-1}) &= \frac{\Lambda_t^{I_t}e^{-\Lambda_t}}{I_t!} \\
+\end{aligned}
+$$
+
+
+
+# Conclusion
+
+We've presented 3 methods for estimating the growth rates, which produce comparable estimates to each other which are in line with those expected in an artificial time series. As we have been asked to produce estimates of growth rate, in the short term we will the method based on local fitting of exponential growth as these seem to have a good trade off between signal and noise. It is clear that we need to revisit our outlier detection algorithm as this is having excessive influence particularly in smoothing the peak of the incidence curve. This is the only place where it is used in this way - and in our estimates of R(t) the outlier detection is used on the log1p data, where it is not triggered. It's worth also clarifying that a less invasive smoothing algorithm is employed during Rt estimation, and this is under continuous review.
+
+# Limitations
+
+None of these methods account for estimates of the prevalence, and hence a "true" growth rate from an epidemic sense. The estimates of growth rate will tend to be biased on the low side during the growth phase of the epidemic. For the methods based on local fitting algorithm it is possible that weighting the local fitting using a convolution of the serial interval distribution could address this.
+

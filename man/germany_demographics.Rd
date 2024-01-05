@@ -24,4 +24,5 @@ data(germany_demographics)
 Derived from the Robert Koch Survstat service by comparing counts and
 incidence rates.
 }
+\concept{datasets}
 \keyword{datasets}

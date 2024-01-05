@@ -7,6 +7,8 @@
 #' @return TRUE if dates, FALSE otherwise
 #' @export
 #'
+#' @concept time_period
+#'
 #' @examples
 #' is.Date(Sys.Date())
 is.Date = function(x) {
@@ -23,6 +25,8 @@ is.Date = function(x) {
 #'
 #' @return a date. `9999-12-31` if there is no well defined minimum.
 #' @export
+#'
+#' @concept time_period
 #'
 #' @examples
 #' min_date(NA)
@@ -43,6 +47,8 @@ min_date = function(x,...) {
 #' @return a date. `0001-01-01`` if there is no well defined minimum.
 #' @export
 #'
+#' @concept time_period
+#'
 #' @examples
 #' max_date(NA)
 max_date = function(x,...) {
@@ -58,6 +64,8 @@ max_date = function(x,...) {
 #'
 #' @return the formatted date
 #' @export
+#'
+#' @concept time_period
 #'
 #' @examples
 #' fdmy(Sys.Date())
@@ -75,21 +83,24 @@ fdmy = function(date) {
 #'
 #' @param x a vector of numbers (may be integer or real) or a time_period
 #' @param unit the length of one unit of time. This will be either a integer
-#'   number of days, or a specification such as "1 week". If `x` is a
-#'   `time_period`, and the unit is different then this will recalibrate
-#'   the `time_period` to use the new units.
+#'   number of days, or a specification such as "1 week", or another `time_period`.
+#'   If `x` is a `time_period`, and the unit is different then from that of `x`
+#'   this will return a new `time_period` using the new units.
 #' @param start_date the zero time date as something that can be coerced to a
 #'   date. If the `x` input is already a `time_period` and this is different to its
 #'   `start_date` then it will be recalibrated to use the new start date.
-#' @param anchor only relevant is `x` is a vector of dates and `start_date` is not specified, this is a date, or "start" or "end" or a weekday name e.g. "mon".
-#'   With the vector of dates in `x` it will find a reference date for the
-#'   time-series. If this is `NULL` and `start_date` is also `NULL` it will fall back to
-#'   `getOption("day_zero","2019-12-29")`
+#' @param anchor only relevant is `x` is a vector of dates and `start_date` is
+#'   not specified, this is a date, or "start" or "end" or a weekday name e.g.
+#'   "mon". With the vector of dates in `x` it will find a reference date for
+#'   the time-series. If this is `NULL` and `start_date` is also `NULL` it will
+#'   fall back to `getOption("day_zero","2019-12-29")`
 #' @param ... used for subtype implementations
 #'
 #' @return a `time_period` class, consisting of a vector of numbers, with
 #'   attributes for time period and `start_date`
 #' @export
+#'
+#' @concept time_period
 #'
 #' @example inst/examples/time-period-example.R
 as.time_period = function(x, unit = NULL, start_date = NULL, anchor = NULL, ...) {
@@ -153,12 +164,22 @@ as.time_period.Date = function(x, unit = NULL, start_date = NULL, anchor = NULL,
 # numerics need a start date and unit.
 #' @export
 as.time_period.numeric = function(x, unit, start_date = getOption("day_zero","2019-12-29"), ...) {
-  start_date = as.Date(start_date)
+
+  if (is.time_period(unit)) {
+
+    start_date = .get_meta(unit)$start_date
+    unit = .get_meta(unit)$unit
+
+  } else {
+    start_date = as.Date(start_date)
+    unit = unit %>% .make_unit()
+  }
   times = as.numeric(x)
+
   tmp = structure(
     times,
     start_date = start_date,
-    unit = unit %>% .make_unit(),
+    unit = unit,
     class = unique(c("time_period",class(times)))
   )
   names(tmp) = names(x)
@@ -172,6 +193,9 @@ as.time_period.numeric = function(x, unit, start_date = getOption("day_zero","20
 #'
 #' @return a vector of dates representing the start of each of the input
 #'   `time_period` entries
+#'
+#' @concept time_period
+#'
 #' @export
 as.Date.time_period = function(x, ...) {
   return(time_to_date(x))
@@ -186,7 +210,7 @@ as.POSIXct.time_period = function(x,...) {
 }
 
 #' @describeIn as.time_period Combine `time_period`
-#' @param recursive concate recursively
+#' @param recursive concatenate recursively
 #' @export
 c.time_period = function(..., recursive = F) {
   inputs = list(...)
@@ -311,6 +335,8 @@ print.time_period = function(x,...) {
 #' @return a set of character labels for the time
 #' @export
 #'
+#' @concept time_period
+#'
 #' @examples
 #' eg = as.time_period(Sys.Date()+0:10*7, anchor="start")
 #' labels(eg)
@@ -357,11 +383,15 @@ labels.time_period = function(object, ..., dfmt = "%d/%b", ifmt = "{start} \u201
 #' Using a start_date and a unit specification
 #'
 #' @param dates a vector of dates to convert
-#' @param unit a specification of the unit of the resulting time series. Will be determined from periodicity of dates if not specified
+#' @param unit a specification of the unit of the resulting time series.
+#'   Will be determined from periodicity of dates if not specified. If another
+#'   `time_period` is given as the unit then the
 #' @param start_date the origin of the conversion. Defaults to the beginning of the COVID pandemic
 #'
 #' @return a vector of class `time_period`
 #' @export
+#'
+#' @concept time_period
 #'
 #' @examples
 #' times = date_to_time(as.Date("2019-12-29")+0:100, "1 week")
@@ -370,12 +400,21 @@ date_to_time = function(dates, unit = .day_interval(dates), start_date = getOpti
 
   #TODO: do we want to either allow anchor as a parameter or export .start_from_anchor?
 
-  if (!lubridate::is.period(unit)) {
-    if (is.numeric(unit)) unit = lubridate::period(sprintf("%1.0f days", unit))
-    else unit = lubridate::period(unit)
-  }
+  if (is.time_period(unit)) {
 
-  start_date = as.Date(start_date)
+    start_date = .get_meta(unit)$start_date
+    unit = .get_meta(unit)$unit
+
+  } else {
+
+    if (!lubridate::is.period(unit)) {
+      if (is.numeric(unit)) unit = lubridate::period(sprintf("%1.0f days", unit))
+      else unit = lubridate::period(unit)
+    }
+
+    start_date = as.Date(start_date)
+
+  }
 
   return(as.time_period.numeric(
     lubridate::interval(start_date, dates) / unit,
@@ -392,6 +431,8 @@ date_to_time = function(dates, unit = .day_interval(dates), start_date = getOpti
 #'
 #' @return a vector of dates
 #' @export
+#'
+#' @concept time_period
 #'
 #' @examples
 #' times = date_to_time(as.Date("2019-12-29")+0:100, "1 week")
@@ -480,6 +521,8 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @return a vector of the same type as the input
 #' @export
 #'
+#' @concept time_period
+#'
 #' @examples
 #' full_seq(c(1, 2, 4, 5, 10), 1)
 full_seq = function(x, period, ...) {
@@ -532,6 +575,8 @@ full_seq.numeric = function(x, period=1, tol=1e-06, ...) {
 #'   dates, with the boundaries defined by the anchor.
 #' @export
 #'
+#' @concept time_period
+#'
 #' @examples
 #' full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
 full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
@@ -579,6 +624,8 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #' @return a vector of `time_periods` for regular periods between the minimum and maximum of
 #'   dates, with the boundaries defined by the anchor.
 #' @export
+#'
+#' @concept time_period
 #'
 #' @examples
 #' tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
@@ -663,6 +710,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #'   and the anchor
 #' @export
 #'
+#' @concept time_period
 #'
 #' @examples
 #' dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))

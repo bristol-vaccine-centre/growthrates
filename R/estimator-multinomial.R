@@ -15,11 +15,15 @@
 #'
 #' @return a new dataframe with `time` (as a time period), `class`, and `proportion.0.5`, or a model object
 #' @export
+#' @concept models
 #' @examples
-#' tmp = growthrates::england_covid %>%
-#'   dplyr::filter(date > "2022-01-01") %>%
-#'   growthrates::multinomial_nnet_model(window=21) %>%
-#'   dplyr::glimpse()
+#' if (FALSE) {
+#'   # not run due to long running
+#'   tmp = growthrates::england_covid %>%
+#'     dplyr::filter(date > "2022-01-01") %>%
+#'     growthrates::multinomial_nnet_model(window=21) %>%
+#'     dplyr::glimpse()
+#' }
 multinomial_nnet_model = function(d = i_multinomial_input, ..., window = 14, frequency = "1 day", predict = TRUE) { #, output_unit="1 day") {
 
   interfacer::igroup_process(d, function(d, ..., window, deg, frequency, predict) {

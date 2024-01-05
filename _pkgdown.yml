@@ -1,0 +1,19 @@
+url: ~
+template:
+  bootstrap: 5
+reference:
+- title: Growth rate models
+- contents:
+  - has_concept("models")
+- title: Visualisations
+- contents:
+  - has_concept("vis")
+- title: Time series functions
+- contents:
+  - has_concept("time_period")
+- title: Data Documentation
+- contents:
+  - has_concept("datasets")
+- title: Others
+- contents:
+  - lacks_concepts(c("models","vis","time_period","datasets"))

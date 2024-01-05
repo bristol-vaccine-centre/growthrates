@@ -7,7 +7,7 @@
 rt_from_growth_rate(
   df = i_growth_rate,
   ip = i_infectivity_profile,
-  bootstraps = 20
+  bootstraps = 2000
 )
 }
 \arguments{
@@ -73,3 +73,4 @@ if (FALSE) {
 }
 
 }
+\concept{models}

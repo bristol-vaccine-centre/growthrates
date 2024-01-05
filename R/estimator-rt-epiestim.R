@@ -1,0 +1,85 @@
+## EpiEstim wrapper ----
+
+
+#' EpiEstim reproduction number
+#'
+#' Calculate a reproduction number estimate from incidence data using the
+#' EpiEstim library and an empirical generation time distribution. This uses
+#' resampling to transmit uncertainty in generation time estimates. This is
+#' quite slow for each time series depending on the number of bootstraps and
+#' samples in the infectivity profile.
+#'
+#' This will calculate a reproduction number for each group in the input dataframe.
+#'
+#'
+#' @param df `r interfacer::idocument(rt_epiestim, df)`. Extra groups are allowed.
+#' @param ip `r interfacer::idocument(rt_epiestim, ip)`
+#' @param bootstraps - the number of bootstraps to take to calculate for each point.
+#' @param window - the width of the epiestim window
+#' @param mean_prior the prior for the $R_t$ estimate. When sample size is low the
+#'   $R_t$ estimate will revert to this prior. In EpiEstim the default is a high
+#'   number to allow detection of insufficient data but this tends to create
+#'   anomalies in the early part of infection timeseries. A possible value is $R_0$
+#'   but in fact this also will be a poor choice for the value of $R_t$ when case
+#'   numbers drop to a low value.
+#' @param std_prior the prior for the $R_t$ SD.
+#' @param ... not used
+#'
+#' @return `r i_reproduction_number`
+#' @export
+#' @concept models
+#' @examples
+#' tmp = growthrates::england_covid %>%
+#'   time_aggregate(count=sum(count))
+#'
+#' if (FALSE) {
+#'   # not run due to long running
+#'   tmp2 = tmp %>% rt_epiestim()
+#' }
+#'
+#'
+rt_epiestim = function(df = i_incidence_input, ip = i_infectivity_profile, bootstraps = 2000, window = 14, mean_prior = 1, std_prior = 2, ...) {
+
+  ip = interfacer::ivalidate(ip)
+  ip_boots = dplyr::n_distinct(ip$boot)
+
+  siConfig = EpiEstim::make_config(method = "si_from_sample", mean_prior = mean_prior, std_prior = std_prior)
+  yMatrix = ip %>% tidyr::pivot_wider(names_from = boot, values_from = probability) %>%
+    dplyr::arrange(time) %>%
+    dplyr::select(-time) %>%
+    as.matrix()
+  yMatrix = rbind(rep(0,dim(yMatrix)[2]),yMatrix)
+
+  siConfig$n2 = max(bootstraps %/% ip_boots,10)
+
+  interfacer::igroup_process(df, function(df,siConfig,window,...) {
+
+    meta = .get_meta(df$time)
+    tmp = df %>% dplyr::transmute(I=count)
+    siConfig$t_start = c(2:(nrow(tmp)-window))
+    siConfig$t_end = siConfig$t_start+window
+
+    rt.warn = NA
+
+    tmp4 =
+      withCallingHandlers(
+        tryCatch(EpiEstim::estimate_R(tmp, method = "si_from_sample",config=siConfig,si_sample = yMatrix), error = stop), warning= function(w) {
+          rt.warn <<- w$message
+          invokeRestart("muffleWarning")
+        })
+
+    out = tmp4$R %>% dplyr::transmute(
+      time = as.time_period(t_end, meta$unit, meta$start_date),
+      rt.fit = `Mean(R)`,
+      rt.se.fit = `Std(R)`,
+      rt.0.025 = `Quantile.0.025(R)`,
+      rt.0.5 = `Median(R)`,
+      rt.0.975 = `Quantile.0.975(R)`,
+      rt.warn = rt.warn
+    )
+
+    return(out)
+
+  })
+}
+

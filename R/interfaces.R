@@ -169,7 +169,10 @@ i_events = interfacer::iface(
 #'
 #' @docType data
 #' @keywords interfaces
+#' @concept datasets
 #' @name covid_infectivity_profile
+NULL
+
 i_infectivity_profile = interfacer::iface(
   boot = anything ~ "a bootstrap identifier",
   time = positive_double ~ "the end of the time period (in days)",

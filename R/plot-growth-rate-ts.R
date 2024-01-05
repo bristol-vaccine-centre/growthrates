@@ -18,6 +18,7 @@
 #'
 #' @return a ggplot timeseries
 #' @export
+#' @concept vis
 #' @examples
 #' # example code
 #' tmp = growthrates::england_covid %>%

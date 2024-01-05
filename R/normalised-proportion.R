@@ -16,6 +16,7 @@
 #' @return a dataframe with incidence rates per unit capita.
 #'   `r i_risk_ratio_model`
 #' @export
+#' @concept models
 #'
 #' @examples
 #'

@@ -34,6 +34,7 @@ variants2 = variants %>%
       full_tree %>% stringr::str_starts("B.1.1.7") ~ "Alpha (B.1.1.7)",
       full_tree %>% stringr::str_starts("B.1.617.2.4") ~ "Delta (AY.4)",
       full_tree %>% stringr::str_starts("B.1.617.2") ~ "Delta (B.1.617.2)",
+      full_tree %>% stringr::str_starts("B.1.1.529.2.86") ~ "Pirola (BA.2.86)",
       full_tree %>% stringr::str_starts("B.1.1.529.2") ~ "Omicron (BA.2)",
       full_tree %>% stringr::str_starts("B.1.1.529.4") ~ "Omicron (BA.4)",
       full_tree %>% stringr::str_starts("B.1.1.529.5") ~ "Omicron (BA.5)",
@@ -46,19 +47,21 @@ variants2 = variants %>%
     ) %>% factor(c(
       "Other", "Alpha (B.1.1.7)", "Delta (B.1.617.2)", "Delta (AY.4)",
       "Omicron (Other)","Omicron (BA.2)","Omicron (BA.4)","Omicron (BA.5)",
-      "XBB (Other)", "Kraken (XBB.1.5)","Arcturus (XBB.1.16)","Eris (EG.5.1)"
+      "XBB (Other)", "Kraken (XBB.1.5)","Arcturus (XBB.1.16)","Eris (EG.5.1)",
+      "Pirola (BA.2.86)"
     )),
     who_class = dplyr::case_when(
       is.na(Lineage) ~ "Unclassified",
       full_tree %>% stringr::str_starts("B.1.1.7") ~ "Alpha",
       full_tree %>% stringr::str_starts("B.1.617.2") ~ "Delta",
+      full_tree %>% stringr::str_starts("B.1.1.529.2.86") ~ "Pirola",
       full_tree %>% stringr::str_starts("B.1.1.529") ~ "Omicron",
       full_tree %>% stringr::str_starts("XBB.1.5") ~ "Kraken",
       full_tree %>% stringr::str_starts("XBB.1.16") ~ "Arcturus",
       full_tree %>% stringr::str_starts("XBB.1.9.2.5.1") ~ "Eris",
       TRUE ~ "Other"
     ) %>% factor(c(
-      "Other", "Alpha", "Delta", "Omicron", "Kraken","Arcturus","Eris"
+      "Other", "Alpha", "Delta", "Omicron", "Kraken","Arcturus","Eris","Pirola"
     ))
   ) #%>% dplyr::select(-prefix,-suffix,-expanded)
 

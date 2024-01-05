@@ -54,3 +54,4 @@ tmp = growthrates::england_covid \%>\%
  growthrates::poisson_glm_model(window=21) \%>\%
  dplyr::glimpse()
 }
+\concept{models}

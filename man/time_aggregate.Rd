@@ -46,3 +46,4 @@ growthrates::england_covid \%>\%
   time_aggregate(.fns=mean) \%>\%
   dplyr::glimpse()
 }
+\concept{time_period}

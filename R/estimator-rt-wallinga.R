@@ -11,6 +11,7 @@
 #'
 #' @return `r i_reproduction_number`
 #' @export
+#' @concept models
 #' @examples
 #' tmp = growthrates::england_covid %>%
 #'   time_aggregate(count=sum(count))
@@ -23,7 +24,7 @@
 #'     rt_from_growth_rate()
 #' }
 #'
-rt_from_growth_rate = function(df = i_growth_rate, ip = i_infectivity_profile, bootstraps = 20) {
+rt_from_growth_rate = function(df = i_growth_rate, ip = i_infectivity_profile, bootstraps = 2000) {
 
   df = interfacer::ivalidate(df)
   ip = interfacer::ivalidate(ip)
@@ -37,7 +38,7 @@ rt_from_growth_rate = function(df = i_growth_rate, ip = i_infectivity_profile, b
   boots_per_ip = max(bootstraps %/% ip_boots,10)
 
   df = df %>% dplyr::mutate(
-    rt = purrr::map2(growth.fit, growth.se.fit, .progress = TRUE, function(mean_r, sd_r) {
+    rt = purrr::map2(growth.fit, growth.se.fit, .progress = interactive(), function(mean_r, sd_r) {
 
       mean_r = .daily_unit*mean_r
       sd_r = .daily_unit*sd_r

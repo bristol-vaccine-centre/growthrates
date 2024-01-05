@@ -13,7 +13,9 @@ date_to_time(
 \arguments{
 \item{dates}{a vector of dates to convert}
 
-\item{unit}{a specification of the unit of the resulting time series. Will be determined from periodicity of dates if not specified}
+\item{unit}{a specification of the unit of the resulting time series.
+Will be determined from periodicity of dates if not specified. If another
+\code{time_period} is given as the unit then the}
 
 \item{start_date}{the origin of the conversion. Defaults to the beginning of the COVID pandemic}
 }
@@ -27,3 +29,4 @@ Using a start_date and a unit specification
 times = date_to_time(as.Date("2019-12-29")+0:100, "1 week")
 dates = time_to_date(times)
 }
+\concept{time_period}

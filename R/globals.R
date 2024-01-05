@@ -53,6 +53,8 @@ utils::globalVariables(c(
 	"y",
 	"ymax",
 	"ymin",
-	"R", "a", "boot", "expr", "population_fn", "probability", "r", "r_i"
+	"R", "a", "boot", "expr", "population_fn", "probability", "r", "r_i",
+  "Mean(R)", "Median(R)", "Quantile.0.025(R)", "Quantile.0.975(R)", "Std(R)",
+	"t_end"
 
 ))

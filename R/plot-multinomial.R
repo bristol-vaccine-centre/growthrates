@@ -10,6 +10,7 @@
 #'
 #' @return a ggplot
 #' @export
+#' @concept vis
 #' @examples
 #' tmp = growthrates::england_covid %>%
 #'   growthrates::proportion_locfit_model(window=21) %>%

@@ -111,3 +111,4 @@ timepoints = as.Date(c("Lockdown 1" = "2020-03-30", "Lockdown 2" = "2020-12-31")
 
 plot_growth_phase(tmp2, timepoints, duration=108)
 }
+\concept{vis}

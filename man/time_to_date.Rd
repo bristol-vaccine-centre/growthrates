@@ -27,3 +27,4 @@ Convert a set of timepoints to dates
 times = date_to_time(as.Date("2019-12-29")+0:100, "1 week")
 dates = time_to_date(times)
 }
+\concept{time_period}

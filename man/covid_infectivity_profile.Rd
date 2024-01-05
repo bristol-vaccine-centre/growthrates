@@ -3,7 +3,6 @@
 \docType{data}
 \name{covid_infectivity_profile}
 \alias{covid_infectivity_profile}
-\alias{i_infectivity_profile}
 \title{The covid_infectivity_profile dataframe structure specification}
 \format{
 A dataframe containing the following columns:
@@ -17,10 +16,8 @@ Must be grouped by: boot (exactly).
 
 A default value is defined.
 }
-\usage{
-i_infectivity_profile
-}
 \description{
 The covid_infectivity_profile dataframe structure specification
 }
+\concept{datasets}
 \keyword{interfaces}

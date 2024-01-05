@@ -96,3 +96,4 @@ tmp2 = tmp \%>\%
 
 plot_incidence(tmp2,tmp \%>\% dplyr::cross_join(tmp_pop),colour="blue",size=0.25)
 }
+\concept{vis}

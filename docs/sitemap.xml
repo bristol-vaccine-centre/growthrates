@@ -22,6 +22,9 @@
     <loc>/articles/index.html</loc>
   </url>
   <url>
+    <loc>/articles/rt-from-incidence.html</loc>
+  </url>
+  <url>
     <loc>/articles/time-periods.html</loc>
   </url>
   <url>
@@ -73,10 +76,16 @@
     <loc>/reference/england_covid_pcr_positivity.html</loc>
   </url>
   <url>
+    <loc>/reference/england_covid_proportion.html</loc>
+  </url>
+  <url>
     <loc>/reference/england_demographics.html</loc>
   </url>
   <url>
     <loc>/reference/england_events.html</loc>
+  </url>
+  <url>
+    <loc>/reference/england_nhs_app.html</loc>
   </url>
   <url>
     <loc>/reference/england_variants.html</loc>
@@ -187,7 +196,13 @@
     <loc>/reference/restore_groups.html</loc>
   </url>
   <url>
+    <loc>/reference/rt_epiestim.html</loc>
+  </url>
+  <url>
     <loc>/reference/rt_from_growth_rate.html</loc>
+  </url>
+  <url>
+    <loc>/reference/rt_from_incidence.html</loc>
   </url>
   <url>
     <loc>/reference/scale_y_log1p.html</loc>

@@ -26,3 +26,4 @@ Convert time period to dates
 \item \code{as.POSIXct(time_period)}: Convert to a vector of POSIXct
 
 }}
+\concept{time_period}

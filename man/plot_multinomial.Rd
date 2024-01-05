@@ -66,3 +66,4 @@ plot_multinomial(tmp, normalise=TRUE)+
   ggplot2::scale_fill_viridis_d()
 
 }
+\concept{vis}

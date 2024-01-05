@@ -21,3 +21,4 @@ is usually inconvenient.
 \examples{
 min_date(NA)
 }
+\concept{time_period}

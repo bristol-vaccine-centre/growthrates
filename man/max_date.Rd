@@ -21,3 +21,4 @@ is usually inconvenient.
 \examples{
 max_date(NA)
 }
+\concept{time_period}

@@ -62,3 +62,4 @@ cut_date(dates2, "1 week", "sun", output="factor")
 cut_date(dates2, dfmt = "\%d/\%b", output="factor", unit = "2 weeks", anchor="sun")
 
 }
+\concept{time_period}

@@ -18,3 +18,4 @@ Format date as dmy
 \examples{
 fdmy(Sys.Date())
 }
+\concept{time_period}

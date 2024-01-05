@@ -36,6 +36,7 @@
 #'
 #' @return `r i_proportion_model`
 #' @export
+#' @concept models
 #' @examples
 #'
 #' # TODO: find out cause of the warnings
@@ -84,6 +85,7 @@ proportion_glm_model = function(d = i_proportion_input, ..., window = 14, freque
 #'
 #' @return `r i_incidence_model`
 #' @export
+#' @concept models
 #' @examples
 #'
 #' tmp = growthrates::england_covid %>%

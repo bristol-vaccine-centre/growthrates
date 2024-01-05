@@ -94,3 +94,4 @@ growthrates::england_covid \%>\%
  growthrates::proportion_locfit_model(window=21) \%>\%
  dplyr::glimpse()
 }
+\concept{models}

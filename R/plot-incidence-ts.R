@@ -20,6 +20,7 @@
 #'
 #' @return a ggplot object
 #' @export
+#' @concept vis
 #' @examples
 #' # example code
 #' tmp = growthrates::england_covid %>%

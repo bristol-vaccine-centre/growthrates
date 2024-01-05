@@ -81,3 +81,4 @@ tmp = growthrates::england_covid \%>\%
 plot_proportion(tmp)+
   ggplot2::scale_fill_viridis_d(aesthetics = c("fill","colour"))
 }
+\concept{vis}

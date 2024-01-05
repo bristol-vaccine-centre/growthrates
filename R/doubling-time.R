@@ -15,6 +15,7 @@
 #' @return the same dataframe with additional columns for doubling time
 #'   or relative doubling time plus confidence intervals.
 #' @export
+#' @concept models
 #' @examples
 #' growthrates::england_covid %>%
 #'   growthrates::poisson_locfit_model(window=21) %>%

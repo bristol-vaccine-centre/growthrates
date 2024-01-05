@@ -53,3 +53,4 @@ tmp = growthrates::england_covid \%>\%
   growthrates::multinomial_nnet_model(window=21) \%>\%
   dplyr::glimpse()
 }
+\concept{models}

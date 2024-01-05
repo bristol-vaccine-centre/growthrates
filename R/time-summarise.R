@@ -42,6 +42,8 @@
 #' @param .fill a list similar to tidyr::complete for values to fill
 #'   variables with
 #'
+#' @concept time_period
+#'
 #' @return The output depends on whether or not the input was grouped and
 #' had a `class` column. The most detailed output will be:
 #'
@@ -136,6 +138,7 @@ time_summarise = function(df = i_dated, unit, anchor = "start", rectangular = FA
 #' @return the summarised time series preserving the `time` column, and with the grouping
 #'   structure involving one fewer levels that the input
 #' @export
+#' @concept time_period
 #'
 #' @examples
 #' growthrates::england_covid %>%

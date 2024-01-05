@@ -53,6 +53,7 @@
 #'
 #' @return `r i_proportion_rate`
 #' @export
+#' @concept models
 #'
 #' @examples
 #' growthrates::england_covid %>%
@@ -142,6 +143,7 @@ proportion_locfit_model = function(d = i_proportion_input, ..., window = 14, deg
 #' @return `r i_incidence_rate`
 #'
 #' @export
+#' @concept models
 #'
 #' @examples
 #' growthrates::england_covid %>%

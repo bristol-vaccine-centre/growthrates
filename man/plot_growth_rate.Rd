@@ -104,3 +104,4 @@ tmp3 = growthrates::england_covid \%>\%
 
 plot_growth_rate(tmp3)
 }
+\concept{vis}
