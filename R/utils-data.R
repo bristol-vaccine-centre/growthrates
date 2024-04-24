@@ -89,4 +89,11 @@
 #   return(df)
 # }
 
+.logit = function(x) {
+  log(x/(1-x))
+}
+
+.expit = function(x) {
+  return(1/(1+exp(-x)))
+}
 

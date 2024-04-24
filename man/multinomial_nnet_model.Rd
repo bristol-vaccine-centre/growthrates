@@ -13,20 +13,7 @@ multinomial_nnet_model(
 )
 }
 \arguments{
-\item{d}{A dataframe containing the following columns:
-\itemize{
-\item class (factor) - A factor specifying the type of observation. This will be things like
-}
-
-variant, or serotype, for a multinomial model. Any missing data points are ignored.
-\itemize{
-\item count (positive_integer) - Positive case counts associated with the specified timeframe
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
-}
-
-Must be grouped by: class (exactly).
-
-No default value.}
+\item{d}{Multiclass count input}
 
 \item{...}{not used and present to allow proportion model to be used in a group_modify}
 
@@ -48,9 +35,12 @@ data using \code{nnet::multinom}, with approx one degree of freedom per class an
 \code{window} units of the time series
 }
 \examples{
-tmp = growthrates::england_covid \%>\%
-  dplyr::filter(date > "2022-01-01") \%>\%
-  growthrates::multinomial_nnet_model(window=21) \%>\%
-  dplyr::glimpse()
+if (FALSE) {
+  # not run due to long running
+  tmp = growthrates::england_covid \%>\%
+    dplyr::filter(date > "2022-01-01") \%>\%
+    growthrates::multinomial_nnet_model(window=21) \%>\%
+    dplyr::glimpse()
+}
 }
 \concept{models}

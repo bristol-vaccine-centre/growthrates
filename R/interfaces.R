@@ -98,13 +98,12 @@ i_incidence_model = interfacer::iface(
 )
 
 i_incidence_per_capita_model = interfacer::iface(
-  i_incidence_model,
+  i_timeseries,
   incidence.per_capita.fit = double ~ "an estimate of the incidence per capita rate on a log scale",
   incidence.per_capita.se.fit = double ~ "the standard error of the incidence per capita rate estimate on a log scale",
   incidence.per_capita.0.025 = positive_double ~ "lower confidence limit of the incidence per capita rate (true scale)",
   incidence.per_capita.0.5 = positive_double ~ "median estimate of the incidence per capita rate (true scale)",
   incidence.per_capita.0.975 = positive_double ~ "upper confidence limit of the incidence per capita rate (true scale)",
-  population = double ~ "The population size for the unadjusted incidence",
   population_unit = double ~ "The population unit on which the per capita incidence rate is calculated"
 )
 

@@ -13,9 +13,11 @@ plot_rt(
 )
 }
 \arguments{
-\item{modelled}{A dataframe containing the following columns:
+\item{modelled}{the modelled Rt estimate
+
+A dataframe containing the following columns: 
 \itemize{
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 \item rt.fit (double) - an estimate of the reproduction number
 \item rt.se.fit (double) - the standard error of the reproduction number
 \item rt.0.025 (double) - lower confidence limit of the reproduction number
@@ -25,7 +27,8 @@ plot_rt(
 
 No mandatory groupings.
 
-No default value.}
+No default value.
+}
 
 \item{...}{
   Arguments passed on to \code{\link[=geom_events]{geom_events}}
@@ -36,7 +39,9 @@ No default value.}
 \item{mapping}{a \code{ggplot2::aes} mapping. Most importantly setting the \code{colour}
 to something if there are multiple incidence time series in the plot}
 
-\item{events}{A dataframe containing the following columns:
+\item{events}{Significant events or time spans
+
+A dataframe containing the following columns: 
 \itemize{
 \item label (character) - the event label
 \item start (date) - the start date, or the date of the event
@@ -45,7 +50,8 @@ to something if there are multiple incidence time series in the plot}
 
 No mandatory groupings.
 
-A default value is defined.}
+A default value is defined.
+}
 }
 \value{
 a ggplot timeseries

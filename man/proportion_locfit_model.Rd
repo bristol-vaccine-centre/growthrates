@@ -14,16 +14,19 @@ proportion_locfit_model(
 )
 }
 \arguments{
-\item{d}{A dataframe containing the following columns:
+\item{d}{the input
+
+A dataframe containing the following columns: 
 \itemize{
 \item denom (positive_integer) - Total test counts associated with the specified timeframe
 \item count (positive_integer) - Positive case counts associated with the specified timeframe
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 }
 
 Ungrouped.
 
-No default value.}
+No default value.
+}
 
 \item{...}{not used and present to allow proportion model to be used in a
 \code{group_modify}}
@@ -31,17 +34,17 @@ No default value.}
 \item{window}{a number of data points defining the bandwidth of the estimate,
 smaller values result in less smoothing, large value in more. The default
 value of 14 is calibrated for data provided on a daily frequency, with
-weekly data a lower value may be preferred.}
+weekly data a lower value may be preferred. - (defaults to \code{14})}
 
 \item{deg}{polynomial degree (min 1) - higher degree results in less
 smoothing, lower values result in more smoothing. A degree of 1 is fitting
-a linear model piece wise.}
+a linear model piece wise. - (defaults to \code{1})}
 
 \item{frequency}{the density of the output estimates as a time period such as
-\verb{7 days} or \verb{2 weeks}.}
+\verb{7 days} or \verb{2 weeks}. - (defaults to \code{"1 day"})}
 
 \item{predict}{result is a prediction dataframe. If false we return the
-\code{locfit} models (advanced).}
+\code{locfit} models (advanced). - (defaults to \code{TRUE})}
 }
 \value{
 A dataframe containing the following columns:

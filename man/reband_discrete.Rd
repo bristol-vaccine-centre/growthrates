@@ -11,7 +11,8 @@ reband_discrete(
   xlim = c(0, NA),
   ytotal = c(0, sum(y)),
   digits = 0,
-  labelling = c("positive_integer", "inclusive", "exclusive")
+  labelling = c("positive_integer", "inclusive", "exclusive"),
+  sep = "-"
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ to put in the labels}
 
 \item{labelling}{are the \code{xout} values interpretable as an \code{inclusive} upper limit, or
 an \code{exclusive} upper limit, or as an upper limit of an `positive_integer`` quantity}
+
+\item{sep}{seperator for names e.g. \code{18-24} or \verb{18 to 24}}
 }
 \value{
 a rebanded set of discrete values, guaranteed to sum to the same as \code{y}

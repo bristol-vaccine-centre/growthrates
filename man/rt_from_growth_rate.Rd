@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimator-rt-wallinga.R
 \name{rt_from_growth_rate}
 \alias{rt_from_growth_rate}
-\title{Wallinga-Teunis reproduction number}
+\title{Wallinga-Lipsitch reproduction number}
 \usage{
 rt_from_growth_rate(
   df = i_growth_rate,
@@ -11,9 +11,11 @@ rt_from_growth_rate(
 )
 }
 \arguments{
-\item{df}{A dataframe containing the following columns:
+\item{df}{Growth rate estimates
+
+A dataframe containing the following columns: 
 \itemize{
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 \item growth.fit (double) - an estimate of the growth rate
 \item growth.se.fit (double) - the standard error the growth rate
 \item growth.0.025 (double) - lower confidence limit of the growth rate
@@ -23,18 +25,22 @@ rt_from_growth_rate(
 
 No mandatory groupings.
 
-No default value.}
+No default value.
+}
 
-\item{ip}{A dataframe containing the following columns:
+\item{ip}{Infectivity profile
+
+A dataframe containing the following columns: 
 \itemize{
 \item boot (anything) - a bootstrap identifier
 \item time (positive_double) - the end of the time period (in days)
-\item probability (proportion) - the probability of infection between previous time period until \code{time}
+\item probability (proportion) - the probability of infection between previous time period until `time`
 }
 
 Must be grouped by: boot (exactly).
 
-A default value is defined.}
+A default value is defined.
+}
 
 \item{bootstraps}{\itemize{
 \item the number of bootstraps to take to calculate for each point.

@@ -1,6 +1,6 @@
 Package: growthrates
 Title: Estimate Incidence, Proportions and Exponential Growth Rates
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     person(given = "Robert",
            family = "Challen",
@@ -14,7 +14,7 @@ Description: Simple statistical models and visualisations for calculating the
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests: 
     downloader,
     fs,
@@ -48,8 +48,8 @@ Imports:
     ggplot2,
     glue,
     purrr,
-    interfacer (>= 0.1.5),
-    EpiEstim
+    EpiEstim,
+    interfacer (>= 0.1.8)
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,
     https://doi.org/10.5281/zenodo.7242761

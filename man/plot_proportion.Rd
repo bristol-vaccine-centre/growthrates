@@ -14,9 +14,11 @@ plot_proportion(
 )
 }
 \arguments{
-\item{modelled}{A dataframe containing the following columns:
+\item{modelled}{Proportion model estimates
+
+A dataframe containing the following columns: 
 \itemize{
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 \item proportion.fit (double) - an estimate of the proportion on a logit scale
 \item proportion.se.fit (double) - the standard error of proportion estimate on a logit scale
 \item proportion.0.025 (proportion) - lower confidence limit of proportion (true scale)
@@ -26,18 +28,22 @@ plot_proportion(
 
 No mandatory groupings.
 
-No default value.}
+No default value.
+}
 
-\item{raw}{A dataframe containing the following columns:
+\item{raw}{Raw count data
+
+A dataframe containing the following columns: 
 \itemize{
 \item denom (positive_integer) - Total test counts associated with the specified timeframe
 \item count (positive_integer) - Positive case counts associated with the specified timeframe
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 }
 
 No mandatory groupings.
 
-No default value.}
+No default value.
+}
 
 \item{...}{
   Arguments passed on to \code{\link[=geom_events]{geom_events}}, \code{\link[=proportion_locfit_model]{proportion_locfit_model}}
@@ -45,18 +51,20 @@ No default value.}
     \item{\code{window}}{a number of data points defining the bandwidth of the estimate,
 smaller values result in less smoothing, large value in more. The default
 value of 14 is calibrated for data provided on a daily frequency, with
-weekly data a lower value may be preferred.}
+weekly data a lower value may be preferred. - (defaults to \code{14})}
     \item{\code{deg}}{polynomial degree (min 1) - higher degree results in less
 smoothing, lower values result in more smoothing. A degree of 1 is fitting
-a linear model piece wise.}
+a linear model piece wise. - (defaults to \code{1})}
     \item{\code{frequency}}{the density of the output estimates as a time period such as
-\verb{7 days} or \verb{2 weeks}.}
+\verb{7 days} or \verb{2 weeks}. - (defaults to \code{"1 day"})}
   }}
 
 \item{mapping}{a \code{ggplot2::aes} mapping. Most importantly setting the \code{colour}
 to something if there are multiple incidence timeseries in the plot}
 
-\item{events}{A dataframe containing the following columns:
+\item{events}{Significant events or time spans
+
+A dataframe containing the following columns: 
 \itemize{
 \item label (character) - the event label
 \item start (date) - the start date, or the date of the event
@@ -65,7 +73,8 @@ to something if there are multiple incidence timeseries in the plot}
 
 No mandatory groupings.
 
-A default value is defined.}
+A default value is defined.
+}
 }
 \value{
 a ggplot object

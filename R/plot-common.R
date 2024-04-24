@@ -4,7 +4,7 @@
 #'
 #' The x axis must be a date.
 #'
-#' @param events `r interfacer::idocument(geom_events, events)`
+#' @iparam events Significant events or time spans
 #' @param event_label_size how big to make the event label
 #' @param event_label_colour the event label colour
 #' @param event_label_angle the event label colour

@@ -6,10 +6,8 @@
 #' geography or age, and we have estimates of the size of that population during
 #' that time period. Normalising by population proportion allows us to compare groups.
 #'
-#' @param base `r interfacer::idocument(normalise_proportion, base)`
-#'   The baseline data must be grouped in the same way as `modelled`.
-#' @param modelled `r interfacer::idocument(normalise_incidence, modelled)`
-#'   Model output from processing the `raw` dataframe with something like
+#' @iparam base The baseline data must be grouped in the same way as `modelled`.
+#' @iparam modelled Model output from processing the `raw` dataframe with something like
 #'   `proportion_locfit_model`
 #' @param ... not used
 #'

@@ -5,8 +5,8 @@
 #' described in the vignette "Estimating the reproduction number from modelled
 #' incidence" and using an empirical generation time distribution.
 #'
-#' @param df `r interfacer::idocument(rt_from_incidence, df)`
-#' @param ip `r interfacer::idocument(rt_from_incidence, ip)`
+#' @iparam df Count data
+#' @iparam ip Infectivity profile
 #'
 #' @return `r i_reproduction_number`
 #' @export

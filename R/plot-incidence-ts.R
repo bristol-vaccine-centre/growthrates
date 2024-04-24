@@ -2,7 +2,7 @@
 
 #' Plot an incidence timeseries
 #'
-#' @param raw `r interfacer::idocument(plot_incidence, raw)`
+#' @iparam raw The raw count data
 #' @param modelled An optional estimate of the incidence time series. If `modelled` is
 #'   missing then it is estimated from `raw` using a `poisson_locfit_model`.
 #'   In this case parameters `window` and `deg` may be supplied to control the
@@ -109,10 +109,14 @@ plot_incidence.per_capita = function(
 ) {
 
   population_unit = unique(modelled$population_unit)
+  time_unit = modelled$time_unit[[1]] # e.g. modelled nornalised time unit is per year
+  # unique() does not work on lubridate::periods
+  # TODO assume no-one is stupid enough to have different durations in same dataframe
 
   if (!interfacer::is.iface(raw)) {
+    timefrac = time_unit/.get_meta(raw$time)$unit # original time unit is per week => we want to *52/7
     raw = interfacer::ivalidate(raw)
-    raw = raw %>% dplyr::mutate(count.per_capita = count/population*population_unit)
+    raw = raw %>% dplyr::mutate(count.per_capita = count/population*population_unit*timefrac)
     plot_points = TRUE
   } else {
     plot_points = FALSE
@@ -143,11 +147,12 @@ plot_incidence.per_capita = function(
           ggplot2::GeomPoint,
           data = raw,
           mapping=ggplot2::aes(x=as.Date(time), y=count.per_capita, !!!mapping),
-          ...
+          ...,
+          .default=list(size=1)
         )
       } else {NULL}
     }+
-    ggplot2::ylab(sprintf("cases per %s per %s", .fmt_pop(population_unit), .fmt_unit(modelled$time)))+
+    ggplot2::ylab(sprintf("cases per %s per %s", .fmt_pop(population_unit), .fmt_unit(time_unit)))+
     ggplot2::xlab(NULL)+
     ggplot2::theme(legend.title=ggplot2::element_blank())
 

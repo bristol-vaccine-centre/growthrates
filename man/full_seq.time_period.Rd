@@ -2,7 +2,7 @@
 % Please edit documentation in R/periodic-times.R
 \name{full_seq.time_period}
 \alias{full_seq.time_period}
-\title{Expand a \code{time_period} vector to the full range of possible timess}
+\title{Expand a \code{time_period} vector to the full range of possible times}
 \usage{
 \method{full_seq}{time_period}(x, period = attributes(x)$unit, complete = FALSE, ...)
 }

@@ -2,8 +2,7 @@
 
 #' Reproduction number timeseries diagram
 #'
-#' @param modelled
-#' `r interfacer::idocument(plot_rt, modelled)`
+#' @iparam modelled the modelled Rt estimate
 #' @param mapping a `ggplot2::aes` mapping. Most importantly setting the `colour`
 #'   to something if there are multiple incidence time series in the plot
 #' @inheritParams geom_events

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-multinomial.R
 \name{plot_multinomial}
 \alias{plot_multinomial}
-\title{Plot a mulitnomial proportions mode}
+\title{Plot a multinomial proportions mode}
 \usage{
 plot_multinomial(
   modelled = i_multinomial_proportion_model,
@@ -13,20 +13,20 @@ plot_multinomial(
 )
 }
 \arguments{
-\item{modelled}{A dataframe containing the following columns:
-\itemize{
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
-\item class (factor) - A factor specifying the type of observation. This will be things like
-}
+\item{modelled}{the multinomial count data
 
-variant, or serotype, for a multinomial model. Any missing data points are ignored.
+A dataframe containing the following columns: 
 \itemize{
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
+\item class (factor) - A factor specifying the type of observation. This will be things like
+variant, or serotype, for a multinomial model. Any missing data points are ignored.
 \item proportion.0.5 (proportion) - median estimate of proportion (true scale)
 }
 
 Must be grouped by: class (exactly).
 
-No default value.}
+No default value.
+}
 
 \item{...}{
   Arguments passed on to \code{\link[=geom_events]{geom_events}}
@@ -37,7 +37,9 @@ No default value.}
 \item{mapping}{a \code{ggplot2::aes} mapping. Most importantly setting the \code{colour}
 to something if there are multiple incidence timeseries in the plot}
 
-\item{events}{A dataframe containing the following columns:
+\item{events}{Significant events or time spans
+
+A dataframe containing the following columns: 
 \itemize{
 \item label (character) - the event label
 \item start (date) - the start date, or the date of the event
@@ -46,7 +48,8 @@ to something if there are multiple incidence timeseries in the plot}
 
 No mandatory groupings.
 
-A default value is defined.}
+A default value is defined.
+}
 
 \item{normalise}{make sure the probabilities add up to one - this can be a
 bad idea if you know you may have missing values.}
@@ -55,7 +58,7 @@ bad idea if you know you may have missing values.}
 a ggplot
 }
 \description{
-Plot a mulitnomial proportions mode
+Plot a multinomial proportions mode
 }
 \examples{
 tmp = growthrates::england_covid \%>\%

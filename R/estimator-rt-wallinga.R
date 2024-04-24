@@ -1,12 +1,12 @@
 
-#' Wallinga-Teunis reproduction number
+#' Wallinga-Lipsitch reproduction number
 #'
 #' Calculate a reproduction number estimate from growth rate using the Wallinga
 #' 2007 estimation using empirical generation time distribution. This uses
 #' resampling to transmit uncertainty in growth rate estimates
 #'
-#' @param df `r interfacer::idocument(rt_from_growth_rate, df)`
-#' @param ip `r interfacer::idocument(rt_from_growth_rate, ip)`
+#' @iparam df Growth rate estimates
+#' @iparam ip Infectivity profile
 #' @param bootstraps - the number of bootstraps to take to calculate for each point.
 #'
 #' @return `r i_reproduction_number`
@@ -92,6 +92,31 @@ rt_from_growth_rate = function(df = i_growth_rate, ip = i_infectivity_profile, b
 
 
 
+#' Calculate the reproduction number from a growth rate estimate and an infectivity profile
+#'
+#' @param r a growth rate (may be a vector)
+#' @param y an empirical infectivity profile as a probability vector, starting at `P(0<t,a[1])`
+#' @param a the end time of the estimate (defaults to single days).
+#'
+#' @return a reproduction number estimate based on `r`
+#' @export
+#'
+#' @examples
+#' wallinga_lipsitch(r=seq(-0.1,0.1,length.out=9), y=dgamma(1:50, 5,2))
+wallinga_lipsitch = function(r, y, a=1:length(y)) {
 
+  y = y/sum(y)
+  tmp = sapply(r, function(r2) {
+    R = r2/sum(
+      y
+      *
+        (exp(-r2*dplyr::lag(a,default=0))-exp(-r2*a))
+      /
+        (a - dplyr::lag(a,default=0))
+    )
+    return(R)
+  })
+  return(ifelse(r==0,1,tmp))
+}
 
 

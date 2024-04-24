@@ -5,59 +5,45 @@
 \title{Calculate a normalised incidence rate per capita}
 \usage{
 normalise_incidence(
-  modelled = i_incidence_model,
-  pop = i_population_data,
+  modelled = i_timeseries,
   ...,
-  population_unit = 1e+05
+  population_unit = 1e+05,
+  normalise_time = FALSE
 )
 }
 \arguments{
-\item{modelled}{A dataframe containing the following columns:
+\item{modelled}{Model output from processing the \code{raw} dataframe with something like
+\code{poission_locfit_model}
+
+A dataframe containing the following columns: 
 \itemize{
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
-\item incidence.fit (double) - an estimate of the incidence rate on a log scale
-\item incidence.se.fit (double) - the standard error of the incidence rate estimate on a log scale
-\item incidence.0.025 (positive_double) - lower confidence limit of the incidence rate (true scale)
-\item incidence.0.5 (positive_double) - median estimate of the incidence rate (true scale)
-\item incidence.0.975 (positive_double) - upper confidence limit of the incidence rate (true scale)
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 }
 
 No mandatory groupings.
 
 No default value.
-Model output from processing the \code{raw} dataframe with something like
-\code{poission_locfit_model}}
-
-\item{pop}{A dataframe containing the following columns:
-\itemize{
-\item population (positive_integer) - Size of population
 }
-
-No mandatory groupings.
-
-No default value.
-The population data must be grouped in the same way as \code{modelled}.}
 
 \item{...}{not used}
 
-\item{population_unit}{what unit do you want the incidence in e.g. per 100K}
+\item{population_unit}{what population unit do you want the incidence in e.g. per 100K}
+
+\item{normalise_time}{The default behaviour for incidence is to keep it in
+the same time units as the input data. If this parameter is set to \code{TRUE} the
+incidence rates are calculated per year. If given as a lubridate period string
+e.g. "1 day" then the incidence is calculated over that time period.}
 }
 \value{
 a dataframe with incidence rates per unit capita.
 A dataframe containing the following columns:
 \itemize{
 \item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
-\item incidence.fit (double) - an estimate of the incidence rate on a log scale
-\item incidence.se.fit (double) - the standard error of the incidence rate estimate on a log scale
-\item incidence.0.025 (positive_double) - lower confidence limit of the incidence rate (true scale)
-\item incidence.0.5 (positive_double) - median estimate of the incidence rate (true scale)
-\item incidence.0.975 (positive_double) - upper confidence limit of the incidence rate (true scale)
 \item incidence.per_capita.fit (double) - an estimate of the incidence per capita rate on a log scale
 \item incidence.per_capita.se.fit (double) - the standard error of the incidence per capita rate estimate on a log scale
 \item incidence.per_capita.0.025 (positive_double) - lower confidence limit of the incidence per capita rate (true scale)
 \item incidence.per_capita.0.5 (positive_double) - median estimate of the incidence per capita rate (true scale)
 \item incidence.per_capita.0.975 (positive_double) - upper confidence limit of the incidence per capita rate (true scale)
-\item population (double) - The population size for the unadjusted incidence
 \item population_unit (double) - The population unit on which the per capita incidence rate is calculated
 }
 

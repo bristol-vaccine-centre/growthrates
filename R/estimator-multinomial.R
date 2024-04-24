@@ -6,7 +6,7 @@
 #' data using `nnet::multinom`, with approx one degree of freedom per class and per
 #' `window` units of the time series
 #'
-#' @param d `r interfacer::idocument(multinomial_nnet_model)`
+#' @param d Multiclass count input
 #' @param ... not used and present to allow proportion model to be used in a group_modify
 #' @param window a number of data points between knots, smaller values result in
 #'   less smoothing, large value in more.

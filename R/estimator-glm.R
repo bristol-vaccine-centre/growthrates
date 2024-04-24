@@ -31,7 +31,7 @@
 #' varying rate as a natural cubic spline with approx one degree of freedom per
 #' `window` units of the time series.
 #'
-#' @param d `r interfacer::idocument(proportion_glm_model)`
+#' @iparam d Proportion model input
 #' @inheritParams poisson_locfit_model
 #'
 #' @return `r i_proportion_model`
@@ -80,7 +80,7 @@ proportion_glm_model = function(d = i_proportion_input, ..., window = 14, freque
 #' varying rate as a natural cubic spline with approx one degree of freedom per
 #' `window` units of the time series.
 #'
-#' @param d `r interfacer::idocument(poisson_glm_model)`
+#' @iparam d Count model input
 #' @inheritParams poisson_locfit_model
 #'
 #' @return `r i_incidence_model`

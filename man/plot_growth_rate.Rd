@@ -64,7 +64,9 @@ No default value.}
 \item{mapping}{a \code{ggplot2::aes} mapping. Most importantly setting the \code{colour}
 to something if there are multiple incidence time series in the plot}
 
-\item{events}{A dataframe containing the following columns:
+\item{events}{Significant events or time spans
+
+A dataframe containing the following columns: 
 \itemize{
 \item label (character) - the event label
 \item start (date) - the start date, or the date of the event
@@ -73,7 +75,8 @@ to something if there are multiple incidence time series in the plot}
 
 No mandatory groupings.
 
-A default value is defined.}
+A default value is defined.
+}
 }
 \value{
 a ggplot timeseries

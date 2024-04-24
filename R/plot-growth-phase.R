@@ -215,7 +215,7 @@ plot_growth_phase.risk_ratio = function(
     dplyr::group_by(!!!grps,end,labels) %>%
     dplyr::filter(time <= end) %>%
     dplyr::arrange(dplyr::desc(time)) %>%
-    dplyr::filter(dplyr::row_number() <= duration) %>%
+    dplyr::filter(time > end-duration) %>%
     dplyr::mutate(
       fade = 1-0.9*(dplyr::row_number()-1)/duration,
       display_point = (dplyr::row_number()-1) %% interval == 0,

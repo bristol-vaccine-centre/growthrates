@@ -73,7 +73,9 @@ as facets. If \code{NULL} (the default) it will be the last time point in the se
 \item{...}{
   Arguments passed on to \code{\link[=geom_events]{geom_events}}
   \describe{
-    \item{\code{events}}{A dataframe containing the following columns:
+    \item{\code{events}}{Significant events or time spans
+
+A dataframe containing the following columns: 
 \itemize{
 \item label (character) - the event label
 \item start (date) - the start date, or the date of the event
@@ -82,7 +84,8 @@ as facets. If \code{NULL} (the default) it will be the last time point in the se
 
 No mandatory groupings.
 
-A default value is defined.}
+A default value is defined.
+}
   }}
 }
 \value{

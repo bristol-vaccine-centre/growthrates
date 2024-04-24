@@ -154,6 +154,12 @@
     <loc>/reference/normalise_incidence.html</loc>
   </url>
   <url>
+    <loc>/reference/normalise_incidence.incidence.html</loc>
+  </url>
+  <url>
+    <loc>/reference/normalise_incidence.proportion.html</loc>
+  </url>
+  <url>
     <loc>/reference/normalise_proportion.html</loc>
   </url>
   <url>
@@ -221,5 +227,8 @@
   </url>
   <url>
     <loc>/reference/time_to_date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/wallinga_lipsitch.html</loc>
   </url>
 </urlset>

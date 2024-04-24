@@ -11,23 +11,27 @@ normalise_proportion(
 )
 }
 \arguments{
-\item{modelled}{A dataframe containing the following columns:
+\item{modelled}{Model output from processing the \code{raw} dataframe with something like
+\code{proportion_locfit_model}
+
+A dataframe containing the following columns: 
 \itemize{
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
-\item incidence.fit (double) - an estimate of the incidence rate on a log scale
-\item incidence.se.fit (double) - the standard error of the incidence rate estimate on a log scale
-\item incidence.0.025 (positive_double) - lower confidence limit of the incidence rate (true scale)
-\item incidence.0.5 (positive_double) - median estimate of the incidence rate (true scale)
-\item incidence.0.975 (positive_double) - upper confidence limit of the incidence rate (true scale)
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
+\item proportion.fit (double) - an estimate of the proportion on a logit scale
+\item proportion.se.fit (double) - the standard error of proportion estimate on a logit scale
+\item proportion.0.025 (proportion) - lower confidence limit of proportion (true scale)
+\item proportion.0.5 (proportion) - median estimate of proportion (true scale)
+\item proportion.0.975 (proportion) - upper confidence limit of proportion (true scale)
 }
 
 No mandatory groupings.
 
 No default value.
-Model output from processing the \code{raw} dataframe with something like
-\code{proportion_locfit_model}}
+}
 
-\item{base}{A dataframe containing the following columns:
+\item{base}{The baseline data must be grouped in the same way as \code{modelled}.
+
+A dataframe containing the following columns: 
 \itemize{
 \item baseline_proportion (proportion) - Size of population
 }
@@ -35,7 +39,7 @@ Model output from processing the \code{raw} dataframe with something like
 No mandatory groupings.
 
 No default value.
-The baseline data must be grouped in the same way as \code{modelled}.}
+}
 
 \item{...}{not used}
 }

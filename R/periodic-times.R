@@ -118,11 +118,13 @@ as.time_period.time_period = function(x, unit = NULL, start_date = NULL, ...) {
   times = x
   orig_unit = attributes(times)$unit
   orig_start_date = as.Date(attributes(times)$start_date)
+  if (is.null(orig_unit) || is.null(orig_start_date)) stop("time period has been corrupted")
   if (is.null(unit)) unit = orig_unit
   if (is.time_period(unit)) {
     # If a second timeseries is given it is a reference
     start_date = .get_meta(unit)$start_date
     unit = .get_meta(unit)$unit
+    if (is.null(unit) || is.null(start_date)) stop("comparison time period has been corrupted")
   } else {
     if (is.null(start_date)) start_date = orig_start_date
   }
@@ -214,6 +216,9 @@ as.POSIXct.time_period = function(x,...) {
 #' @export
 c.time_period = function(..., recursive = F) {
   inputs = list(...)
+  if (!all(sapply(inputs, is.time_period))) {
+    return(unlist(lapply(inputs,as.numeric)))
+  }
   unit = lapply(inputs, function(x) attributes(x)$unit) %>% unique()
   start_date = sapply(inputs, function(x) attributes(x)$start_date) %>% unique() %>% as.Date("1970-01-01")
   if (length(unit) > 1) stop("Cannot join time_periods with differing units.")
@@ -274,11 +279,11 @@ c.time_period = function(..., recursive = F) {
 
 #' @export
 `Summary.time_period` = function(..., na.rm=FALSE) {
-  inputs = list(...)
-  unit = lapply(inputs, function(x) attributes(x)$unit) %>% unique()
-  start_date = sapply(inputs, function(x) attributes(x)$start_date) %>% unique() %>% as.Date("1970-01-01")
-  if (length(unit) > 1) stop("Cannot compare time_periods with differing units.")
-  if (length(start_date) > 1) stop("Cannot compare time_periods with differing start dates.")
+  inputs = c(...)
+
+  # Lubridate periods cannot be made unique
+  unit = attributes(inputs)$unit
+  start_date = attributes(inputs)$start_date
 
   tmp = c(unlist(lapply(list(...), unclass)))
   y = get(.Generic)(tmp)
@@ -295,6 +300,8 @@ c.time_period = function(..., recursive = F) {
 .clone_time_period = function(x, original) {
   orig_unit = attributes(original)$unit
   orig_start_date = attributes(original)$start_date
+  # If for some reason this has broken fall back to a numeric.
+  if (is.null(orig_unit) || is.null(orig_start_date)) return(as.numeric(x))
   return(structure(
     as.numeric(x),
     start_date = orig_start_date,
@@ -359,7 +366,7 @@ labels.time_period = function(object, ..., dfmt = "%d/%b", ifmt = "{start} \u201
 }
 
 .fmt_unit = function(x,...) {
-  tmp = attributes(x)$unit
+  tmp = if (is.time_period(x)) attributes(x)$unit else lubridate::as.period(x)
   tf = function(u, d) if(d==1) u else sprintf("%d %ss", d, u)
   return(dplyr::case_when(
     tmp@year != 0 && tmp@month == 0 && tmp@day ==0 && tmp@hour == 0 && tmp@minute == 0 && tmp@.Data == 0 ~ tf("year",tmp@year),
@@ -444,8 +451,9 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
     if (is.numeric(unit)) unit = lubridate::period(unit,unit="day")
     else unit = lubridate::period(unit)
   }
-
   start_date = as.Date(start_date)
+
+  timepoints = as.numeric(timepoints)
   if (all(timepoints == floor(timepoints),na.rm = TRUE)) {
     return(start_date+unit*as.numeric(timepoints))
   }
@@ -599,7 +607,7 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 }
 
 
-#' Expand a `time_period` vector to the full range of possible timess
+#' Expand a `time_period` vector to the full range of possible times
 #'
 #' Derive from a vector of observation `time_periods`, a complete ordered sequence of
 #' periods in a regular time series, where the length of the periods is

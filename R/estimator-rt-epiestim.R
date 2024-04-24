@@ -12,8 +12,8 @@
 #' This will calculate a reproduction number for each group in the input dataframe.
 #'
 #'
-#' @param df `r interfacer::idocument(rt_epiestim, df)`. Extra groups are allowed.
-#' @param ip `r interfacer::idocument(rt_epiestim, ip)`
+#' @iparam df Count data. Extra groups are allowed.
+#' @iparam ip infectivity profile
 #' @param bootstraps - the number of bootstraps to take to calculate for each point.
 #' @param window - the width of the epiestim window
 #' @param mean_prior the prior for the $R_t$ estimate. When sample size is low the

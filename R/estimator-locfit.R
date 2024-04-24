@@ -48,7 +48,8 @@
 #' and may be a better estimate of the true growth rate in the situation where
 #' testing effort is variable, or capacity saturated.
 #'
-#' @param d `r interfacer::idocument(proportion_locfit_model)`
+#'
+#' @iparam d the input
 #' @inheritParams poisson_locfit_model
 #'
 #' @return `r i_proportion_rate`
@@ -95,12 +96,12 @@ proportion_locfit_model = function(d = i_proportion_input, ..., window = 14, deg
     if (!predict) return(tibble::tibble(proportion = list(fit), relative.growth = list(deriv)))
 
     # proportion
-    tmp = stats::preplot(fit,newdata=output_times, se.fit = TRUE, band="local")
+    tmp = stats::preplot(fit,newdata=output_times, se.fit = TRUE, band="global")
     # logit transformer function:
     t = tmp$tr
 
     # growth rate
-    tmp2 = stats::preplot(deriv,newdata=output_times, se.fit = TRUE, band="local")
+    tmp2 = stats::preplot(deriv,newdata=output_times, se.fit = TRUE, band="global")
     t2 = function(x) x
 
     new_data = tibble::tibble(
@@ -125,19 +126,19 @@ proportion_locfit_model = function(d = i_proportion_input, ..., window = 14, deg
 #' growth rate estimate both based on the time unit of the input data (e.g. for
 #' daily data the rate will be cases per day and the growth rate will be daily).
 #'
-#' @param d `r interfacer::idocument(poisson_locfit_model, d)`
-#' @param ... not used and present to allow proportion model to be used in a
+#' @iparam d input data
+#' @iparam ... not used and present to allow proportion model to be used in a
 #'   `group_modify`
-#' @param window a number of data points defining the bandwidth of the estimate,
+#' @iparam window a number of data points defining the bandwidth of the estimate,
 #'   smaller values result in less smoothing, large value in more. The default
 #'   value of 14 is calibrated for data provided on a daily frequency, with
 #'   weekly data a lower value may be preferred.
-#' @param deg polynomial degree (min 1) - higher degree results in less
+#' @iparam deg polynomial degree (min 1) - higher degree results in less
 #'   smoothing, lower values result in more smoothing. A degree of 1 is fitting
 #'   a linear model piece wise.
-#' @param frequency the density of the output estimates as a time period such as
+#' @iparam frequency the density of the output estimates as a time period such as
 #'   `7 days` or `2 weeks`.
-#' @param predict result is a prediction dataframe. If false we return the
+#' @iparam predict result is a prediction dataframe. If false we return the
 #'   `locfit` models (advanced).
 #'
 #' @return `r i_incidence_rate`

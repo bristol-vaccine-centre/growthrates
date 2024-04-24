@@ -15,26 +15,32 @@ rt_epiestim(
 )
 }
 \arguments{
-\item{df}{A dataframe containing the following columns:
+\item{df}{Count data. Extra groups are allowed.
+
+A dataframe containing the following columns: 
 \itemize{
 \item count (positive_integer) - Positive case counts associated with the specified timeframe
-\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a \code{time_period}
+\item time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`
 }
 
 Ungrouped.
 
-No default value.. Extra groups are allowed.}
+No default value.
+}
 
-\item{ip}{A dataframe containing the following columns:
+\item{ip}{infectivity profile
+
+A dataframe containing the following columns: 
 \itemize{
 \item boot (anything) - a bootstrap identifier
 \item time (positive_double) - the end of the time period (in days)
-\item probability (proportion) - the probability of infection between previous time period until \code{time}
+\item probability (proportion) - the probability of infection between previous time period until `time`
 }
 
 Must be grouped by: boot (exactly).
 
-A default value is defined.}
+A default value is defined.
+}
 
 \item{bootstraps}{\itemize{
 \item the number of bootstraps to take to calculate for each point.
@@ -84,8 +90,10 @@ This will calculate a reproduction number for each group in the input dataframe.
 tmp = growthrates::england_covid \%>\%
   time_aggregate(count=sum(count))
 
-tmp2 = tmp \%>\%
-   rt_epiestim()
+if (FALSE) {
+  # not run due to long running
+  tmp2 = tmp \%>\% rt_epiestim()
+}
 
 
 }

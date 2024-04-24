@@ -120,7 +120,7 @@ $$
 
 $\mu$ is the central estimate of case counts on the log scale, and its standard
 deviation can also be large. There are numerical stability issues dealing
-with terms involving $e^(\mu+\sigma^2)$, however keeping everything in log space and 
+with terms involving $e^{(\mu+\sigma^2)}$, however keeping everything in log space and 
 using optimised log-sum-exp functions this can be made computationally tractable.
 
 $$

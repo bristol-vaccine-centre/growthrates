@@ -1,6 +1,6 @@
-#' Plot a mulitnomial proportions mode
+#' Plot a multinomial proportions mode
 #'
-#' @param modelled `r interfacer::idocument(plot_multinomial, modelled)`
+#' @iparam modelled the multinomial count data
 #' @param mapping a `ggplot2::aes` mapping. Most importantly setting the `colour`
 #'   to something if there are multiple incidence timeseries in the plot
 #' @inheritParams geom_events

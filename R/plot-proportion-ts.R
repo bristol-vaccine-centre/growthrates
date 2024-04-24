@@ -1,7 +1,7 @@
 #' Plot a proportions timeseries
 #'
-#' @param raw `r interfacer::idocument(plot_proportion, raw)`
-#' @param modelled `r interfacer::idocument(plot_proportion, modelled)`
+#' @iparam raw Raw count data
+#' @iparam modelled Proportion model estimates
 #' @param mapping a `ggplot2::aes` mapping. Most importantly setting the `colour`
 #'   to something if there are multiple incidence timeseries in the plot
 #' @inheritParams geom_events
