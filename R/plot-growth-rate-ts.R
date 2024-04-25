@@ -21,9 +21,6 @@
 #' @concept vis
 #' @examples
 #' # example code
-#' old = options(device="agg_png")
-#' on.exit(options(old))
-#'
 #' tmp = growthrates::england_covid %>%
 #'   time_aggregate(count=sum(count))
 #'
@@ -38,12 +35,19 @@
 #'   poisson_locfit_model() %>%
 #'   normalise_incidence(tmp_pop)
 #'
-#' plot_growth_rate(tmp2,colour="blue")
+#' # Default pdf device doesn't support unicode
+#' if (FALSE) {
+#'   plot_growth_rate(tmp2,colour="blue")
+#' }
 #'
 #' tmp3 = growthrates::england_covid %>%
 #'   proportion_locfit_model()
 #'
-#' plot_growth_rate(tmp3)
+#' # Default pdf device doesn't support unicode
+#' if (FALSE) {
+#'   plot_growth_rate(tmp3)
+#' }
+#'
 plot_growth_rate = function(
     modelled = i_timeseries,
     ...,

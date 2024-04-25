@@ -1,4 +1,8 @@
 ## Date utility ----
+#
+# rlang::on_load({
+#   requireNamespace("lubridate",quietly = TRUE)
+# })
 
 #' Check whether vector is a date
 #'
@@ -389,6 +393,11 @@ labels.time_period = function(object, ..., dfmt = "%d/%b", ifmt = "{start} \u201
 #'
 #' Using a start_date and a unit specification
 #'
+#' @importMethodsFrom lubridate /
+#' @importMethodsFrom lubridate *
+#' @importMethodsFrom lubridate +
+#' @importMethodsFrom lubridate -
+#'
 #' @param dates a vector of dates to convert
 #' @param unit a specification of the unit of the resulting time series.
 #'   Will be determined from periodicity of dates if not specified. If another
@@ -520,7 +529,7 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 
 #' Create the full sequence of values in a vector
 #'
-#' This is useful if you want to fill in missing values that should have been observed but weren't. For example, full_seq(c(1, 2, 4, 6), 1) will return 1:6.
+#' This is useful if you want to fill in missing values that should have been observed but weren't. For example, date_seq(c(1, 2, 4, 6), 1) will return 1:6.
 #'
 #' @param x a numeric or date vector
 #' @param period Gap between each observation. The existing data will be checked to ensure that it is actually of this periodicity.
@@ -532,16 +541,16 @@ time_to_date = function(timepoints, unit = attr(timepoints,"unit"), start_date =
 #' @concept time_period
 #'
 #' @examples
-#' full_seq(c(1, 2, 4, 5, 10), 1)
-full_seq = function(x, period, ...) {
-  UseMethod("full_seq")
+#' date_seq(c(1, 2, 4, 5, 10), 1)
+date_seq = function(x, period, ...) {
+  UseMethod("date_seq")
 }
 
 
-#' @inherit full_seq
+#' @inherit date_seq
 #' @param tol Numerical tolerance for checking periodicity.
 #' @export
-full_seq.numeric = function(x, period=1, tol=1e-06, ...) {
+date_seq.numeric = function(x, period=1, tol=1e-06, ...) {
   #dplyr::check_number_decimal(period)
   #dplyr::check_number_decimal(tol, min = 0)
   rng <- range(x, na.rm = TRUE)
@@ -586,10 +595,10 @@ full_seq.numeric = function(x, period=1, tol=1e-06, ...) {
 #' @concept time_period
 #'
 #' @examples
-#' full_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
-full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
+#' date_seq(as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-01",NA)), "2 days")
+date_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete = FALSE, ...) {
   dates = x
-  if (all(is.na(x))) stop("No non-NA dates provided to full_seq")
+  if (all(is.na(x))) stop("No non-NA dates provided to date_seq")
   start_date = .start_from_anchor(dates,anchor)
   period = .make_unit(period)
   start_date = as.Date(start_date)
@@ -637,24 +646,24 @@ full_seq.Date = function(x, period=.day_interval(x), anchor = "start", complete 
 #'
 #' @examples
 #' tmp = as.time_period(c(0,10,100), 7, "2020-01-01")
-#' full_seq(tmp, "7 days")
-full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE, ...) {
+#' date_seq(tmp, "7 days")
+date_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE, ...) {
 
-  if (all(is.na(x))) stop("No non-NA times provided to full_seq")
+  if (all(is.na(x))) stop("No non-NA times provided to date_seq")
 
   period = .make_unit(period)
   if (period == attributes(x)$unit) {
     # no change of unit.
 
 
-    new_times = full_seq.numeric(as.numeric(x), .step(as.numeric(x)))
+    new_times = date_seq.numeric(as.numeric(x), .step(as.numeric(x)))
     return(.clone_time_period(new_times, x))
   }
 
   times = x
   start_date = attributes(times)$start_date
   orig_unit = attributes(times)$unit
-  dates = full_seq.Date(time_to_date(range(x,na.rm = TRUE)), period = period, anchor = start_date, complete = complete, ... )
+  dates = date_seq.Date(time_to_date(range(x,na.rm = TRUE)), period = period, anchor = start_date, complete = complete, ... )
   date_to_time(dates,unit = orig_unit, start_date = start_date)
 }
 
@@ -693,7 +702,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 
 #' Places a set of dates within a regular time series
 #'
-#' The counterpart to full_seq_dates(). Take an original set of data and place
+#' The counterpart to date_seq_dates(). Take an original set of data and place
 #' it within a regular time series where the periodicity of the time series may
 #' be expressed as numbers of days, weeks, months quarters, or years, and the
 #' periods are defined by an anchoring date, day of the week or by reference to
@@ -722,7 +731,7 @@ full_seq.time_period = function(x, period = attributes(x)$unit, complete = FALSE
 #'
 #' @examples
 #' dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-#' fs = growthrates::full_seq(dates, "2 days")
+#' fs = growthrates::date_seq(dates, "2 days")
 #' dates - cut_date(dates, "2 days")
 #' cut_date(dates,unit="2 days", output="time_period")
 #'
@@ -755,7 +764,7 @@ cut_date = function(dates, unit, anchor = "start", output = c("date","factor","t
   # factor rather than integer / numeric. to decide whether this is worth pursuing
   if (output == "factor") {
     # create a whole full time sequence from dates plus one period
-    complete_dates = full_seq.Date(dates, unit, start_date)
+    complete_dates = date_seq.Date(dates, unit, start_date)
     complete_times = date_to_time(complete_dates,unit,start_date)
     # create a label from that sequence and use it as levels for names
     labelled_dates = .labelled_date_from_times(complete_times, dfmt, ifmt)

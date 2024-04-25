@@ -61,9 +61,6 @@ a ggplot
 Plot a multinomial proportions mode
 }
 \examples{
-old = options(device="agg_png")
-on.exit(options(old))
-
 tmp = growthrates::england_covid \%>\%
   growthrates::proportion_locfit_model(window=21) \%>\%
   dplyr::glimpse()

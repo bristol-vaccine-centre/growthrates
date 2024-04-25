@@ -76,15 +76,15 @@ if(interactive()) interfacer::use_dataframe(england_covid_pcr_positivity)
 # devtools::load_all()
 # tmp = growthrates::england_covid %>%
 # dplyr::group_modify(growthrates::poisson_locfit_model, window=21) %>%
-# glimpse()
+# dplyr::glimpse()
 # plot_incidence(tmp)+facet_wrap(~class)+scale_y_log1p()
 # tmp = growthrates::england_covid %>%
 # dplyr::group_modify(growthrates::poisson_locfit_model, window=21) %>%
-# glimpse()
+# dplyr::glimpse()
 # plot_incidence(tmp)+facet_wrap(~class)+scale_y_log1p()
 # tmp2 = growthrates::england_covid %>%
 # dplyr::group_modify(growthrates::proportion_locfit_model, window=21) %>%
-# glimpse()
+# dplyr::glimpse()
 # tmp2 %>% view()
 # plot_proportion(tmp2)
 # tmp2$time
@@ -132,7 +132,7 @@ denom_by_age = tmp_by_age %>% pivot_longer(cols=dplyr::starts_with("X"), names_t
   ) %>%
   dplyr::group_by(class,date) %>%
   dplyr::summarise(denom = sum(denom,na.rm = TRUE))
-denom_by_age %>% glimpse()
+denom_by_age %>% dplyr::glimpse()
 
 
 .date_band = function(t) {
@@ -206,4 +206,4 @@ if (interactive()) interfacer::use_dataframe(england_covid_proportion)
 #     ) %>%
 #     dplyr::group_by(class,date) %>%
 #     dplyr::summarise(count = sum(count,na.rm = TRUE))
-# count_by_age %>% glimpse()
+# count_by_age %>% dplyr::glimpse()

@@ -35,7 +35,7 @@ germany_covid = covid_count_1 %>%
     class=factor(as.character(age_cat), levels(germany_demographics$class))
   ) %>%
   dplyr::group_by(class) %>%
-  tidyr::complete(date = full_seq(date), fill = list(count=NA_integer_)) %>%
+  tidyr::complete(date = date_seq(date), fill = list(count=NA_integer_)) %>%
   dplyr::mutate(time = as.time_period(date, unit="1 week", start_date="2019-12-30")) %>%
   dplyr::group_by(time,class,date) %>%
   dplyr::mutate(denom=sum(count)) %>%
@@ -49,16 +49,14 @@ if(interactive()) interfacer::use_dataframe(germany_covid)
 
 ## Growth rates example results
 
-library(tidyverse)
-
 covid_modelled_incidence = growthrates::england_covid %>%
   dplyr::group_modify(growthrates::poisson_locfit_model) %>%
-  glimpse()
+  dplyr::glimpse()
 
 if(interactive()) interfacer::use_dataframe(covid_modelled_incidence)
 
 covid_normalised_incidence = growthrates::covid_count %>%
   growthrates::normalised_incidence(incidence_fn = growthrates::poisson_locfit_model) %>%
-  glimpse()
+  dplyr::glimpse()
 
 if(interactive()) interfacer::use_dataframe(covid_normalised_incidence)

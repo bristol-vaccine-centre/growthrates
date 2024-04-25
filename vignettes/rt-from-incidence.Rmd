@@ -23,7 +23,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(tidyverse)
 library(patchwork)
 library(growthrates)
 here::i_am("vignettes/rt-from-incidence.Rmd")
@@ -47,7 +46,7 @@ fit = raw %>% poisson_locfit_model()
 
 plot_incidence(fit,raw, colour="blue",size=0.025,events = england_events)+
   scale_y_log1p()+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2023-01-01")))
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2023-01-01")))
 ```
 
 It is appealing to use this modelled incidence estimate to calculate an estimate
@@ -225,8 +224,8 @@ system.time({
 })
 
 plot_rt(rt_fit, events = england_events, colour="blue")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2023-01-01")), ylim=c(0.6,1.6))+
-  geom_errorbar(data=england_consensus_rt,aes(x=date-14,ymin=low,ymax=high),colour="red")
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2023-01-01")), ylim=c(0.6,1.6))+
+  ggplot2::geom_errorbar(data=england_consensus_rt,ggplot2::aes(x=date-14,ymin=low,ymax=high),colour="red")
 
 ```
 

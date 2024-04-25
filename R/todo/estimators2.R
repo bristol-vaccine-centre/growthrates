@@ -33,7 +33,7 @@
   return(floor(times*interval+interval/100)+day_zero)
 }
 
-.full_seq_times = function(times, interval=NA) {
+.date_seq_times = function(times, interval=NA) {
   orig_interval=attr(times,"interval")
   if(is.null(orig_interval)) stop("the original timeseries has lost its metadata")
   if (is.na(interval)) interval=orig_interval
@@ -44,7 +44,7 @@
 
 # turn a random set of dates into an evenly spaced set separated by an interval that makes sense given the data
 # intervals will be inside the data
-.full_seq_dates = function(dates, interval=.day_interval(dates), truncate_partials = FALSE) {
+.date_seq_dates = function(dates, interval=.day_interval(dates), truncate_partials = FALSE) {
   times = .date_to_time(dates,interval)
   # the +1/interval - 1 here ensures we have a full final interval as defined by the
   # dates. if interval is one this resolves to the max period
@@ -59,9 +59,9 @@
 # full seq dates should be start of periods. interval is length of period.
 # checks to see if a date or dates is within a range of dates where the dates define the start of a period
 # of size defined by interval parameter as an integer.
-.within_sequence = function(dates, full_seq_dates, interval = .day_interval(full_seq_dates)) {
+.within_sequence = function(dates, date_seq_dates, interval = .day_interval(date_seq_dates)) {
   times = .date_to_time(dates,interval)
-  test = .date_to_time(full_seq_dates, interval)
+  test = .date_to_time(date_seq_dates, interval)
   return(times >= min(test) & times < max(test)+1)
 }
 
@@ -72,9 +72,9 @@
   return(.time_to_date(floor(times+1/100)))
 }
 
-#.full_seq_dates(c(Sys.Date(),Sys.Date()-7,Sys.Date()-21,Sys.Date()-28))
+#.date_seq_dates(c(Sys.Date(),Sys.Date()-7,Sys.Date()-21,Sys.Date()-28))
 #.day_interval(Sys.Date()+c(4,8,24))
-#.full_seq_dates(Sys.Date()+c(4,8,24))
+#.date_seq_dates(Sys.Date()+c(4,8,24))
 
 ## .specification_from_formula( formula = ~ date + age + gender + region )
 ## .specification_from_formula( formula = ~ date + reported(report_date) + age + gender + region )
@@ -393,7 +393,7 @@ as.epimetadata.specification = function(x, type, interval = 1, ...) {
   }
 
   grpwise_count_R2 = x %>% dplyr::group_by(!!!grps,!!cls,!!date) %>% dplyr::count() %>% dplyr::pull(n) %>% magrittr::subtract(1) %>% magrittr::raise_to_power(2) %>% mean()
-  full = .full_seq_dates(x %>% dplyr::pull(!!date),interval)
+  full = .date_seq_dates(x %>% dplyr::pull(!!date),interval)
   incomplete_ts = x %>% dplyr::group_by(!!!grps,!!cls) %>% dplyr::summarise(matched = sum(!!date %in% full)) %>% dplyr::mutate(missing = length(full)-matched, total=length(full)) %>% dplyr::ungroup() %>% dplyr::summarise(prop = sum(missing)/sum(total)) %>% dplyr::pull(prop)
   if (incomplete_ts < 0.05 & grpwise_count_R2 < 0.01) {
     browser()
@@ -542,7 +542,7 @@ as.epi_ts.epi_ll = function(x, formula = dplyr::count() + . ~ ., interval = 1, d
   # what dates are we looking at?
   orig_dates = x %>% dplyr::pull(!!m$date)
   if (is.null(dates)) dates = orig_dates
-  dates = .full_seq_dates(dates,interval, truncate_partials = TRUE)
+  dates = .date_seq_dates(dates,interval, truncate_partials = TRUE)
 
   y = .convert_dataframe(x %>% dplyr::mutate(!!new_count == 1), new_meta, rectangular = TRUE, verbose = FALSE, dates = dates)
   return(y %>% set_meta(new_meta))
@@ -563,7 +563,7 @@ as.epi_ts.epi_ll = function(x, formula = dplyr::count() + . ~ ., interval = 1, d
 
   dates_given = !is.null(dates)
   orig_dates = x %>% dplyr::pull(!!date)
-  if(!dates_given) dates = .full_seq_dates(orig_dates,interval)
+  if(!dates_given) dates = .date_seq_dates(orig_dates,interval)
 
   # make sure data dates are within the range of the desired interval dates
 
@@ -615,7 +615,7 @@ as.epi_ts.epi_ll = function(x, formula = dplyr::count() + . ~ ., interval = 1, d
       # including the range present in the data.
       if (!rectangular & !dates_given) {
         tmp = d %>% dplyr::pull(!!date)
-        dates = .full_seq_dates(tmp,interval)
+        dates = .date_seq_dates(tmp,interval)
         lhs = .dates_and_classes(date,dates,cls,clsses)
       }
       # do the fill for missing counts.
@@ -653,7 +653,7 @@ summary.epi_ts = function(x, ...) {
   m = epi$m
   dates = x %>% dplyr::pull(!!(m$date)) %>% range()
   grpCount = x %>% dplyr::select(!!!m$grps) %>% dplyr::distinct() %>% nrow()
-  cat(sprintf("%1.0f timeseries, with interval %s lubridate::day(s), from %s up to (but not including) %s, %1.0f total records", grpCount, epi$interval, dates[[1]], dates[[2]]+1+epi$interval, nrow(x)),"\n")
+  cat(sprintf("%1.0f timeseries, with interval %s day(s), from %s up to (but not including) %s, %1.0f total records", grpCount, epi$interval, dates[[1]], dates[[2]]+1+epi$interval, nrow(x)),"\n")
   print(epi$formula, showEnv = FALSE)
 }
 
@@ -742,7 +742,7 @@ glimpse.epi_ts = function(x,...) {
   new_meta = as.epimetadata.specification(new_spec, type=meta$type, interval = meta$interval)
 
   y = y %>% dplyr::ungroup() %>% dplyr::select(any_of(old_cols),all_of(new_obs),any_of(".id"))
-  # y = y %>% dplyr::ungroup() %>% dplyr::select(c(!testthat::starts_with("."),.id)) %>% glimpse()
+  # y = y %>% dplyr::ungroup() %>% dplyr::select(c(!testthat::starts_with("."),.id)) %>% dplyr::glimpse()
   return(y %>% .guess_type(new_meta))
 }
 

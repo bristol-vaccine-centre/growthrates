@@ -9,8 +9,7 @@
 #' @export
 #'
 #' @examples
-#' library(tidyverse)
-#' ggplot2::ggplot(diamonds, ggplot2::aes(x=price))+
+#' ggplot2::ggplot(ggplot2::diamonds, ggplot2::aes(x=price))+
 #'   ggplot2::geom_density()+
 #'   ggplot2::scale_x_continuous(trans="log1p", breaks=breaks_log1p())
 breaks_log1p = function(n=5,base=10) {

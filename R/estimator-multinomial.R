@@ -37,7 +37,7 @@ multinomial_nnet_model = function(d = i_multinomial_input, ..., window = 14, fre
     predictor = tmp2 %>% dplyr::pull(time)
     data = tibble::tibble(prob=response,time=predictor)
 
-    output_times = full_seq.time_period(d$time, period = frequency)
+    output_times = date_seq.time_period(d$time, period = frequency)
     df = .df_from_window(window, timeseries = d, classes = ncol(response))
     model = nnet::multinom(prob ~ splines::ns(time, df = df), Hess = TRUE,data = data)
 

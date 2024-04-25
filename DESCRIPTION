@@ -24,7 +24,6 @@ Suggests:
     here,
     jsonlite,
     readr,
-    tidyverse,
     stringr,
     testthat (>= 3.0.0),
     devtools,
@@ -49,7 +48,7 @@ Imports:
     glue,
     purrr,
     EpiEstim,
-    interfacer (>= 0.1.8),
+    interfacer (>= 0.1.9),
     ragg
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,

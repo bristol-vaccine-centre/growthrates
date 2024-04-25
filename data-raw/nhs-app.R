@@ -1,6 +1,5 @@
 ## Venue check ins and pings.
 tmp = readr::read_csv("https://assets.publishing.service.gov.uk/media/64662cfde140700013b6e221/covid19_app_country_specific_dataset.csv")
-library(tidyverse)
 glimpse(tmp)
 
 england_nhs_app = tmp %>%

@@ -58,6 +58,18 @@
     <loc>/reference/cut_date.html</loc>
   </url>
   <url>
+    <loc>/reference/date_seq.Date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/date_seq.html</loc>
+  </url>
+  <url>
+    <loc>/reference/date_seq.numeric.html</loc>
+  </url>
+  <url>
+    <loc>/reference/date_seq.time_period.html</loc>
+  </url>
+  <url>
     <loc>/reference/date_to_time.html</loc>
   </url>
   <url>

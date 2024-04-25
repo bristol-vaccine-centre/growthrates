@@ -6,7 +6,7 @@
 #   mutate(denom = sum(count)) %>%
 #   group_by(serotype) %>%
 #   group_modify(proportion_model, deg=3) %>%
-#   glimpse()
+#   dplyr::glimpse()
 
 # Counts
 # data4 %>%
@@ -15,4 +15,4 @@
 #   summarise(count = n(), .groups="drop_last") %>%
 #   group_by(serotype) %>%
 #   group_modify(poisson_model, df=4) %>%
-#   glimpse()
+#   dplyr::glimpse()

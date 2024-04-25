@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(tidyverse)
+
 library(patchwork)
 # devtools::load_all()
 library(growthrates)
@@ -26,7 +26,7 @@ in either absolute or proportional terms. Based on the 2021 census we have some
 demo data for the demographics of England:
 
 ```{r}
-glimpse(england_demographics)
+dplyr::glimpse(england_demographics)
 ```
 
 # Incidence Poisson rate model
@@ -46,10 +46,10 @@ tmp = growthrates::england_covid %>%
    growthrates::poisson_locfit_model(window=21) %>%
    growthrates::normalise_incidence(growthrates::england_demographics)
 
-raw_pop = growthrates::england_covid %>% inner_join(england_demographics, by="class")
+raw_pop = growthrates::england_covid %>% dplyr::inner_join(england_demographics, by="class")
 
 plot_incidence(tmp,raw = raw_pop, size=0.25)+scale_y_log1p(n=7)+
-  scale_colour_viridis_d(aesthetics = c("fill","colour"))
+  ggplot2::scale_colour_viridis_d(aesthetics = c("fill","colour"))
   
 ```
 
@@ -69,8 +69,8 @@ and this would be easy to over-interpret.
 
 
 plot_growth_rate(tmp)+
-  scale_fill_viridis_d(aesthetics = c("fill","colour"))+
-  coord_cartesian(ylim=c(-0.15,0.15))
+  ggplot2::scale_fill_viridis_d(aesthetics = c("fill","colour"))+
+  ggplot2::coord_cartesian(ylim=c(-0.15,0.15))
 
 
 
@@ -87,7 +87,7 @@ plot_growth_phase(tmp,
     duration = 70, 
     interval = 7
 )+
-  scale_colour_viridis_d()
+  ggplot2::scale_colour_viridis_d()
 
 ```
 
@@ -113,14 +113,14 @@ tmp2 = growthrates::england_covid %>%
    growthrates::proportion_locfit_model(window=21)
 
 p1 = plot_multinomial(tmp2,normalise = TRUE)+
-  scale_fill_viridis_d()
+  ggplot2::scale_fill_viridis_d()
 
-p2 = ggplot(england_demographics)+
-  geom_bar(aes(x="baseline",y=population/sum(population)*100,fill=class), stat="identity", position="stack", colour="black", linewidth=0.1)+
-  scale_fill_viridis_d(guide="none")+
-  xlab(NULL)+
-  ylab(NULL)+
-  theme(axis.text.y = element_blank())+
+p2 = ggplot2::ggplot(england_demographics)+
+  ggplot2::geom_bar(ggplot2::aes(x="baseline",y=population/sum(population)*100,fill=class), stat="identity", position="stack", colour="black", linewidth=0.1)+
+  ggplot2::scale_fill_viridis_d(guide="none")+
+  ggplot2::xlab(NULL)+
+  ggplot2::ylab(NULL)+
+  ggplot2::theme(axis.text.y = ggplot2::element_blank())+
   ggplot2::coord_cartesian(expand=FALSE)
 
 p1+p2+patchwork::plot_layout(nrow=1,widths = c(20,1),guides = "collect")
@@ -152,7 +152,7 @@ plot_growth_phase(tmp3,
     duration = 70, 
     interval = 7
 )+
-  scale_colour_viridis_d()
+  ggplot2::scale_colour_viridis_d()
 
 ```
 
@@ -171,14 +171,14 @@ and look into ascertainment bias in age groups.
 prop = growthrates::england_covid_proportion %>%
   growthrates::proportion_locfit_model(window=5)
 
-plot_proportion(prop)+scale_fill_viridis_d(aesthetics = c("colour","fill"))
+plot_proportion(prop)+ggplot2::scale_fill_viridis_d(aesthetics = c("colour","fill"))
 
-tmp_pop = growthrates::england_covid_proportion %>% select(class,population) %>% distinct()
+tmp_pop = growthrates::england_covid_proportion %>% dplyr::select(class,population) %>% dplyr::distinct()
 pois = growthrates::england_covid_proportion %>%
   growthrates::poisson_locfit_model(window=5) %>%
   growthrates::normalise_incidence(tmp_pop)
 
-plot_incidence(pois)+scale_fill_viridis_d(aesthetics = c("colour","fill"))
+plot_incidence(pois)+ggplot2::scale_fill_viridis_d(aesthetics = c("colour","fill"))
 
 
 ```

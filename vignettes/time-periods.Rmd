@@ -12,12 +12,11 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(tidyverse)
 # devtools::load_all()
 library(growthrates)
 here::i_am("vignettes/time-periods.Rmd")
 source(here::here("vignettes/vignette-utils.R"))
-ggplot2::theme_set(ggplot2::theme_minimal())
+
 ```
 
 
@@ -99,18 +98,18 @@ and the original dates should be recoverable:
 as.Date(tmp2)
 ```
 
-`full_seq()` can be used to make sure a set of periodic times is complete:
+`date_seq()` can be used to make sure a set of periodic times is complete:
 
 ```{r}
 
 tmp3 = as.time_period(Sys.Date()+c(0:2,4:5)*7,anchor = "start")
-as.Date(full_seq(tmp3))
+as.Date(date_seq(tmp3))
 
 ```
 
 `time_periods` can be used with any monthly or yearly data but such data are not
 regular. This is handled and irregular date periods are generally OK to use with
-`growthrates` but some functions like `full_seq` may not work as anticipated
+`growthrates` but some functions like `date_seq` may not work as anticipated
 with irregular dates.
 
 Two time series can be aligned to make them comparable:
@@ -149,7 +148,7 @@ function. A minimal line-list will have a date column and nothing else.
 
 random_dates = Sys.Date()+sample.int(21,50,replace = TRUE)
 linelist = tibble::tibble(date = random_dates)
-linelist %>% time_summarise(unit="1 week") %>% glimpse()
+linelist %>% time_summarise(unit="1 week") %>% dplyr::glimpse()
 
 ```
 
@@ -162,9 +161,9 @@ this case the positive and negative results of a test:
 random_dates = Sys.Date()+sample.int(21,200,replace = TRUE)
 linelist2 = tibble::tibble(
   date = random_dates,
-  class = rbinom(200, 1, 0.04) %>% ifelse("positive","negative")
+  class = stats::rbinom(200, 1, 0.04) %>% ifelse("positive","negative")
 )
-linelist2 %>% time_summarise(unit="1 week") %>% glimpse()
+linelist2 %>% time_summarise(unit="1 week") %>% dplyr::glimpse()
 
 
 ```
@@ -180,19 +179,19 @@ may need to be manually calculated:
 ```{r}
 
 random_dates = Sys.Date()+sample.int(21,200,replace = TRUE)
-variant = apply(rmultinom(200, 1, c(0.1,0.3,0.6)), MARGIN = 2, function(x) which(x==1))
+variant = apply(stats::rmultinom(200, 1, c(0.1,0.3,0.6)), MARGIN = 2, function(x) which(x==1))
 
 linelist3 = tibble::tibble(
   date = random_dates,
   class = c("variant1","variant2","variant3")[variant],
-  gender = ifelse(rbinom(200,1,0.5),"male","female")
+  gender = ifelse(stats::rbinom(200,1,0.5),"male","female")
 )
   
 count_by_gender = linelist3 %>% 
-  group_by(gender) %>% 
+  dplyr::group_by(gender) %>% 
   time_summarise(unit="1 week") %>% 
-  arrange(time, gender, class) %>%
-  glimpse()
+  dplyr::arrange(time, gender, class) %>%
+  dplyr::glimpse()
 
 ```
 
@@ -206,9 +205,9 @@ grouping.
 ```{r}
 
 count_by_gender %>% 
-  group_by(class,gender) %>% 
+  dplyr::group_by(class,gender) %>% 
   time_aggregate() %>%
-  glimpse()
+  dplyr::glimpse()
 
 ```
 

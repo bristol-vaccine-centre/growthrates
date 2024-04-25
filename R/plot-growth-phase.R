@@ -25,8 +25,6 @@
 #' @concept vis
 #' @examples
 #' # example code
-#' old = options(device="agg_png")
-#' on.exit(options(old))
 #'
 #' tmp = growthrates::england_covid %>%
 #'   time_aggregate(count=sum(count))
@@ -35,8 +33,6 @@
 #'   dplyr::ungroup() %>%
 #'   dplyr::summarise(population = sum(population))
 #'
-#'
-#'
 #' # If the incidence is normalised by population
 #' tmp2 = tmp %>%
 #'   poisson_locfit_model() %>%
@@ -44,7 +40,9 @@
 #'
 #' timepoints = as.Date(c("Lockdown 1" = "2020-03-30", "Lockdown 2" = "2020-12-31"))
 #'
-#' plot_growth_phase(tmp2, timepoints, duration=108)
+#' if (FALSE) {
+#'   plot_growth_phase(tmp2, timepoints, duration=108)
+#' }
 plot_growth_phase = function(
     modelled = i_timestamped,
     timepoints = NULL,
@@ -54,6 +52,11 @@ plot_growth_phase = function(
     cis = TRUE,
     ...
 ) {
+
+  # N.B. standard pdf device does not support unicode for
+  # doubling time interval and grid generates a warning that
+  # cannot be suppressed.
+  # conversion failure on '±<inf>' in 'mbcsToSbcs': for <inf> (U+221E)"
 
   if (is.null(timepoints)) timepoints = max(modelled$time)
 

@@ -64,7 +64,7 @@ proportion_locfit_model = function(d = i_proportion_input, ..., window = 14, deg
 
   interfacer::igroup_process(d, function(d, ..., window, deg, frequency, predict) {
 
-    output_times = full_seq.time_period(d$time, period = frequency)
+    output_times = date_seq.time_period(d$time, period = frequency)
     nn = .nn_from_window(window, d)
 
     # Not enough non zero results
@@ -158,7 +158,7 @@ poisson_locfit_model = function(d = i_incidence_input, ..., window = 14, deg = 1
     # d = interfacer::ivalidate(d, .prune = TRUE, ...)
 
     nn = .nn_from_window(window, d)
-    output_times = full_seq.time_period(d$time, period = frequency)
+    output_times = date_seq.time_period(d$time, period = frequency)
 
     # Not enough non zero results
     if(sum(stats::na.omit(d$count) != 0) < deg) {

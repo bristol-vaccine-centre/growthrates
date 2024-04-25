@@ -63,7 +63,7 @@ rt_from_growth_rate = function(df = i_growth_rate, ip = i_infectivity_profile, b
         dplyr::filter(a > 0) %>%
         dplyr::group_by(boot,r_i) %>%
         dplyr::arrange(boot,r_i,a) %>%
-        dplyr::summarise(
+        dplyr::mutate(
           R = r/sum(
             y
               *

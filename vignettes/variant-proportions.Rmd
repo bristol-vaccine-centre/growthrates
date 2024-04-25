@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 here::i_am("vignettes/variant-proportions.Rmd")
 source(here::here("vignettes/vignette-utils.R"))
-library(tidyverse)
+
 library(growthrates)
 
 ```

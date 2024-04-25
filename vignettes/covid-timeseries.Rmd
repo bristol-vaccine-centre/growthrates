@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 here::i_am("vignettes/covid-timeseries.Rmd")
 source(here::here("vignettes/vignette-utils.R"))
-library(tidyverse) 
+
 library(patchwork)
 library(growthrates)
 ```
@@ -25,7 +25,7 @@ aggregate it into an England wide rate. This is the purpose of `time_aggregate()
 which performs a simple summarisation.
 
 ```{r}
-england_covid %>% glimpse()
+england_covid %>% dplyr::glimpse()
 
 tmp = growthrates::england_covid %>%
   time_aggregate(count=sum(count))
@@ -47,14 +47,14 @@ years of the pandemic:
 
 ```{r}
 plot_incidence(fit, raw = tmp,events = england_events, colour="blue",size=0.025)+
-  scale_y_log1p(n=7) + coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")))
+  scale_y_log1p(n=7) + ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")))
 
 ```
 
 The incidence model assumes case rates result from a Poisson process and the
 rate is estimated with a time varying locally fitted polynomial with degree
 defined by the `deg` parameter, using a log link function, according to the
-methods of Loader et al. (see `citation("locfit")`). The fitting process is a
+methods of Loader et al. (see `utils::citation("locfit")`). The fitting process is a
 local maximum likelihood estimation and uses a bandwidth defined to account for
 the data points within `window` of the time point being estimated.
 
@@ -69,8 +69,8 @@ better represent the timing of changes.
 ```{r}
 
 plot_growth_rate(fit,events = england_events, colour="blue")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(-0.15,0.15))+
-  geom_errorbar(data=england_consensus_growth_rate,aes(x=date-21,ymin=low,ymax=high),colour="red")
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(-0.15,0.15))+
+  ggplot2::geom_errorbar(data=england_consensus_growth_rate,ggplot2::aes(x=date-21,ymin=low,ymax=high),colour="red")
 
 ```
 
@@ -109,14 +109,14 @@ is a bootstrapped set of discrete probability distributions. It is truncated at
 
 
 ggplot2::ggplot()+
-  geom_errorbar(
+  ggplot2::geom_errorbar(
     data = growthrates::covid_infectivity_profile %>% tidyr::complete(time=0:max(time), fill = list(probability=0)),
     mapping = ggplot2::aes(x=as.factor(time),ymin=probability,ymax=probability),
     width=1,
     colour="blue",
     alpha=0.1
   )+
-  geom_line(
+  ggplot2::geom_line(
     data = growthrates::covid_infectivity_profile %>% 
       dplyr::group_by(time) %>%
       dplyr::summarise(m = mean(probability)) %>% 
@@ -142,13 +142,11 @@ values from the SPI-M-O group (red):
 #   cache = .cache
 # )
 
-
 rt_fit = fit %>% growthrates::rt_from_growth_rate(ip = covid_infectivity_profile)
 
-
 plot_rt(rt_fit, events = england_events, colour="blue")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(0.6,1.6))+
-  geom_errorbar(data=england_consensus_rt,aes(x=date-21,ymin=low,ymax=high),colour="red")
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(0.6,1.6))+
+  ggplot2::geom_errorbar(data=england_consensus_rt,ggplot2::aes(x=date-21,ymin=low,ymax=high),colour="red")
 ```
 
 EpiEstim $R_t$ fits for comparison for the same data, and the same infectivity
@@ -160,8 +158,8 @@ periodicity of the underlying time series.
 rt_epi_fit = tmp %>% growthrates::rt_epiestim(ip = covid_infectivity_profile)
 
 plot_rt(rt_epi_fit, events = england_events, colour="blue")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(0.6,1.6))+
-  geom_errorbar(data=england_consensus_rt,aes(x=date-7,ymin=low,ymax=high),colour="red")
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(0.6,1.6))+
+  ggplot2::geom_errorbar(data=england_consensus_rt,ggplot2::aes(x=date-7,ymin=low,ymax=high),colour="red")
 
 ```
 
@@ -176,7 +174,7 @@ of its own. For this the data must contain a `denom` column which in this
 case represents the number of tests conducted:
 
 ```{r}
-england_covid_pcr_positivity %>% glimpse()
+england_covid_pcr_positivity %>% dplyr::glimpse()
 
 
 ```
@@ -188,7 +186,7 @@ fit2 = england_covid_pcr_positivity %>%
   growthrates::proportion_locfit_model()
 
 plot_proportion(fit2, england_covid_pcr_positivity, events = england_events, size=0.25, colour="blue")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")))
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")))
 
 ```
 
@@ -199,8 +197,8 @@ effort but in this case produces an answer very similar to the incidence model.
 ```{r}
 
 plot_growth_rate(fit2, events = england_events, colour="blue")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(-0.15,0.15))+
-  geom_errorbar(data=england_consensus_growth_rate,aes(x=date-21,ymin=low,ymax=high),colour="red")
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2022-01-01")), ylim=c(-0.15,0.15))+
+  ggplot2::geom_errorbar(data=england_consensus_growth_rate,ggplot2::aes(x=date-21,ymin=low,ymax=high),colour="red")
 ```
 
 With similar growth rate estimates this method can also theoretically be used to
@@ -231,30 +229,30 @@ https://www.gov.uk/government/publications/nhs-covid-19-app-statistics)
 ```{r fig.height=7}
 
 p1 = plot_incidence(fit,events = england_events, colour="blue", date_breaks="3 months")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2023-07-01")))+
-  facet_wrap(~"Cases")+
-  theme(axis.text.x.bottom = element_blank())+
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2023-07-01")))+
+  ggplot2::facet_wrap(~"Cases")+
+  ggplot2::theme(axis.text.x.bottom = ggplot2::element_blank())+
   scale_y_log1p()
 
 p2 = plot_growth_rate(fit,events = england_events, colour="blue", date_breaks="3 months")+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2023-07-01")), ylim=c(-0.15,0.15))+
-  geom_errorbar(data=england_consensus_growth_rate,aes(x=date-21,ymin=low,ymax=high),colour="red")+
-  facet_wrap(~"Growth rate")+
-  theme(axis.text.x.bottom = element_blank(),axis.text.x.top = element_blank())
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2023-07-01")), ylim=c(-0.15,0.15))+
+  ggplot2::geom_errorbar(data=england_consensus_growth_rate,ggplot2::aes(x=date-21,ymin=low,ymax=high),colour="red")+
+  ggplot2::facet_wrap(~"Growth rate")+
+  ggplot2::theme(axis.text.x.bottom = ggplot2::element_blank(),axis.text.x.top = ggplot2::element_blank())
 
 p3 = ggplot2::ggplot(growthrates::england_nhs_app)+
   geom_events(events=england_events,hide_labels = TRUE)+
-  geom_step(aes(x=date, y=alerts/mean(alerts, na.rm=TRUE),colour="alerts"))+
-  geom_step(aes(x=date, y=visits/mean(visits, na.rm=TRUE),colour="venue visits"))+
-  geom_rect(aes(xmin=date,xmax=lead(date), ymin=0, ymax=alerts/mean(alerts, na.rm=TRUE),fill="alerts"), linewidth=0, alpha=0.2)+
-  geom_rect(aes(xmin=date,xmax=lead(date), ymin=0, ymax=visits/mean(visits, na.rm=TRUE),fill="venue visits"), linewidth=0, alpha=0.2)+
-  coord_cartesian(xlim=as.Date(c("2020-01-01","2023-07-01")))+
-  ylab("relative frequency")+
-  xlab(NULL)+
-  facet_wrap(~"NHS app")+
-  scale_color_brewer(palette="Dark2", name=NULL, aesthetics = c("fill","colour"))+
-  scale_x_date(date_breaks="3 months",date_labels = "%b %y")+
-  theme(legend.position = "bottom")
+  ggplot2::geom_step(ggplot2::aes(x=date, y=alerts/mean(alerts, na.rm=TRUE),colour="alerts"))+
+  ggplot2::geom_step(ggplot2::aes(x=date, y=visits/mean(visits, na.rm=TRUE),colour="venue visits"))+
+  ggplot2::geom_rect(ggplot2::aes(xmin=date,xmax=dplyr::lead(date), ymin=0, ymax=alerts/mean(alerts, na.rm=TRUE),fill="alerts"), linewidth=0, alpha=0.2)+
+  ggplot2::geom_rect(ggplot2::aes(xmin=date,xmax=dplyr::lead(date), ymin=0, ymax=visits/mean(visits, na.rm=TRUE),fill="venue visits"), linewidth=0, alpha=0.2)+
+  ggplot2::coord_cartesian(xlim=as.Date(c("2020-01-01","2023-07-01")))+
+  ggplot2::ylab("relative frequency")+
+  ggplot2::xlab(NULL)+
+  ggplot2::facet_wrap(~"NHS app")+
+  ggplot2::scale_color_brewer(palette="Dark2", name=NULL, aesthetics = c("fill","colour"))+
+  ggplot2::scale_x_date(date_breaks="3 months",date_labels = "%b %y")+
+  ggplot2::theme(legend.position = "bottom")
 
 p1+p2+p3+patchwork::plot_layout(ncol=1)
 

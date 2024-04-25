@@ -85,14 +85,14 @@ time_summarise = function(df = i_dated, unit, anchor = "start", rectangular = FA
   }
 
   # when rectangular the full sequence is for all the obseverations
-  times = full_seq.time_period(df$time)
+  times = date_seq.time_period(df$time)
 
   # df grouped by grps, class(?), and time at this point
   tmp = df %>%
     dplyr::summarise(!!!dots, .groups="drop_last") %>%
     dplyr::group_by(!!!grps) %>%
     dplyr::group_modify(function(d,g,...) {
-      if (!rectangular) times = full_seq.time_period(d$time)
+      if (!rectangular) times = date_seq.time_period(d$time)
       if (has_class) {
         dtmp = d %>% tidyr::complete(class, time = times, fill = .fill)
         if (!.has_cols(d, "denom") & .has_cols(d,"count")) {
@@ -169,12 +169,12 @@ time_aggregate = function(df = i_timestamped, ..., .groups = NULL, .cols = NULL,
   } else {
     dots = rlang::enexprs(...)
     if (length(dots) == 0) {
-      dots = list(count = expr(sum(count)))
+      dots = list(count = rlang::expr(sum(count)))
       if (.has_cols(df, "denom")) {
-        dots = c(dots,list(denom = expr(sum(denom))))
+        dots = c(dots,list(denom = rlang::expr(sum(denom))))
       }
       if (.has_cols(df, "population")) {
-        dots = c(dots,list(population = expr(sum(population))))
+        dots = c(dots,list(population = rlang::expr(sum(population))))
       }
     }
     out = df %>% dplyr::summarise(!!!dots, .groups=.groups)

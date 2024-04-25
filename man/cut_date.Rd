@@ -39,7 +39,7 @@ the period the date falls into, where the period is defined by the duration
 and the anchor
 }
 \description{
-The counterpart to full_seq_dates(). Take an original set of data and place
+The counterpart to date_seq_dates(). Take an original set of data and place
 it within a regular time series where the periodicity of the time series may
 be expressed as numbers of days, weeks, months quarters, or years, and the
 periods are defined by an anchoring date, day of the week or by reference to
@@ -49,7 +49,7 @@ relies on a numeric representation of the date or duration from the anchor.
 }
 \examples{
 dates = as.Date(c("2020-01-01","2020-02-01","2020-01-15","2020-02-03",NA))
-fs = growthrates::full_seq(dates, "2 days")
+fs = growthrates::date_seq(dates, "2 days")
 dates - cut_date(dates, "2 days")
 cut_date(dates,unit="2 days", output="time_period")
 

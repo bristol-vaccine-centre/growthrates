@@ -41,7 +41,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(tidyverse)
 library(patchwork)
 library(growthrates)
 ```
@@ -108,32 +107,32 @@ No clear answer here apart from resampling
 We calculate growth rates for two time series. Time series one is artificial, constructed from 100 time points starting form Jan 1st 2020 at 1, and growing exponentially with a day on day increase given by 1.5 for days 1-29 days, followed by 0.8 for 20-49, then 1.1 for 50-69 days, 0.7 for 70-89, then steady at 1 for the last 10 days. Timeseries 2 is based on case counts published on the Public Health England coronavirus website for England. It has a few missing values.
 
 ```{r}
-testData = tibble(time = 1:200) %>% mutate(growth_rate = case_when(
+testData = tibble::tibble(time = 1:200) %>% dplyr::mutate(growth_rate = dplyr::case_when(
   time < 60 ~ 0.05,
   time < 80 ~ -0.025,
   time < 140 ~ -0.025+0.045/40*(time-80),
   time < 180 ~ -0.05,
   TRUE ~ 0.03
 ), value = growth_rate ) %>% 
-  mutate(type = "incidence", lambda_t = cumsum(growth_rate), date = as.Date("2020-01-01")+time) %>%
-  group_by_all() %>%
-  summarise(tibble(subgroup = 1:10,value=rpois(10,exp(lambda_t)))) %>%
-  ungroup()
+  dplyr::mutate(type = "incidence", lambda_t = cumsum(growth_rate), date = as.Date("2020-01-01")+time) %>%
+  dplyr::group_by_all() %>%
+  dplyr::summarise(tibble::tibble(subgroup = 1:10,value=stats::rpois(10,exp(lambda_t)))) %>%
+  dplyr::ungroup()
 
-testTs = testData %>% mutate(statistic = "case",type = "incidence", code="XYZ", name="Test",codeType = "TEST",source="TEST",gender=NA_character_,ageCat=NA_character_)
+testTs = testData %>% dplyr::mutate(statistic = "case",type = "incidence", code="XYZ", name="Test",codeType = "TEST",source="TEST",gender=NA_character_,ageCat=NA_character_)
 
 
 discGRToR = function(growth_rate, y = Flu2009$si_distr, a = seq(0.5,length.out = length(y),by = 1) ) {
   
-  p = y/(a - lag(a,default=0))
+  p = y/(a - dplyr::lag(a,default=0))
   out = sapply(growth_rate, function(r) {
-    r/sum(p*(exp(-r*lag(a,default=0))-exp(-r*a)))
+    r/sum(p*(exp(-r*dplyr::lag(a,default=0))-exp(-r*a)))
   })
   return(out)
   
-  # R = pmap(list(r,d$a,d$y,d$p), function(r,a,y,p) {
-  #   # tmp = r/sum(y*(exp(-r*lag(a,default=0))-exp(-r*a))/(a - lag(a,default=0)))
-  #   tmp = r/sum(p*(exp(-r*lag(a,default=0))-exp(-r*a)))
+  # R = dplyr::pmap(list(r,d$a,d$y,d$p), function(r,a,y,p) {
+  #   # tmp = r/sum(y*(exp(-r*dplyr::lag(a,default=0))-exp(-r*a))/(a - dplyr::lag(a,default=0)))
+  #   tmp = r/sum(p*(exp(-r*dplyr::lag(a,default=0))-exp(-r*a)))
   #   # if(!is.finite(tmp)) browser()
   #   return(tmp)
   # })
@@ -141,13 +140,13 @@ discGRToR = function(growth_rate, y = Flu2009$si_distr, a = seq(0.5,length.out =
   # return(unlist(R))
 }
 
-testTs = testTs %>% mutate(Rt = discGRToR(growth_rate))
+testTs = testTs %>% dplyr::mutate(Rt = discGRToR(growth_rate))
 
 
 
 
 
-ggplot(testTs,aes(x=date,y=value,group=subgroup))+geom_line(alpha=0.2)
+ggplot2::ggplot(testTs,ggplot2::aes(x=date,y=value,group=subgroup))+ggplot2::geom_line(alpha=0.2)
 
 testEst = testTs %>%
   tsp$logIncidenceStats(growthRateWindow = 28, nocache=TRUE) %>%
@@ -160,27 +159,27 @@ testEst3 = testTs %>%
   tsp$smoothAndSlopeTimeseries(smoothExpr = value,window = 28)
   
 
-ggplot(testEst, aes(x=date, group=subgroup))+
-  geom_line(aes(y=Growth.windowed.value,colour="dlog/dt (smoothed)"))+
-  geom_ribbon(aes(ymin=Growth.windowed.value-1.96*Growth.windowed.SE.value,ymax=Growth.windowed.value+1.96*Growth.windowed.SE.value,fill="dlog/dt (smoothed)"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))
+ggplot2::ggplot(testEst, ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Growth.windowed.value,colour="dlog/dt (smoothed)"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Growth.windowed.value-1.96*Growth.windowed.SE.value,ymax=Growth.windowed.value+1.96*Growth.windowed.SE.value,fill="dlog/dt (smoothed)"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))
 
-# ggplot(testEst %>% filter(TRUE), aes(x=date, group=subgroup))+
-#   geom_ribbon(aes(ymin=Est.Quantile.0.025.value,ymax=Est.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
-#   geom_point(aes(y=value,colour="reference"))+
-#   geom_line(aes(y=Est.log(value+,colour="pois (loess)"))
+# ggplot2::ggplot(testEst %>% dplyr::filter(TRUE), ggplot2::aes(x=date, group=subgroup))+
+#   ggplot2::geom_ribbon(ggplot2::aes(ymin=Est.Quantile.0.025.value,ymax=Est.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
+#   ggplot2::geom_point(ggplot2::aes(y=value,colour="reference"))+
+#   ggplot2::geom_line(ggplot2::aes(y=Est.log(value+,colour="pois (loess)"))
 
 
 
-ggplot(testEst, aes(x=date, group=subgroup))+
-  geom_line(aes(y=Growth.value,colour="pois (loess)"))+
-  geom_ribbon(aes(ymin=Growth.Quantile.0.025.value,ymax=Growth.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))
+ggplot2::ggplot(testEst, ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Growth.value,colour="pois (loess)"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Growth.Quantile.0.025.value,ymax=Growth.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))
 
-ggplot(testEst %>% filter(TRUE), aes(x=date, group=subgroup))+
-  geom_ribbon(aes(ymin=Est.Quantile.0.025.value,ymax=Est.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
-  geom_point(aes(y=value,colour="reference"))+
-  geom_line(aes(y=Est.value,colour="pois (loess)"))
+ggplot2::ggplot(testEst %>% dplyr::filter(TRUE), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Est.Quantile.0.025.value,ymax=Est.Quantile.0.975.value,fill="pois (loess)"),alpha=0.1)+
+  ggplot2::geom_point(ggplot2::aes(y=value,colour="reference"))+
+  ggplot2::geom_line(ggplot2::aes(y=Est.value,colour="pois (loess)"))
 
 
 bayes.window=14
@@ -188,16 +187,16 @@ mu.prior = 0
 var.prior = 1
 
 testEst2 = testEst2 %>% 
-  group_by(subgroup) %>% arrange(date) %>%
-  mutate(
+  dplyr::group_by(subgroup) %>% dplyr::arrange(date) %>%
+  dplyr::mutate(
     subgroup.growth.mu = stats::filter(x = Growth.value/bayes.window, filter = rep(1,bayes.window)),
   ) %>%
-  fill(subgroup.growth.mu, .direction = "down") %>%
-  mutate(
+  tidyr::fill(subgroup.growth.mu, .direction = "down") %>%
+  dplyr::mutate(
     subgroup.growth.var = stats::filter(x = ((Growth.value-subgroup.growth.mu)^2)/(bayes.window-1), filter = rep(1,bayes.window))
   ) %>%
-  #fill(subgroup.growth.var, .direction = "down") %>%
-  mutate(  
+  #tidyr::fill(subgroup.growth.var, .direction = "down") %>%
+  dplyr::mutate(  
     # https://towardsdatascience.com/a-bayesian-approach-to-estimating-revenue-growth-55d029efe2dd
     # bayes normal normal - prior mu = 0, prior variance = 1.
     subgroup.growth.mu.posterior =
@@ -207,41 +206,41 @@ testEst2 = testEst2 %>%
       (1/var.prior + bayes.window/subgroup.growth.var)
   )
 
-ggplot(testEst2 %>% filter(), aes(x=date, group=subgroup))+
-  geom_line(aes(y=Growth.value,colour="pois (unsmoothed)"))+
-  geom_ribbon(aes(ymin=Growth.value-1.96*Growth.SE.value,ymax=Growth.value+1.96*Growth.SE.value,fill="pois (unsmoothed)"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))
+ggplot2::ggplot(testEst2 %>% dplyr::filter(), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Growth.value,colour="pois (unsmoothed)"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Growth.value-1.96*Growth.SE.value,ymax=Growth.value+1.96*Growth.SE.value,fill="pois (unsmoothed)"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))
 
 
 
-ggplot(testEst2, aes(x=date, group=subgroup))+
-  geom_line(aes(y=subgroup.growth.mu.posterior,colour="pois (bayes normal)"))+
-  geom_ribbon(aes(ymin=subgroup.growth.mu.posterior-1.96*sqrt(subgroup.growth.var.posterior),ymax=subgroup.growth.mu.posterior+1.96*sqrt(subgroup.growth.var.posterior),fill="pois (bayes normal)"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))+
-  coord_cartesian(ylim=c(-0.1,0.1))
+ggplot2::ggplot(testEst2, ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=subgroup.growth.mu.posterior,colour="pois (bayes normal)"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=subgroup.growth.mu.posterior-1.96*sqrt(subgroup.growth.var.posterior),ymax=subgroup.growth.mu.posterior+1.96*sqrt(subgroup.growth.var.posterior),fill="pois (bayes normal)"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))+
+  ggplot2::coord_cartesian(ylim=c(-0.1,0.1))
 
-ggplot(testEst2, aes(x=date, group=subgroup))+
-  geom_line(aes(y=subgroup.growth.mu.posterior,colour="pois (smoothed)"))+
-  geom_ribbon(aes(ymin=subgroup.growth.mu.posterior-1.96*subgroup.growth.var.posterior,ymax=subgroup.growth.mu.posterior+1.96*subgroup.growth.var.posterior,fill="pois (smoothed)"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))+
-  coord_cartesian(ylim=c(-0.1,0.1))
-
-
+ggplot2::ggplot(testEst2, ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=subgroup.growth.mu.posterior,colour="pois (smoothed)"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=subgroup.growth.mu.posterior-1.96*subgroup.growth.var.posterior,ymax=subgroup.growth.mu.posterior+1.96*subgroup.growth.var.posterior,fill="pois (smoothed)"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))+
+  ggplot2::coord_cartesian(ylim=c(-0.1,0.1))
 
 
 
 
-ggplot(testEst3, aes(x=date, group=subgroup))+
-  geom_line(aes(y=Ratio.value,colour="dI/dt / I"))+
-  geom_ribbon(aes(ymin=Ratio.value-1.96*Ratio.SE.value,ymax=Ratio.value+1.96*Ratio.SE.value,fill="dI/dt / I"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))+
-  coord_cartesian(ylim=c(-0.1,0.1))
 
 
-ggplot(testEst3 %>% filter(TRUE), aes(x=date, group=subgroup))+
-  geom_ribbon(aes(ymin=Est.value-1.96*Est.SE.value,ymax=Est.value+1.96*Est.SE.value,fill="dI/dt / I"),alpha=0.1)+
-  geom_point(aes(y=value,colour="reference"))+
-  geom_line(aes(y=Est.value,colour="dI/dt / I"))
+ggplot2::ggplot(testEst3, ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Ratio.value,colour="dI/dt / I"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Ratio.value-1.96*Ratio.SE.value,ymax=Ratio.value+1.96*Ratio.SE.value,fill="dI/dt / I"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))+
+  ggplot2::coord_cartesian(ylim=c(-0.1,0.1))
+
+
+ggplot2::ggplot(testEst3 %>% dplyr::filter(TRUE), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Est.value-1.96*Est.SE.value,ymax=Est.value+1.96*Est.SE.value,fill="dI/dt / I"),alpha=0.1)+
+  ggplot2::geom_point(ggplot2::aes(y=value,colour="reference"))+
+  ggplot2::geom_line(ggplot2::aes(y=Est.value,colour="dI/dt / I"))
 
 
 ```
@@ -249,12 +248,12 @@ ggplot(testEst3 %>% filter(TRUE), aes(x=date, group=subgroup))+
 ```{r fig1, fig.cap="Epidemic curve based on (A) an artifical and (B) a real timeseries of lab positive cases in England as published on the PHE dashboard, on a log1p scale."}
 
 ukts = dpc$datasets$getPHEApiNations() %>% 
-  filter(name=="England" & type=="incidence") %>%
+  dplyr::filter(name=="England" & type=="incidence") %>%
   tsp$logIncidenceStats(smoothingWindow=14) %>%
   tsp$estimateGrowthRate(window = 14, nocache=TRUE)
 
-p1=ggplot(testTs,aes(x=date,y=value))+geom_bar(stat="identity", width=0.6)+scale_y_continuous(trans="log1p")+labs(subtitle="Artificial")
-p2= ggplot(ukts,aes(x=date,y=value))+geom_bar(stat="identity", width=0.6)+scale_y_continuous(trans="log1p")+labs(subtitle="PHE England cases")
+p1=ggplot2::ggplot(testTs,ggplot2::aes(x=date,y=value))+ggplot2::geom_bar(stat="identity", width=0.6)+ggplot2::scale_y_continuous(trans="log1p")+ggplot2::labs(subtitle="Artificial")
+p2= ggplot2::ggplot(ukts,ggplot2::aes(x=date,y=value))+ggplot2::geom_bar(stat="identity", width=0.6)+ggplot2::scale_y_continuous(trans="log1p")+ggplot2::labs(subtitle="PHE England cases")
 (p1+p2+patchwork::plot_annotation(tag_levels = "A") +patchwork::plot_layout(nrow=1)) %>% standardPrintOutput::saveThirdPageFigure("~/Dropbox/covid19/growth-rates/Fig1_EpidemicCurves")
 ```
 
@@ -286,14 +285,14 @@ TODO: update this with artificial time-series from projections package
 
 ```{r}
 
-#install.packages("projections")
+#utils::install.packages("projections")
 # 
-# seed = incidence::incidence(dates = as.Date(unlist(lapply(as.Date("2020-01-01"):as.Date("2020-01-10"),function(x) rep(x,runif(1,90,110)))),"1970-01-01"))
+# seed = incidence::incidence(dates = as.Date(unlist(lapply(as.Date("2020-01-01"):as.Date("2020-01-10"),function(x) rep(x,stats::runif(1,90,110)))),"1970-01-01"))
 # proj_3 <- projections::project(x = seed, R = c(1,1.2,0.7), si = Flu2009$si_distr, n_days = 60, time_change = c(20,40), R_fix_within = TRUE)
 # 
 # plot(proj_3)
 # 
-# tmp = as.data.frame(proj_3,long=TRUE) %>% group_by(sim) %>% mutate(incidence = as.numeric(incidence))
+# tmp = as.data.frame(proj_3,long=TRUE) %>% dplyr::group_by(sim) %>% dplyr::mutate(incidence = as.numeric(incidence))
 ```
 
 Figure 2 shows the 3 methods applied to an artificial time series with defined growth rate. In the panel A we see the Poisson method closely estimates the artifical series with a predictable delay introduced by the windowing. The implementation estimates growth rates using values prior to the point of estimation. 
@@ -305,11 +304,11 @@ In panel C we have the estimates based on local exponential fitting. This perfor
 ```{r fig2, fig.cap="Comparison of 3 methods for growth rate estimation in an artificial time series."}
 
 # 
-# p1 = ggplot(testTs, aes(x=date)) +geom_line(aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Mean(Growth rate)`,`Sd(Growth rate)`, colourExpr = "red")+labs(y="r",subtitle="Poisson \U03BB")+coord_cartesian(ylim=c(-1,1))
+# p1 = ggplot2::ggplot(testTs, ggplot2::aes(x=date)) +ggplot2::geom_line(ggplot2::aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Mean(Growth rate)`,`Sd(Growth rate)`, colourExpr = "red")+ggplot2::labs(y="r",subtitle="Poisson \U03BB")+ggplot2::coord_cartesian(ylim=c(-1,1))
 # 
-# p2 = ggplot(testTs, aes(x=date)) +geom_line(aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Ratio.value`,`Ratio.SE.value`, "blue")+geom_rug(aes(colour=Imputed.value),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*I,delta*t) * I^-1))+coord_cartesian(ylim=c(-1,1))
+# p2 = ggplot2::ggplot(testTs, ggplot2::aes(x=date)) +ggplot2::geom_line(ggplot2::aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Ratio.value`,`Ratio.SE.value`, "blue")+ggplot2::geom_rug(ggplot2::aes(colour=Imputed.value),show.legend = FALSE)+ggplot2::labs(y="r",subtitle=expression(frac(delta*I,delta*t) * I^-1))+ggplot2::coord_cartesian(ylim=c(-1,1))
 # 
-# p3 = ggplot(testTs, aes(x=date)) +geom_line(aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Growth`,`Growth.SE`,"magenta")+geom_rug(aes(colour=`Imputed.log(value + 1)`),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*log(I+1),delta*t)))+coord_cartesian(ylim=c(-1,1))
+# p3 = ggplot2::ggplot(testTs, ggplot2::aes(x=date)) +ggplot2::geom_line(ggplot2::aes(y=log(growth_rate)), colour = "black")+ plotRibbons(`Growth`,`Growth.SE`,"magenta")+ggplot2::geom_rug(ggplot2::aes(colour=`Imputed.log(value + 1)`),show.legend = FALSE)+ggplot2::labs(y="r",subtitle=expression(frac(delta*log(I+1),delta*t)))+ggplot2::coord_cartesian(ylim=c(-1,1))
 # 
 # (p1+p2+p3+patchwork::plot_annotation(tag_levels = "A") + patchwork::plot_layout(nrow=1)) %>% standardPrintOutput::saveThirdPageFigure("~/Dropbox/covid19/growth-rates/Fig2_ArtificalTest")
 
@@ -324,9 +323,9 @@ In panel B the direct estimation method again demonstrates some value but is inf
 In panel C the local fitting of exponential produces a smooth estimate with appropriate confidence intervals. It is difficult to say whether it is over smoothed. We can empirically adjust windowing functions to see what effect that will have in the future.
 
 ```{r fig3, fig.cap="Comparison of 3 smoothing methods in a real time series."}
-# p1 = ggplot(ukts, aes(x=date)) + plotRibbons(`Mean(Growth rate)`,`Sd(Growth rate)`, "red")+labs(y="r",subtitle="Poisson \U03BB")+coord_cartesian(ylim=c(-0.25,0.5))
-# p2 = ggplot(ukts, aes(x=date)) + plotRibbons(`Ratio.value`,`Ratio.SE.value`, "blue")+geom_rug(aes(colour=Imputed.value),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*I,delta*t) * I^-1))+coord_cartesian(ylim=c(-0.25,0.5))
-# p3 = ggplot(ukts, aes(x=date)) + plotRibbons(`Growth`,`Growth.SE`,"magenta")+geom_rug(aes(colour=`Imputed.log(value + 1)`),show.legend = FALSE)+labs(y="r",subtitle=expression(frac(delta*log(I+1),delta*t)))+coord_cartesian(ylim=c(-0.25,0.5))
+# p1 = ggplot2::ggplot(ukts, ggplot2::aes(x=date)) + plotRibbons(`Mean(Growth rate)`,`Sd(Growth rate)`, "red")+ggplot2::labs(y="r",subtitle="Poisson \U03BB")+ggplot2::coord_cartesian(ylim=c(-0.25,0.5))
+# p2 = ggplot2::ggplot(ukts, ggplot2::aes(x=date)) + plotRibbons(`Ratio.value`,`Ratio.SE.value`, "blue")+ggplot2::geom_rug(ggplot2::aes(colour=Imputed.value),show.legend = FALSE)+ggplot2::labs(y="r",subtitle=expression(frac(delta*I,delta*t) * I^-1))+ggplot2::coord_cartesian(ylim=c(-0.25,0.5))
+# p3 = ggplot2::ggplot(ukts, ggplot2::aes(x=date)) + plotRibbons(`Growth`,`Growth.SE`,"magenta")+ggplot2::geom_rug(ggplot2::aes(colour=`Imputed.log(value + 1)`),show.legend = FALSE)+ggplot2::labs(y="r",subtitle=expression(frac(delta*log(I+1),delta*t)))+ggplot2::coord_cartesian(ylim=c(-0.25,0.5))
 # 
 # (p1+p2+p3+patchwork::plot_annotation(tag_levels = "A") + patchwork::plot_layout(nrow=1)) %>% standardPrintOutput::saveThirdPageFigure("~/Dropbox/covid19/growth-rates/Fig3_RealTest")
 
@@ -429,8 +428,8 @@ betaPrior = 2
 tau = 6
 
 testEst4 = testTs %>%
-  group_by(subgroup) %>%
-  mutate(
+  dplyr::group_by(subgroup) %>%
+  dplyr::mutate(
     alpha1 = slider::slide_dbl(value, sum, .after = 2*tau, .complete = TRUE ) + alphaPrior,
     alpha2 = slider::slide_dbl(value, sum, .before = 2*tau, .complete = TRUE ) + alphaPrior,
     alpha0 = slider::slide_dbl(value, sum, .before = tau, .after=tau, .complete = TRUE ) + alphaPrior,
@@ -444,7 +443,7 @@ testEst4 = testTs %>%
     Growth.mean = 1/(2*tau)*(log(betap_mean) - betap_variance/(2*betap_mean^2)),
     Growth.variance = 1/(2*tau)*(betap_variance/(betap_mean^2))
   ) %>%
-  mutate(
+  dplyr::mutate(
     Growth.quantile.0.025 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.025, alpha1, alpha2)),
     Growth.quantile.0.05 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.05, alpha1, alpha2)),
     Growth.quantile.0.25 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.25, alpha1, alpha2)),
@@ -453,28 +452,28 @@ testEst4 = testTs %>%
     Growth.quantile.0.95 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.95, alpha1, alpha2)),
     Growth.quantile.0.975 = 1/(2*tau)*log(extraDistr::qbetapr(p=0.975, alpha1, alpha2))
   ) %>%
-  mutate(
+  dplyr::mutate(
     Est.mean = alpha0/beta0,
     Est.variance = alpha0/(beta0^2)*(2*tau+2+beta0),
-    Est.quantile.0.025 = qnbinom(p=0.025, nb_size, nb_prob),
-    Est.quantile.0.05 = qnbinom(p=0.05, nb_size, nb_prob),
-    Est.quantile.0.25 = qnbinom(p=0.25, nb_size, nb_prob),
-    Est.quantile.0.5 = qnbinom(p=0.5, nb_size, nb_prob),
-    Est.quantile.0.75 = qnbinom(p=0.75, nb_size, nb_prob),
-    Est.quantile.0.95 = qnbinom(p=0.95, nb_size, nb_prob),
-    Est.quantile.0.975 = qnbinom(p=0.975, nb_size, nb_prob),
+    Est.quantile.0.025 = stats::qnbinom(p=0.025, nb_size, nb_prob),
+    Est.quantile.0.05 = stats::qnbinom(p=0.05, nb_size, nb_prob),
+    Est.quantile.0.25 = stats::qnbinom(p=0.25, nb_size, nb_prob),
+    Est.quantile.0.5 = stats::qnbinom(p=0.5, nb_size, nb_prob),
+    Est.quantile.0.75 = stats::qnbinom(p=0.75, nb_size, nb_prob),
+    Est.quantile.0.95 = stats::qnbinom(p=0.95, nb_size, nb_prob),
+    Est.quantile.0.975 = stats::qnbinom(p=0.975, nb_size, nb_prob),
   )
 
-ggplot(testEst4 %>% filter(), aes(x=date, group=subgroup))+
-  geom_line(aes(y=Growth.mean,colour="Beta prime"))+
-  geom_ribbon(aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))+
-  coord_cartesian(ylim=c(-0.1,0.1))
+ggplot2::ggplot(testEst4 %>% dplyr::filter(), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Growth.mean,colour="Beta prime"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))+
+  ggplot2::coord_cartesian(ylim=c(-0.1,0.1))
 
-ggplot(testEst4 %>% filter(TRUE), aes(x=date, group=subgroup))+
-  geom_ribbon(aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
-  geom_point(aes(y=value,colour="reference"))+
-  geom_line(aes(y=Est.mean,colour="Beta prime"))
+ggplot2::ggplot(testEst4 %>% dplyr::filter(TRUE), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  ggplot2::geom_point(ggplot2::aes(y=value,colour="reference"))+
+  ggplot2::geom_line(ggplot2::aes(y=Est.mean,colour="Beta prime"))
   
   
 
@@ -559,8 +558,8 @@ betaPrior = 1
 m = 3
 
 testEst4 = testTs %>%
-  group_by(subgroup) %>%
-  mutate(
+  dplyr::group_by(subgroup) %>%
+  dplyr::mutate(
     shape2 = slider::slide_dbl(value, sum, .before = 4*m, .after = 2*m, .complete = TRUE ) + alphaPrior,
     shape1 = slider::slide_dbl(value, sum, .after = 2*m, .complete = TRUE ) + shape2,
     scale = (6*m+betaPrior+1)/(8*m+betaPrior+2),
@@ -577,7 +576,7 @@ testEst4 = testTs %>%
     Growth.mean = 1/(2*m)*(log(betap_mean) - betap_variance/(2*betap_mean^2)),
     Growth.variance = 1/(2*m)*(betap_variance/(betap_mean^2))
   ) %>%
-  mutate(
+  dplyr::mutate(
     Growth.quantile.0.025 = 1/(2*m)*log(extraDistr::qbetapr(p=0.025, shape1, shape2, scale)),
     Growth.quantile.0.05 = 1/(2*m)*log(extraDistr::qbetapr(p=0.05, shape1, shape2, scale)),
     Growth.quantile.0.25 = 1/(2*m)*log(extraDistr::qbetapr(p=0.25, shape1, shape2, scale)),
@@ -586,28 +585,28 @@ testEst4 = testTs %>%
     Growth.quantile.0.95 = 1/(2*m)*log(extraDistr::qbetapr(p=0.95, shape1, shape2, scale)),
     Growth.quantile.0.975 = 1/(2*m)*log(extraDistr::qbetapr(p=0.975, shape1, shape2, scale))
   ) %>%
-  mutate(
+  dplyr::mutate(
     Est.mean = alpha0/beta0,
     Est.variance = alpha0/(beta0^2)*(2*m+2+beta0),
-    Est.quantile.0.025 = qnbinom(p=0.025, nb_size, nb_prob),
-    Est.quantile.0.05 = qnbinom(p=0.05, nb_size, nb_prob),
-    Est.quantile.0.25 = qnbinom(p=0.25, nb_size, nb_prob),
-    Est.quantile.0.5 = qnbinom(p=0.5, nb_size, nb_prob),
-    Est.quantile.0.75 = qnbinom(p=0.75, nb_size, nb_prob),
-    Est.quantile.0.95 = qnbinom(p=0.95, nb_size, nb_prob),
-    Est.quantile.0.975 = qnbinom(p=0.975, nb_size, nb_prob),
+    Est.quantile.0.025 = stats::qnbinom(p=0.025, nb_size, nb_prob),
+    Est.quantile.0.05 = stats::qnbinom(p=0.05, nb_size, nb_prob),
+    Est.quantile.0.25 = stats::qnbinom(p=0.25, nb_size, nb_prob),
+    Est.quantile.0.5 = stats::qnbinom(p=0.5, nb_size, nb_prob),
+    Est.quantile.0.75 = stats::qnbinom(p=0.75, nb_size, nb_prob),
+    Est.quantile.0.95 = stats::qnbinom(p=0.95, nb_size, nb_prob),
+    Est.quantile.0.975 = stats::qnbinom(p=0.975, nb_size, nb_prob),
   )
 
-ggplot(testEst4 %>% filter(), aes(x=date, group=subgroup))+
-  geom_line(aes(y=Growth.quantile.0.5,colour="Beta prime"))+
-  geom_ribbon(aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))#+
-  #coord_cartesian(ylim=c(-0.1,0.1))
+ggplot2::ggplot(testEst4 %>% dplyr::filter(), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Growth.quantile.0.5,colour="Beta prime"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))#+
+  #ggplot2::coord_cartesian(ylim=c(-0.1,0.1))
 
-ggplot(testEst4 %>% filter(TRUE), aes(x=date, group=subgroup))+
-  geom_ribbon(aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
-  geom_point(aes(y=value,colour="reference"))+
-  geom_line(aes(y=Est.mean,colour="Beta prime"))
+ggplot2::ggplot(testEst4 %>% dplyr::filter(TRUE), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  ggplot2::geom_point(ggplot2::aes(y=value,colour="reference"))+
+  ggplot2::geom_line(ggplot2::aes(y=Est.mean,colour="Beta prime"))
   
   
 
@@ -686,8 +685,8 @@ betaPrior = 1
 m = 10
 
 testEst4 = testTs %>%
-  group_by(subgroup) %>%
-  mutate(
+  dplyr::group_by(subgroup) %>%
+  dplyr::mutate(
     shape2 = slider::slide_dbl(value, sum, .before = 3*m, .after = 1*m, .complete = TRUE ) + alphaPrior,
     shape1 = slider::slide_dbl(value, sum, .after = 2*m, .complete = TRUE ) + alphaPrior,
     scale = (4*m+betaPrior+1)/(2*m+betaPrior+1),
@@ -704,7 +703,7 @@ testEst4 = testTs %>%
     Growth.mean = 1/(2*m)*(log(betap_mean) - betap_variance/(2*betap_mean^2)),
     Growth.variance = 1/(2*m)*(betap_variance/(betap_mean^2))
   ) %>%
-  mutate(
+  dplyr::mutate(
     Growth.quantile.0.025 = 1/(2*m)*log(extraDistr::qbetapr(p=0.025, shape1, shape2, scale)),
     Growth.quantile.0.05 = 1/(2*m)*log(extraDistr::qbetapr(p=0.05, shape1, shape2, scale)),
     Growth.quantile.0.25 = 1/(2*m)*log(extraDistr::qbetapr(p=0.25, shape1, shape2, scale)),
@@ -713,28 +712,28 @@ testEst4 = testTs %>%
     Growth.quantile.0.95 = 1/(2*m)*log(extraDistr::qbetapr(p=0.95, shape1, shape2, scale)),
     Growth.quantile.0.975 = 1/(2*m)*log(extraDistr::qbetapr(p=0.975, shape1, shape2, scale))
   ) %>%
-  mutate(
+  dplyr::mutate(
     Est.mean = alpha0/beta0,
     Est.variance = alpha0/(beta0^2)*(2*m+2+beta0),
-    Est.quantile.0.025 = qnbinom(p=0.025, nb_size, nb_prob),
-    Est.quantile.0.05 = qnbinom(p=0.05, nb_size, nb_prob),
-    Est.quantile.0.25 = qnbinom(p=0.25, nb_size, nb_prob),
-    Est.quantile.0.5 = qnbinom(p=0.5, nb_size, nb_prob),
-    Est.quantile.0.75 = qnbinom(p=0.75, nb_size, nb_prob),
-    Est.quantile.0.95 = qnbinom(p=0.95, nb_size, nb_prob),
-    Est.quantile.0.975 = qnbinom(p=0.975, nb_size, nb_prob),
+    Est.quantile.0.025 = stats::qnbinom(p=0.025, nb_size, nb_prob),
+    Est.quantile.0.05 = stats::qnbinom(p=0.05, nb_size, nb_prob),
+    Est.quantile.0.25 = stats::qnbinom(p=0.25, nb_size, nb_prob),
+    Est.quantile.0.5 = stats::qnbinom(p=0.5, nb_size, nb_prob),
+    Est.quantile.0.75 = stats::qnbinom(p=0.75, nb_size, nb_prob),
+    Est.quantile.0.95 = stats::qnbinom(p=0.95, nb_size, nb_prob),
+    Est.quantile.0.975 = stats::qnbinom(p=0.975, nb_size, nb_prob),
   )
 
-ggplot(testEst4 %>% filter(), aes(x=date, group=subgroup))+
-  geom_line(aes(y=Growth.quantile.0.5,colour="Beta prime"))+
-  geom_ribbon(aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
-  geom_line(aes(y=growth_rate,colour="reference"))#+
-  #coord_cartesian(ylim=c(-0.1,0.1))
+ggplot2::ggplot(testEst4 %>% dplyr::filter(), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_line(ggplot2::aes(y=Growth.quantile.0.5,colour="Beta prime"))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Growth.quantile.0.025,ymax=Growth.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  ggplot2::geom_line(ggplot2::aes(y=growth_rate,colour="reference"))#+
+  #ggplot2::coord_cartesian(ylim=c(-0.1,0.1))
 
-ggplot(testEst4 %>% filter(TRUE), aes(x=date, group=subgroup))+
-  geom_ribbon(aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
-  geom_point(aes(y=value,colour="reference"))+
-  geom_line(aes(y=Est.mean,colour="Beta prime"))
+ggplot2::ggplot(testEst4 %>% dplyr::filter(TRUE), ggplot2::aes(x=date, group=subgroup))+
+  ggplot2::geom_ribbon(ggplot2::aes(ymin=Est.quantile.0.025,ymax=Est.quantile.0.975,fill="Beta prime"),alpha=0.1)+
+  ggplot2::geom_point(ggplot2::aes(y=value,colour="reference"))+
+  ggplot2::geom_line(ggplot2::aes(y=Est.mean,colour="Beta prime"))
   
   
 

@@ -12,9 +12,6 @@
 #' @export
 #' @concept vis
 #' @examples
-#' old = options(device="agg_png")
-#' on.exit(options(old))
-#'
 #' tmp = growthrates::england_covid %>%
 #'   growthrates::proportion_locfit_model(window=21) %>%
 #'   dplyr::glimpse()

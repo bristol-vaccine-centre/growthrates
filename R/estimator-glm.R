@@ -55,7 +55,7 @@ proportion_glm_model = function(d = i_proportion_input, ..., window = 14, freque
     # for this next bit:
     y = cbind(d$count, d$denom - d$count)
 
-    output_times = full_seq.time_period(d$time, period = frequency)
+    output_times = date_seq.time_period(d$time, period = frequency)
     df = .df_from_window(window,timeseries = d)
 
     if (df < 2) df=2
@@ -98,7 +98,7 @@ poisson_glm_model = function(d = i_incidence_input, ..., window = 14, frequency 
 
   interfacer::igroup_process(d, function(d, ..., window, deg, frequency, predict) {
 
-    output_times = full_seq.time_period(d$time, period = frequency)
+    output_times = date_seq.time_period(d$time, period = frequency)
     # We normalise the spline degrees of freedom by data length
     # to stop extra wigglyness in shorter timeseries and excess smoothing in
     # longer ts.

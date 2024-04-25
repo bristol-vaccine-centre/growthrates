@@ -12,7 +12,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(tidyverse)
 # devtools::load_all()
 library(growthrates)
 here::i_am("vignettes/estimators-example.Rmd")
@@ -32,7 +31,7 @@ An incidence mode based on absolute counts:
 
 ```{r}
 data = .test_data()
-data %>% glimpse()
+data %>% dplyr::glimpse()
 ```
 
 
@@ -66,7 +65,7 @@ epidemic and a proportional distribution of each 'variant' as a fraction of the
 whole. A relative growth rate is calculated based on set parameters.
 
 ```{r}
-data2 = .test_multinomial() %>% dplyr::group_by(class) %>% glimpse()
+data2 = .test_multinomial() %>% dplyr::group_by(class) %>% dplyr::glimpse()
 ```
 
 ### Poisson model

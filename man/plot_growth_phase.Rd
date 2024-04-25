@@ -96,8 +96,6 @@ Plot an incidence or proportion vs. growth phase diagram
 }
 \examples{
 # example code
-old = options(device="agg_png")
-on.exit(options(old))
 
 tmp = growthrates::england_covid \%>\%
   time_aggregate(count=sum(count))
@@ -106,8 +104,6 @@ tmp_pop = growthrates::england_demographics \%>\%
   dplyr::ungroup() \%>\%
   dplyr::summarise(population = sum(population))
 
-
-
 # If the incidence is normalised by population
 tmp2 = tmp \%>\%
   poisson_locfit_model() \%>\%
@@ -115,6 +111,8 @@ tmp2 = tmp \%>\%
 
 timepoints = as.Date(c("Lockdown 1" = "2020-03-30", "Lockdown 2" = "2020-12-31"))
 
-plot_growth_phase(tmp2, timepoints, duration=108)
+if (FALSE) {
+  plot_growth_phase(tmp2, timepoints, duration=108)
+}
 }
 \concept{vis}
