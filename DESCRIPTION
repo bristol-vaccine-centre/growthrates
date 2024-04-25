@@ -29,8 +29,7 @@ Suggests:
     testthat (>= 3.0.0),
     devtools,
     patchwork,
-    memoise,
-    ragg
+    memoise
 Remotes: github::bristol-vaccine-centre/interfacer
 VignetteBuilder: knitr
 Imports: 
@@ -50,7 +49,8 @@ Imports:
     glue,
     purrr,
     EpiEstim,
-    interfacer (>= 0.1.8)
+    interfacer (>= 0.1.8),
+    ragg
 URL: https://bristol-vaccine-centre.github.io/growthrates/,
     https://github.com/bristol-vaccine-centre/growthrates,
     https://doi.org/10.5281/zenodo.7242761
