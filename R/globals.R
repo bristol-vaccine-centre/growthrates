@@ -59,3 +59,7 @@ utils::globalVariables(c(
 	"proportion.fit",
 	"proportion.se.fit"
 ))
+
+
+#' @importFrom ragg agg_png
+NULL

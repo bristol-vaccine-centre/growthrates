@@ -77,18 +77,23 @@ that time period. Normalising by population size allows us to compare groups.</p
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>modelled</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a <code>time_period</code></p></li>
+<dd><p>Model output from processing the <code>raw</code> dataframe with something like
+<code>poission_locfit_model</code></p>
+<p>A dataframe containing the following columns:</p><ul><li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`</p></li>
+<li><p>incidence.fit (double) - an estimate of the incidence rate on a log scale</p></li>
+<li><p>incidence.se.fit (double) - the standard error of the incidence rate estimate on a log scale</p></li>
+<li><p>incidence.0.025 (positive_double) - lower confidence limit of the incidence rate (true scale)</p></li>
+<li><p>incidence.0.5 (positive_double) - median estimate of the incidence rate (true scale)</p></li>
+<li><p>incidence.0.975 (positive_double) - upper confidence limit of the incidence rate (true scale)</p></li>
 </ul><p>No mandatory groupings.</p>
-<p>No default value.
-Model output from processing the <code>raw</code> dataframe with something like
-<code>poission_locfit_model</code></p></dd>
+<p>No default value.</p></dd>
 
 
 <dt>pop</dt>
-<dd><p>A dataframe containing the following columns:</p>
-<p>No mandatory groupings.</p>
-<p>No default value.
-The population data must be grouped in the same way as <code>modelled</code>.</p></dd>
+<dd><p>The population data must be grouped in the same way as <code>modelled</code>.</p>
+<p>A dataframe containing the following columns:</p><ul><li><p>population (positive_integer) - Size of population</p></li>
+</ul><p>No mandatory groupings.</p>
+<p>No default value.</p></dd>
 
 
 <dt>...</dt>

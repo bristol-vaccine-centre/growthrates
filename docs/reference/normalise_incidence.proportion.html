@@ -76,11 +76,16 @@ that time period. Normalising by population size allows us to compare groups.</p
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>modelled</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a <code>time_period</code></p></li>
+<dd><p>Model output from processing the <code>raw</code> dataframe with something like
+<code>poission_locfit_model</code></p>
+<p>A dataframe containing the following columns:</p><ul><li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`</p></li>
+<li><p>proportion.fit (double) - an estimate of the proportion on a logit scale</p></li>
+<li><p>proportion.se.fit (double) - the standard error of proportion estimate on a logit scale</p></li>
+<li><p>proportion.0.025 (proportion) - lower confidence limit of proportion (true scale)</p></li>
+<li><p>proportion.0.5 (proportion) - median estimate of proportion (true scale)</p></li>
+<li><p>proportion.0.975 (proportion) - upper confidence limit of proportion (true scale)</p></li>
 </ul><p>No mandatory groupings.</p>
-<p>No default value.
-Model output from processing the <code>raw</code> dataframe with something like
-<code>poission_locfit_model</code></p></dd>
+<p>No default value.</p></dd>
 
 
 <dt>...</dt>
@@ -96,13 +101,6 @@ Model output from processing the <code>raw</code> dataframe with something like
 the same time units as the input data. If this parameter is set to <code>TRUE</code> the
 incidence rates are calculated per year. If given as a lubridate period string
 e.g. "1 day" then the incidence is calculated over that time period.</p></dd>
-
-
-<dt>pop</dt>
-<dd><p>A dataframe containing the following columns:</p>
-<p>No mandatory groupings.</p>
-<p>No default value.
-The population data must be grouped in the same way as <code>modelled</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -121,6 +119,11 @@ A dataframe containing the following columns:</p><ul><li><p>time (as.time_period
 
 
 <p>No default value.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>This scales a proportion model by the population unit to make it comparable to
+an incidence model.</p>
     </div>
 
     <div class="section level2">

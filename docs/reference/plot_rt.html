@@ -71,7 +71,8 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>modelled</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a <code>time_period</code></p></li>
+<dd><p>the modelled Rt estimate</p>
+<p>A dataframe containing the following columns:</p><ul><li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`</p></li>
 <li><p>rt.fit (double) - an estimate of the reproduction number</p></li>
 <li><p>rt.se.fit (double) - the standard error of the reproduction number</p></li>
 <li><p>rt.0.025 (double) - lower confidence limit of the reproduction number</p></li>
@@ -95,7 +96,8 @@ to something if there are multiple incidence time series in the plot</p></dd>
 
 
 <dt>events</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>label (character) - the event label</p></li>
+<dd><p>Significant events or time spans</p>
+<p>A dataframe containing the following columns:</p><ul><li><p>label (character) - the event label</p></li>
 <li><p>start (date) - the start date, or the date of the event</p></li>
 <li><p>end (date) - the end date or NA if a single event</p></li>
 </ul><p>No mandatory groupings.</p>

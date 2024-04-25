@@ -85,16 +85,18 @@ samples in the infectivity profile.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>df</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>count (positive_integer) - Positive case counts associated with the specified timeframe</p></li>
-<li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a <code>time_period</code></p></li>
+<dd><p>Count data. Extra groups are allowed.</p>
+<p>A dataframe containing the following columns:</p><ul><li><p>count (positive_integer) - Positive case counts associated with the specified timeframe</p></li>
+<li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a `time_period`</p></li>
 </ul><p>Ungrouped.</p>
-<p>No default value.. Extra groups are allowed.</p></dd>
+<p>No default value.</p></dd>
 
 
 <dt>ip</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>boot (anything) - a bootstrap identifier</p></li>
+<dd><p>infectivity profile</p>
+<p>A dataframe containing the following columns:</p><ul><li><p>boot (anything) - a bootstrap identifier</p></li>
 <li><p>time (positive_double) - the end of the time period (in days)</p></li>
-<li><p>probability (proportion) - the probability of infection between previous time period until <code>time</code></p></li>
+<li><p>probability (proportion) - the probability of infection between previous time period until `time`</p></li>
 </ul><p>Must be grouped by: boot (exactly).</p>
 <p>A default value is defined.</p></dd>
 

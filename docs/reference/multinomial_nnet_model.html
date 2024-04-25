@@ -83,11 +83,7 @@ data using <code><a href="https://rdrr.io/pkg/nnet/man/multinom.html" class="ext
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>d</dt>
-<dd><p>A dataframe containing the following columns:</p><ul><li><p>class (factor) - A factor specifying the type of observation. This will be things like</p></li>
-</ul><p>variant, or serotype, for a multinomial model. Any missing data points are ignored.</p><ul><li><p>count (positive_integer) - Positive case counts associated with the specified timeframe</p></li>
-<li><p>time (as.time_period + group_unique) - A (usually complete) set of singular observations per unit time as a <code>time_period</code></p></li>
-</ul><p>Must be grouped by: class (exactly).</p>
-<p>No default value.</p></dd>
+<dd><p>Multiclass count input</p></dd>
 
 
 <dt>...</dt>

@@ -88,6 +88,9 @@ Plot an incidence timeseries
 }
 \examples{
 # example code
+old = options(device="agg_png")
+on.exit(options(old))
+
 tmp = growthrates::england_covid \%>\%
   time_aggregate(count=sum(count))
 
