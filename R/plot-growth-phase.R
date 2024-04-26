@@ -40,9 +40,7 @@
 #'
 #' timepoints = as.Date(c("Lockdown 1" = "2020-03-30", "Lockdown 2" = "2020-12-31"))
 #'
-#' if (FALSE) {
-#'   plot_growth_phase(tmp2, timepoints, duration=108)
-#' }
+#' plot_growth_phase(tmp2, timepoints, duration=108)
 plot_growth_phase = function(
     modelled = i_timestamped,
     timepoints = NULL,
@@ -255,7 +253,7 @@ plot_growth_phase.risk_ratio = function(
       if (show_doubling) {
           # Doubling time is not easy to interpret for realtive growth rates
           ggplot2::scale_x_continuous(sec.axis = ggplot2::dup_axis(
-            labels = function(x) ifelse(x==0,"\u00B1\u221E",sprintf("%.2g",(log(2)/x/.step(modelled$time)))),
+            labels = function(x) ifelse(x==0,.pdf_safe("\u00B1\u221E"),sprintf("%.2g",(log(2)/x/.step(modelled$time)))),
             name="Doubling time (days)"))
       } else {
         NULL

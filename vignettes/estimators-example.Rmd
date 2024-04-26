@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-# devtools::load_all()
+
 library(growthrates)
 here::i_am("vignettes/estimators-example.Rmd")
 source(here::here("vignettes/vignette-utils.R"))

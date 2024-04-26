@@ -101,17 +101,13 @@ tmp2 = tmp \%>\%
   normalise_incidence(tmp_pop)
 
 # Default pdf device doesn't support unicode
-if (FALSE) {
-  plot_growth_rate(tmp2,colour="blue")
-}
+plot_growth_rate(tmp2,colour="blue")
 
 tmp3 = growthrates::england_covid \%>\%
   proportion_locfit_model()
 
 # Default pdf device doesn't support unicode
-if (FALSE) {
-  plot_growth_rate(tmp3)
-}
+plot_growth_rate(tmp3)
 
 }
 \concept{vis}

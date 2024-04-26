@@ -51,11 +51,9 @@ significantly over time. The frequency of each variant over time can be determin
 with a multinomial model.
 
 ```{r}
-# debug(estimate_multinomial_proportion)
-# devtools::load_all()
+
 probs = england_variants %>% 
   multinomial_nnet_model(window = 28)
-
 
 plot_multinomial(probs)+
   ggplot2::scale_fill_viridis_d(option="cividis")

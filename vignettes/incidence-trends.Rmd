@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 
 library(patchwork)
-# devtools::load_all()
+
 library(growthrates)
 here::i_am("vignettes/incidence-trends.Rmd")
 source(here::here("vignettes/vignette-utils.R"))

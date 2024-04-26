@@ -119,3 +119,34 @@ scale_y_logit = function(...) {
 .growth_scale_limits = function() {
   return(getOption("growthrates.growth_scale_limit",default = c(-0.15,0.15)))
 }
+
+#' Switch UTF-8 into plain text when using the pdf device
+#'
+#' The plain `pdf()` device is the default when running examples via CRAN R CMD
+#' check. It throws warnings and sometimes errors that other devices do not when
+#' encountering UTF-8 characters in plot objects (due to a warning from `grid`).
+#' The resulting behaviour is R version dependent. It is basically impossible to
+#' get round these in your function examples and you either decide not to run
+#' them or only run them with non UTF-8 content. This will make that decision at
+#' runtime and provide a transliterated alternative for the `pdf` device in the
+#' context of a function example in a CRAN check.
+#'
+#' @param label a UTF8 label
+#' @param alt alternative for the pdf device
+#'
+#' @return the same string or a non UTF alternative if currently using the
+#'   legacy pdf device
+#' @noRd
+#'
+#' @examples
+#' .pdf_safe("test")
+#' .pdf_safe("\u00B1\u221E")
+#' ggplot2::ggplot()+ggplot2::xlab(.pdf_safe("\u00B1\u221E"))
+.pdf_safe = function(label, alt=label) {
+  alt = iconv(alt, from = 'UTF-8', to = 'ASCII//TRANSLIT')
+  if (names(grDevices::dev.cur())=="pdf") {
+    return(alt)
+  }
+  return(label)
+}
+

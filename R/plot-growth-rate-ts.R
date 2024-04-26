@@ -36,17 +36,13 @@
 #'   normalise_incidence(tmp_pop)
 #'
 #' # Default pdf device doesn't support unicode
-#' if (FALSE) {
-#'   plot_growth_rate(tmp2,colour="blue")
-#' }
+#' plot_growth_rate(tmp2,colour="blue")
 #'
 #' tmp3 = growthrates::england_covid %>%
 #'   proportion_locfit_model()
 #'
 #' # Default pdf device doesn't support unicode
-#' if (FALSE) {
-#'   plot_growth_rate(tmp3)
-#' }
+#' plot_growth_rate(tmp3)
 #'
 plot_growth_rate = function(
     modelled = i_timeseries,
@@ -91,7 +87,7 @@ plot_growth_rate.incidence = function(
     ggplot2::xlab(NULL)+
     ggplot2::theme(legend.title=ggplot2::element_blank())+
     ggplot2::scale_y_continuous(sec.axis = ggplot2::dup_axis(
-      labels = function(x) ifelse(x==0,"\u00B1\u221E",sprintf("%.2g",(log(2)/x/.step(modelled$time)))),
+      labels = function(x) ifelse(x==0,.pdf_safe("\u00B1\u221E"),sprintf("%.2g",(log(2)/x/.step(modelled$time)))),
       name="Doubling time (days)"))+
     ggplot2::coord_cartesian(ylim = c(-my,my))
 
