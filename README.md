@@ -7,6 +7,7 @@
 [![growthrates status badge](https://bristol-vaccine-centre.r-universe.dev/badges/growthrates)](https://bristol-vaccine-centre.r-universe.dev)
 <!-- badges: end -->
 
+THIS PACKAGE HAS BEEN RENAMED `ggoutbreak` AND IS NOW HOSTED [HERE](https://github.com/ai4ci/ggoutbreak)
 
 Simple statistical models and visualisations for calculating the 
 incidence, proportion, exponential growth rate, and reproduction number of 
